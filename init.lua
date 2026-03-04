@@ -9,8 +9,8 @@ local transparency = vim.env.SYSINIT_NVIM_TRANSPARENCY
 vim.g.sysinit_nix_managed = nix_managed
 vim.g.sysinit_theme = {
   family = theme_family or "catppuccin",
-  variant = theme_variant or "mocha",
-  appearance = theme_appearance or "dark",
+  variant = theme_variant or "latte",
+  appearance = theme_appearance or "light",
   transparency = transparency == "true",
 }
 
