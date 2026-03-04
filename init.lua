@@ -1,6 +1,18 @@
-if vim.env.NIX_MANAGED == nil then
-  vim.env.NIX_MANAGED = false
-end
+-- Load theme configuration from environment variables (set by home-manager)
+local nix_managed = vim.env.SYSINIT_NVIM_NIX_MANAGED == "true"
+local theme_family = vim.env.SYSINIT_NVIM_COLORSCHEME_FAMILY
+local theme_variant = vim.env.SYSINIT_NVIM_COLORSCHEME_VARIANT
+local theme_appearance = vim.env.SYSINIT_NVIM_COLORSCHEME_APPEARANCE
+local transparency = vim.env.SYSINIT_NVIM_TRANSPARENCY
+
+-- Store theme config for plugin configuration
+vim.g.sysinit_nix_managed = nix_managed
+vim.g.sysinit_theme = {
+  family = theme_family or "catppuccin",
+  variant = theme_variant or "mocha",
+  appearance = theme_appearance or "dark",
+  transparency = transparency == "true",
+}
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
