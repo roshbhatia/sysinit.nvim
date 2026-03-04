@@ -4,17 +4,13 @@ local function has_obsidian_workspace()
 end
 
 if has_obsidian_workspace() then
-  local capabilities = vim.tbl_deep_extend(
-    "force",
-    require("blink.cmp").get_lsp_capabilities(),
-    {
-      workspace = {
-        didChangeWatchedFiles = {
-          dynamicRegistration = true,
-        },
+  local capabilities = vim.tbl_deep_extend("force", require("blink.cmp").get_lsp_capabilities(), {
+    workspace = {
+      didChangeWatchedFiles = {
+        dynamicRegistration = true,
       },
-    }
-  )
+    },
+  })
 
   vim.lsp.config("markdown_oxide", {
     cmd = { "markdown-oxide" },
