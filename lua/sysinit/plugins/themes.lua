@@ -1,5 +1,3 @@
-local json_loader = require("sysinit.utils.json_loader")
-
 local SYNTAX_STYLES = {
   comments = { "italic" },
   conditionals = { "italic" },
@@ -237,11 +235,18 @@ local THEMES = {
   },
 }
 
-local theme_cfg = vim.env.NIX_MANAGED
-    and json_loader.load_json_file(json_loader.get_config_path("theme_config.json"), "theme_config")
-  or {
-    colorscheme = "base16-black-metal",
-  }
+local theme_cfg = {
+  colorscheme = "base16-black-metal",
+  transparency = false,
+}
+
+if vim.env.SYSINIT_NVIM_COLORS then
+  local colors_str = vim.env.SYSINIT_NVIM_COLORS
+  local ok, parsed = pcall(vim.json.decode, colors_str)
+  if ok and parsed then
+    theme_cfg = vim.tbl_extend("force", theme_cfg, parsed)
+  end
+end
 
 local meta = THEMES[theme_cfg.colorscheme]
   or {
@@ -250,7 +255,7 @@ local meta = THEMES[theme_cfg.colorscheme]
   }
 
 local function apply_highlights()
-  if vim.env.NIX_MANAGED then
+  if theme_cfg.transparency then
     for _, group in ipairs(TRANSPARENT_GROUPS) do
       vim.api.nvim_set_hl(0, group, { bg = "none" })
     end
