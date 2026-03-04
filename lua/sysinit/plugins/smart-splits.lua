@@ -1,7 +1,6 @@
 return {
   {
     "mrjones2014/smart-splits.nvim",
-    enabled = vim.env.NIX_MANAGED,
     event = "VeryLazy",
     config = function()
       require("smart-splits").setup({

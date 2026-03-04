@@ -1,7 +1,6 @@
 return {
   {
     "iamcco/markdown-preview.nvim",
-    enabled = vim.env.NIX_MANAGED,
     cmd = { "MarkdownPreviewToggle" },
     build = "cd app && yarn install --force --pure-lockfile",
     init = function()
