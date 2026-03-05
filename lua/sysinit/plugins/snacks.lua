@@ -213,36 +213,6 @@ return {
         },
       })
 
-      local agents = require("sysinit.utils.ai.agents")
-      local session = require("sysinit.utils.ai.session")
-      local completion = require("sysinit.utils.ai.completion")
-      local file_refresh = require("sysinit.utils.ai.file_refresh")
-
-      completion.setup()
-
-      local terminals_config = {}
-      for _, agent in ipairs(agents.get_all()) do
-        terminals_config[agent.name] = {
-          cmd = agent.full_cmd,
-        }
-      end
-
-      session.setup({
-        terminals = terminals_config,
-        env = {
-          PAGER = "bat",
-        },
-      })
-
-      file_refresh.setup({
-        file_refresh = {
-          enable = true,
-          timer_interval = 1000,
-          updatetime = 100,
-          show_notifications = true,
-        },
-      })
-
       -- Fix for snacks dashboard autocommand group cleanup error
       -- Safely handle autocommand group deletion to prevent E367 errors
       local safe_delete_augroup = function(group_id)
@@ -266,9 +236,6 @@ return {
       end
     end,
     keys = function()
-      local keymaps = require("sysinit.utils.ai.keymaps")
-      local ai_keys = keymaps.generate_all_keymaps()
-
       local default_keys = {
         -- Pickers
         {
@@ -451,9 +418,6 @@ return {
           mode = { "n", "t" },
         },
       }
-      for _, key in ipairs(ai_keys) do
-        table.insert(default_keys, key)
-      end
 
       return default_keys
     end,
