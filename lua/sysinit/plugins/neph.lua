@@ -1,13 +1,16 @@
 return {
   {
+    -- "roshbhatia/neph.nvim",
     dir = vim.fn.expand("~/github/personal/roshbhatia/neph.nvim"),
     name = "neph.nvim",
     dependencies = {
       "folke/snacks.nvim",
-      -- "nvim-treesitter/nvim-treesitter",
-      -- "Saghen/blink.cmp",
+      "nvim-treesitter/nvim-treesitter",
+      "Saghen/blink.cmp",
     },
-    opts = {},
+    opts = {
+      multiplexer = "wezterm",
+    },
     keys = function()
       local api = require("neph.api")
       return {
