@@ -93,10 +93,10 @@ return {
         incremental_selection = {
           enable = true,
           keymaps = {
-            init_selection = "gx",
-            node_incremental = "gx",
-            scope_incremental = false,
-            node_decremental = "gX",
+            init_selection = "vvv",
+            node_incremental = "vvi",
+            scope_incremental = "vvI",
+            node_decremental = "vvd",
           },
         },
         indent = {
