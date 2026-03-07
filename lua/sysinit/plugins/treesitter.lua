@@ -173,15 +173,5 @@ return {
         end,
       })
     end,
-    keys = {
-      {
-        "gx",
-        desc = "Selection init or increment",
-      },
-      {
-        "gX",
-        desc = "Selection decrement",
-      },
-    },
   },
 }
