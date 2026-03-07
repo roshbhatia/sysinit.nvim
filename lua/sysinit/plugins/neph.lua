@@ -11,7 +11,7 @@ return {
     },
     opts = {
       -- Terminal multiplexer used to open the agent pane.
-      multiplexer = "snacks",
+      multiplexer = "wezterm",
     },
     keys = function()
       local api = require("neph.api")
