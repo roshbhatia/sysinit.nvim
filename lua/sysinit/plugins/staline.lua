@@ -17,15 +17,15 @@ return {
 
       local function neph_status()
         if vim.g.neph_connected then
-          return "󱚣 "
+          return "󰞇"
         end
         return ""
       end
 
       require("staline").setup({
         sections = {
-          left = { "mode", "branch", "file_name" },
-          mid = { neph_status },
+          left = { "mode", "branch", "file_name", neph_status },
+          mid = {},
           right = { get_format_status, "lsp", "lsp_name", "file_size", "line_column" },
         },
         defaults = {
