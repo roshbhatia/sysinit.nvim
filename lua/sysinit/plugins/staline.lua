@@ -15,16 +15,37 @@ return {
         return ""
       end
 
+      local function copilot_status()
+        local ok, status = pcall(function()
+          return require("sidekick").get_status()
+        end)
+
+        if not ok then
+          return ""
+        end
+
+        if status then
+          if status.kind == "Error" then
+            return " "
+          elseif status.busy then
+            return " "
+          else
+            return " "
+          end
+        end
+        return ""
+      end
+
       local function neph_status()
         if vim.g.neph_connected then
-          return "󰞇"
+          return "󰞇 "
         end
         return ""
       end
 
       require("staline").setup({
         sections = {
-          left = { "mode", "branch", "file_name", neph_status },
+          left = { "mode", "branch", "file_name", neph_status, copilot_status },
           mid = {},
           right = { get_format_status, "lsp", "lsp_name", "file_size", "line_column" },
         },
