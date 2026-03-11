@@ -237,6 +237,14 @@ return {
     end,
     keys = function()
       local default_keys = {
+        -- Terminal
+        {
+          "<leader>t",
+          function()
+            Snacks.terminal.toggle()
+          end,
+          desc = "Toggle terminal",
+        },
         -- Pickers
         {
           "<leader>ff",
