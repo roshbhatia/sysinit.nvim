@@ -32,6 +32,7 @@ return {
         { "<leader>gf", group = "Find" },
         { "<leader>gh", group = "Hunk" },
         { "<leader>j", group = "AI Agents" },
+        { "<leader>k", group = "Avante" },
         { "<leader>m", group = "Marks" },
         { "<leader>q", group = "Force Quit" },
         { "<leader>r", group = "Debug" },

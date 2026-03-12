@@ -11,6 +11,7 @@ return {
       "neovim/nvim-lspconfig",
       "fang2hou/blink-copilot",
       "copilotlsp-nvim/copilot-lsp",
+      "Kaiser-Yang/blink-cmp-avante",
     },
     opts = function()
       local providers = {
@@ -81,6 +82,12 @@ return {
             return items
           end,
         },
+        avante = {
+          module = "blink-cmp-avante",
+          name = "Avante",
+          score_offset = 100,
+          async = true,
+        },
       }
 
       local sources = {
@@ -90,6 +97,7 @@ return {
         "path",
         "snippets",
         "copilot",
+        "avante",
       }
 
       return {
