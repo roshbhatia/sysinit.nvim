@@ -31,6 +31,20 @@ return {
         provider = "snacks",
         provider_opts = {},
       },
+      windows = {
+        spinner = {
+          thinking = { "󰟶", "󰟷" },
+        },
+        ask = {
+          floating = true,
+        },
+      },
+      behaviour = {
+        auto_apply_diff_after_generation = true,
+        jump_result_buffer_on_finish = true,
+        ---@type "popup" | "inline_buttons"
+        confirmation_ui_style = "popup",
+      },
       mappings = {
         submit = {
           normal = "<CR>",
