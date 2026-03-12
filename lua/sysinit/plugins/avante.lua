@@ -37,13 +37,15 @@ return {
         },
         ask = {
           floating = true,
+          border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+        },
+        edit = {
+          border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
         },
       },
       behaviour = {
         auto_apply_diff_after_generation = true,
         jump_result_buffer_on_finish = true,
-        ---@type "popup" | "inline_buttons"
-        confirmation_ui_style = "popup",
       },
       mappings = {
         submit = {
@@ -80,6 +82,8 @@ return {
     },
     config = function(_, opts)
       require("avante").setup(opts)
+
+      vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = "NONE", blend = 100 })
 
       vim.api.nvim_create_autocmd("FileType", {
         pattern = {
