@@ -30,6 +30,7 @@ return {
             })
           end,
           desc = "Grep (alt.)",
+          mode = { "n", "v" },
         },
       }
     end,

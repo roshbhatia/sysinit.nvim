@@ -25,7 +25,7 @@ return {
         { "<leader>c", group = "Code" },
         { "<leader>cf", group = "Find (Code)" },
         { "<leader>d", group = "Diff" },
-        { "<leader>e", group = "Editor" },
+        { "<leader>e", group = "Explorer" },
         { "<leader>f", group = "Find" },
         { "<leader>g", group = "Git" },
         { "<leader>gb", group = "Buffer" },

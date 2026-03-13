@@ -58,14 +58,14 @@ return {
     keys = function()
       return {
         {
-          "<leader>ee",
+          "<leader>ef",
           function()
             vim.cmd("Oil")
           end,
           desc = "Explore current directory",
         },
         {
-          "<leader>eE",
+          "<leader>eF",
           function()
             vim.cmd("Oil .")
           end,
