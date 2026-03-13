@@ -10,7 +10,7 @@ return {
     neoconf.setup(opts)
 
     -- Register custom schemas for autocompletion in .sysinit/neoconf.json
-    neoconf.register({
+    require("neoconf.plugins").register({
       name = "sysinit",
       on_schema = function(schema)
         -- Avante schema
