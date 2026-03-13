@@ -1,4 +1,6 @@
-return {
+local neoconf = require("neoconf")
+
+local base_config = {
   settings = {
     gopls = {
       -- Formatting
@@ -43,3 +45,5 @@ return {
     },
   },
 }
+
+return vim.tbl_deep_extend("force", base_config, neoconf.get("gopls") or {})

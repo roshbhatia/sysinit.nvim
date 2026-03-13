@@ -1,3 +1,5 @@
+local neoconf = require("neoconf")
+
 -- Parse JSON to ensure file_store is an object, not an array
 local init_options_json = [[
 {
@@ -53,7 +55,7 @@ local init_options_json = [[
 }
 ]]
 
-return {
+local base_config = {
   cmd = { "lsp-ai", "--stdio" },
   filetypes = {
     "asciidoc",
@@ -86,3 +88,5 @@ return {
   root_markers = { ".git" },
   init_options = vim.fn.json_decode(init_options_json),
 }
+
+return vim.tbl_deep_extend("force", base_config, neoconf.get("lsp_ai") or {})

@@ -1,6 +1,8 @@
+local neoconf = require("neoconf")
+
 -- Crossplane XPLS language server
 -- Activates for YAML files when crossplane.yaml exists anywhere in the repo
-return {
+local base_config = {
   cmd = { "up", "xpls", "serve" },
   filetypes = {
     "yaml",
@@ -40,3 +42,5 @@ return {
     end,
   },
 }
+
+return vim.tbl_deep_extend("force", base_config, neoconf.get("up") or {})

@@ -1,4 +1,6 @@
-return {
+local neoconf = require("neoconf")
+
+local base_config = {
   settings = {
     ["nil"] = {
       nix = {
@@ -16,3 +18,5 @@ return {
     },
   },
 }
+
+return vim.tbl_deep_extend("force", base_config, neoconf.get("nil_ls") or {})

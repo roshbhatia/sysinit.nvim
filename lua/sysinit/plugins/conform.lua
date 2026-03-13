@@ -1,50 +1,57 @@
 return {
   "stevearc/conform.nvim",
   event = "VeryLazy",
-  opts = {
-    formatters_by_ft = {
-      cue = { "cue_fmt" },
-      lua = { "stylua" },
-      nix = { "nixpkgs_fmt" }, -- note: many setups alias this as "nixpkgs-fmt"
-      javascript = { "prettier" },
-      typescript = { "prettier" },
-      javascriptreact = { "prettier" },
-      typescriptreact = { "prettier" },
-      json = { "prettier" },
-      jsonc = { "prettier" },
-      yaml = { "prettier" },
-      html = { "prettier" },
-      css = { "prettier" },
-      scss = { "prettier" },
-      less = { "prettier" },
-      sh = { "shfmt" },
-      bash = { "shfmt" },
-      zsh = { "shfmt" },
-      go = { "goimports", "gofmt" },
-      rust = { "rustfmt" },
-      terraform = { "terraform_fmt" },
-      tf = { "terraform_fmt" },
-      tfvars = { "terraform_fmt" },
-      markdown = { "prettier" },
-    },
+  opts = function()
+    local neoconf = require("neoconf")
+    local defaults = {
+      formatters_by_ft = {
+        cue = { "cue_fmt" },
+        lua = { "stylua" },
+        nix = { "nixpkgs_fmt" },
+        javascript = { "prettier" },
+        typescript = { "prettier" },
+        javascriptreact = { "prettier" },
+        typescriptreact = { "prettier" },
+        json = { "prettier" },
+        jsonc = { "prettier" },
+        yaml = { "prettier" },
+        html = { "prettier" },
+        css = { "prettier" },
+        scss = { "prettier" },
+        less = { "prettier" },
+        sh = { "shfmt" },
+        bash = { "shfmt" },
+        zsh = { "shfmt" },
+        go = { "goimports", "gofmt" },
+        rust = { "rustfmt" },
+        terraform = { "terraform_fmt" },
+        tf = { "terraform_fmt" },
+        tfvars = { "terraform_fmt" },
+        markdown = { "prettier" },
+      },
 
-    default_format_opts = {
-      lsp_format = "fallback",
-    },
+      default_format_opts = {
+        lsp_format = "fallback",
+      },
 
-    notify_on_error = false,
+      notify_on_error = false,
 
-    format_after_save = function(bufnr)
-      if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
-        return
-      end
-      local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(bufnr))
-      if ok and stats and stats.size and stats.size > 1024 * 1024 then
-        return
-      end
-      return { lsp_format = "fallback" }
-    end,
-  },
+      format_after_save = function(bufnr)
+        -- Check neoconf for project-level override
+        local project_autoformat = neoconf.get("conform.autoformat", nil, { bufnr = bufnr })
+        if project_autoformat == false or vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+          return
+        end
+        local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(bufnr))
+        if ok and stats and stats.size and stats.size > 1024 * 1024 then
+          return
+        end
+        return { lsp_format = "fallback" }
+      end,
+    }
+
+    return vim.tbl_deep_extend("force", defaults, neoconf.get("conform") or {})
+  end,
 
   init = function()
     vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"

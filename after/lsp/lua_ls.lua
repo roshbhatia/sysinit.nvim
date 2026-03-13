@@ -1,4 +1,6 @@
-return {
+local neoconf = require("neoconf")
+
+local base_config = {
   settings = {
     Lua = {
       -- Runtime
@@ -57,3 +59,5 @@ return {
     },
   },
 }
+
+return vim.tbl_deep_extend("force", base_config, neoconf.get("lua_ls") or {})

@@ -13,73 +13,78 @@ return {
     event = "VeryLazy",
     ---@module 'avante'
     ---@type avante.Config
-    opts = {
-      instructions_file = "AGENTS.md",
-      provider = "copilot",
-      input = {
-        provider = "snacks",
-        provider_opts = {
-          title = "Avante Input",
-          icon = " ",
+    opts = function()
+      local neoconf = require("neoconf")
+      local defaults = {
+        instructions_file = "AGENTS.md",
+        provider = "copilot",
+        input = {
+          provider = "snacks",
+          provider_opts = {
+            title = "Avante Input",
+            icon = " ",
+          },
         },
-      },
-      selector = {
-        provider = "snacks",
-        provider_opts = {},
-      },
-      file_selector = {
-        provider = "snacks",
-        provider_opts = {},
-      },
-      windows = {
-        spinner = {
-          thinking = { "󰟶", "󰟷" },
+        selector = {
+          provider = "snacks",
+          provider_opts = {},
         },
-        ask = {
-          floating = true,
-          border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+        file_selector = {
+          provider = "snacks",
+          provider_opts = {},
         },
-        edit = {
-          border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+        windows = {
+          spinner = {
+            thinking = { "󰟶", "󰟷" },
+          },
+          ask = {
+            floating = true,
+            border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+          },
+          edit = {
+            border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+          },
         },
-      },
-      behaviour = {
-        auto_apply_diff_after_generation = true,
-        jump_result_buffer_on_finish = true,
-      },
-      mappings = {
-        submit = {
-          normal = "<CR>",
-          insert = "<S-CR>",
+        behaviour = {
+          auto_apply_diff_after_generation = true,
+          jump_result_buffer_on_finish = true,
         },
-        suggestion = {
-          accept = "<C-CR>",
-          next = "<C-n>",
-          prev = "<C-p>",
-          dismiss = "<Esc>",
+        mappings = {
+          submit = {
+            normal = "<CR>",
+            insert = "<S-CR>",
+          },
+          suggestion = {
+            accept = "<C-CR>",
+            next = "<C-n>",
+            prev = "<C-p>",
+            dismiss = "<Esc>",
+          },
+          ask = "<leader>ka",
+          new_ask = "<leader>kn",
+          zen_mode = "<leader>kz",
+          edit = "<leader>ke",
+          refresh = "<leader>kr",
+          focus = "<leader>kf",
+          stop = "<leader>kS",
+          toggle = {
+            default = "<leader>kk",
+            debug = "<leader>kd",
+            selection = "<leader>kC",
+            suggestion = "<leader>ks",
+            repomap = "<leader>kR",
+          },
+          files = {
+            add_current = "<leader>kc",
+            add_all_buffers = "<leader>kB",
+          },
+          select_model = "<leader>k?",
+          select_history = "<leader>kh",
         },
-        ask = "<leader>ka",
-        new_ask = "<leader>kn",
-        zen_mode = "<leader>kz",
-        edit = "<leader>ke",
-        refresh = "<leader>kr",
-        focus = "<leader>kf",
-        stop = "<leader>kS",
-        toggle = {
-          default = "<leader>kk",
-          debug = "<leader>kd",
-          selection = "<leader>kC",
-          suggestion = "<leader>ks",
-          repomap = "<leader>kR",
-        },
-        files = {
-          add_current = "<leader>kc",
-          add_all_buffers = "<leader>kB",
-        },
-        select_model = "<leader>k?",
-        select_history = "<leader>kh",
-      },
-    },
+      }
+
+      return vim.tbl_deep_extend("force", defaults, neoconf.get("avante") or {})
+    end,
     config = function(_, opts)
       require("avante").setup(opts)
 

@@ -1,6 +1,7 @@
+local neoconf = require("neoconf")
 local schemastore = require("schemastore")
 
-return {
+local base_config = {
   settings = {
     yaml = {
       -- Use schemastore for JSON schemas
@@ -66,3 +67,5 @@ return {
     end,
   },
 }
+
+return vim.tbl_deep_extend("force", base_config, neoconf.get("yamlls") or {})

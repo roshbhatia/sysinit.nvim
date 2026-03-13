@@ -1,3 +1,5 @@
+local neoconf = require("neoconf")
+
 -- Files that should never have Copilot enabled (secrets, credentials, etc.)
 local secret_patterns = {
   "%.env$",
@@ -178,7 +180,7 @@ function setup_commands()
   })
 end
 
-return {
+local base_config = {
   -- Dynamically decide whether to activate based on file path
   root_dir = function(bufnr, on_dir)
     local bufname = vim.api.nvim_buf_get_name(bufnr)
@@ -193,3 +195,5 @@ return {
     setup(client, bufnr)
   end,
 }
+
+return vim.tbl_deep_extend("force", base_config, neoconf.get("copilot_ls") or {})
