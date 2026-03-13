@@ -81,6 +81,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
     Snacks.keymap.set("n", "<leader>cn", vim.diagnostic.goto_next, { buffer = bufnr, desc = "Next diagnostic" })
     Snacks.keymap.set("n", "<leader>cp", vim.diagnostic.goto_prev, { buffer = bufnr, desc = "Previous diagnostic" })
 
+    Snacks.keymap.set("n", "]d", vim.diagnostic.goto_next, { buffer = bufnr, desc = "Next diagnostic" })
+    Snacks.keymap.set("n", "[d", vim.diagnostic.goto_prev, { buffer = bufnr, desc = "Previous diagnostic" })
+    Snacks.keymap.set("n", "]D", function()
+      vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })
+    end, { buffer = bufnr, desc = "Next error" })
+    Snacks.keymap.set("n", "[D", function()
+      vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
+    end, { buffer = bufnr, desc = "Previous error" })
+
     Snacks.keymap.set("n", "<leader>cj", function()
       vim.lsp.buf.signature_help({ border = "rounded" })
     end, { buffer = bufnr, desc = "Signature help" })
