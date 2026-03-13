@@ -236,7 +236,7 @@ local THEMES = {
 }
 
 local theme_cfg = {
-  colorscheme = "base16-black-metal",
+  colorscheme = "black-metal",
   transparency = false,
 }
 
@@ -251,7 +251,7 @@ end
 local meta = THEMES[theme_cfg.colorscheme]
   or {
     plugin = "RRethy/base16-nvim",
-    colorscheme = theme_cfg.colorscheme,
+    colorscheme = "base16-" .. theme_cfg.colorscheme,
   }
 
 local function apply_highlights()
