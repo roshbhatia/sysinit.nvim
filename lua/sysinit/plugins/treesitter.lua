@@ -61,7 +61,7 @@ return {
           "yaml",
         },
         sync_install = false,
-        auto_install = true,
+        auto_install = false,
         ignore_install = {
           "org",
         },
