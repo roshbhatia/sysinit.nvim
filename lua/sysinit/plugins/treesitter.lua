@@ -1,7 +1,6 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
     event = "VimEnter",
     branch = "master",
     init = function(plugin)
