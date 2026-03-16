@@ -104,15 +104,15 @@ return {
         },
         {
           ft = "Avante",
-          size = { width = 0.7 },
-        },
-        {
-          ft = "AvanteInput",
-          size = { width = 0.2 },
+          size = { width = 0.3, height = 0.7 },
         },
         {
           ft = "AvanteSelectedFiles",
-          size = { width = 0.1 },
+          size = { width = 0.3, height = 0.1 },
+        },
+        {
+          ft = "AvanteInput",
+          size = { width = 0.3, height = 0.2 },
         },
       },
     },
