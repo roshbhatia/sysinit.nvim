@@ -18,9 +18,6 @@ local SYNTAX_STYLES = {
 }
 
 -- Groups whose background gets cleared in transparent mode.
--- CursorLine / CursorLineNr / CursorLineFold / CursorLineSign are
--- intentionally absent — they keep their bg so the cursorline tint
--- is visible against both transparent and opaque backgrounds.
 local TRANSPARENT_GROUPS = {
   "BlinkCmpDoc",
   "BlinkCmpDocBorder",
@@ -130,9 +127,7 @@ local HIGHLIGHT_OVERRIDES = {
   ["@variable.parameter"] = { link = "Identifier" },
 }
 
----------------------------------------------------------------------------
 -- Sync phase: parse LS_COLORS, detect transparency, pick base flavour
----------------------------------------------------------------------------
 local ls_data = ls_colors.parse()
 local ls_palette = ls_colors.extract_palette(ls_data)
 local transparent = terminal.is_transparent()
@@ -142,9 +137,7 @@ local base_flavor = has_ls_colors and "mocha" or "latte"
 -- Build the initial palette (terminal colours not yet available)
 local initial_palette = palette_builder.build({}, ls_palette)
 
----------------------------------------------------------------------------
 -- Catppuccin setup helper
----------------------------------------------------------------------------
 local function setup_catppuccin(flavor, color_overrides, is_transparent)
   require("catppuccin").setup({
     flavour = flavor,
@@ -182,9 +175,7 @@ local function setup_catppuccin(flavor, color_overrides, is_transparent)
   })
 end
 
----------------------------------------------------------------------------
 -- Highlight application
----------------------------------------------------------------------------
 local function apply_highlights()
   if transparent then
     for _, group in ipairs(TRANSPARENT_GROUPS) do
@@ -197,9 +188,6 @@ local function apply_highlights()
   end
 end
 
----------------------------------------------------------------------------
--- Lazy plugin spec
----------------------------------------------------------------------------
 return {
   {
     "catppuccin/nvim",
@@ -219,7 +207,9 @@ return {
 
       -- Async: query terminal for real ANSI colours, then refine the palette
       terminal.query_colors(function(term_colors, bg)
-        if vim.tbl_isempty(term_colors) and not bg then return end
+        if vim.tbl_isempty(term_colors) and not bg then
+          return
+        end
 
         -- Re-evaluate flavour based on actual terminal background
         local flavor = base_flavor
