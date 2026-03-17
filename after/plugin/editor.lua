@@ -42,6 +42,6 @@ if vim.fn.has("nvim-0.9") == 1 then
 end
 
 vim.opt.diffopt = diffopt
-vim.opt.cursorline = false
+vim.opt.cursorline = true
 vim.opt.spell = true
 vim.opt.fixeol = false

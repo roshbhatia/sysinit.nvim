@@ -1,3 +1,7 @@
+local terminal = require("sysinit.utils.terminal")
+local ls_colors = require("sysinit.utils.ls_colors")
+local palette_builder = require("sysinit.utils.palette")
+
 local SYNTAX_STYLES = {
   comments = { "italic" },
   conditionals = { "italic" },
@@ -13,6 +17,10 @@ local SYNTAX_STYLES = {
   operators = { "bold" },
 }
 
+-- Groups whose background gets cleared in transparent mode.
+-- CursorLine / CursorLineNr / CursorLineFold / CursorLineSign are
+-- intentionally absent — they keep their bg so the cursorline tint
+-- is visible against both transparent and opaque backgrounds.
 local TRANSPARENT_GROUPS = {
   "BlinkCmpDoc",
   "BlinkCmpDocBorder",
@@ -22,10 +30,6 @@ local TRANSPARENT_GROUPS = {
   "BlinkCmpSignatureHelpBorder",
   "ColorColumn",
   "CursorColumn",
-  "CursorLine",
-  "CursorLineFold",
-  "CursorLineNr",
-  "CursorLineSign",
   "DropBarCurrentContext",
   "DropBarIconKindDefault",
   "DropBarIconKindDefaultNC",
@@ -126,136 +130,63 @@ local HIGHLIGHT_OVERRIDES = {
   ["@variable.parameter"] = { link = "Identifier" },
 }
 
-local THEMES = {
-  catppuccin = {
-    plugin = "catppuccin/nvim",
-    colorscheme = "catppuccin",
-    setup = function(cfg)
-      require("catppuccin").setup({
-        flavour = cfg.variant or "mocha",
-        show_end_of_buffer = false,
-        transparent_background = true,
-        float = { transparent = true, solid = false },
-        styles = SYNTAX_STYLES,
-        integrations = {
-          cmp = true,
-          dap = true,
-          dap_ui = true,
-          fzf = true,
-          gitsigns = true,
-          grug_far = true,
-          hop = true,
-          notify = true,
-          nvimtree = true,
-          markview = true,
-          semantic_tokens = true,
-          treesitter = true,
-          treesitter_context = true,
-          which_key = true,
-          snacks = { enabled = true },
-          telescope = { enabled = true, style = "nvchad" },
-          dropbar = { enabled = true, color_mode = true },
-          indent_blankline = { enabled = true, scope_color = "lavender", colored_indent_levels = true },
-          native_lsp = { enabled = true, virtual_text = { errors = { "italic" }, hints = { "italic" } } },
-        },
-      })
+---------------------------------------------------------------------------
+-- Sync phase: parse LS_COLORS, detect transparency, pick base flavour
+---------------------------------------------------------------------------
+local ls_data = ls_colors.parse()
+local ls_palette = ls_colors.extract_palette(ls_data)
+local transparent = terminal.is_transparent()
+local has_ls_colors = vim.env.LS_COLORS and vim.env.LS_COLORS ~= ""
+local base_flavor = has_ls_colors and "mocha" or "latte"
+
+-- Build the initial palette (terminal colours not yet available)
+local initial_palette = palette_builder.build({}, ls_palette)
+
+---------------------------------------------------------------------------
+-- Catppuccin setup helper
+---------------------------------------------------------------------------
+local function setup_catppuccin(flavor, color_overrides, is_transparent)
+  require("catppuccin").setup({
+    flavour = flavor,
+    show_end_of_buffer = false,
+    transparent_background = is_transparent,
+    styles = SYNTAX_STYLES,
+    color_overrides = { [flavor] = color_overrides },
+    custom_highlights = function(colors)
+      return {
+        CursorLine = { bg = colors.surface0 },
+        CursorLineNr = { fg = colors.lavender, bold = true },
+      }
     end,
-  },
-
-  gruvbox = {
-    plugin = "sainnhe/gruvbox-material",
-    colorscheme = "gruvbox-material",
-    setup = function(cfg)
-      local bg = vim.tbl_contains({ "hard", "medium", "soft" }, cfg.variant) and cfg.variant or "medium"
-      vim.g.gruvbox_material_background = bg
-      vim.g.gruvbox_material_better_performance = 1
-      vim.g.gruvbox_material_enable_italic = 1
-      vim.g.gruvbox_material_disable_italic_comment = 0
-      vim.g.gruvbox_material_transparent_background = 2
-      vim.g.gruvbox_material_sign_column_background = "none"
-      vim.g.gruvbox_material_ui_contrast = "low"
-      vim.g.gruvbox_material_show_eob = 0
-      vim.g.gruvbox_material_float_style = "bright"
-      vim.g.gruvbox_material_diagnostic_virtual_text = "grey"
-      vim.g.gruvbox_material_current_word = "bold"
-      vim.g.gruvbox_material_inlay_hints_background = "dimmed"
-    end,
-  },
-
-  ["rose-pine"] = {
-    plugin = "casedami/neomodern.nvim",
-    colorscheme = "roseprime",
-    setup = function(cfg)
-      require("neomodern").setup({
-        theme = cfg.colorscheme or "roseprime",
-        transparent = true,
-        term_colors = true,
-        alt_bg = true,
-        show_eob = false,
-        favor_treesitter_hl = true,
-        code_style = {
-          comments = "none",
-          conditionals = "none",
-          functions = "bold",
-          keywords = "bold",
-          headings = "italic",
-          operators = "none",
-          keyword_return = "bold",
-          strings = "italic",
-          variables = "none",
-        },
-      })
-    end,
-  },
-
-  everforest = {
-    plugin = "sainnhe/everforest",
-    colorscheme = "everforest",
-    setup = function(cfg)
-      local bg = "medium"
-      if cfg.variant then
-        local p = vim.split(cfg.variant, "-")[2]
-        if vim.tbl_contains({ "hard", "medium", "soft" }, p) then
-          bg = p
-        end
-      end
-      vim.g.everforest_background = bg
-      vim.g.everforest_better_performance = 1
-      vim.g.everforest_enable_italic = 1
-      vim.g.everforest_disable_italic_comment = 0
-      vim.g.everforest_transparent_background = 2
-      vim.g.everforest_sign_column_background = "none"
-      vim.g.everforest_ui_contrast = "low"
-      vim.g.everforest_show_eob = 0
-      vim.g.everforest_float_style = "bright"
-      vim.g.everforest_diagnostic_virtual_text = "grey"
-      vim.g.everforest_current_word = "bold"
-      vim.g.everforest_inlay_hints_background = "dimmed"
-    end,
-  },
-}
-
-local theme_cfg = {
-  colorscheme = "black-metal",
-  transparency = false,
-}
-
-if vim.env.SYSINIT_NVIM_COLORS then
-  local colors_str = vim.env.SYSINIT_NVIM_COLORS
-  local ok, parsed = pcall(vim.json.decode, colors_str)
-  if ok and parsed then
-    theme_cfg = vim.tbl_extend("force", theme_cfg, parsed)
-  end
+    integrations = {
+      cmp = true,
+      dap = true,
+      dap_ui = true,
+      fzf = true,
+      gitsigns = true,
+      grug_far = true,
+      hop = true,
+      notify = true,
+      nvimtree = true,
+      markview = true,
+      semantic_tokens = true,
+      treesitter = true,
+      treesitter_context = true,
+      which_key = true,
+      snacks = { enabled = true },
+      telescope = { enabled = true, style = "nvchad" },
+      dropbar = { enabled = true, color_mode = true },
+      indent_blankline = { enabled = true, scope_color = "lavender", colored_indent_levels = true },
+      native_lsp = { enabled = true, virtual_text = { errors = { "italic" }, hints = { "italic" } } },
+    },
+  })
 end
 
-local meta = THEMES[theme_cfg.colorscheme]
-  or {
-    plugin = "RRethy/base16-nvim",
-    colorscheme = "base16-" .. theme_cfg.colorscheme,
-  }
-
+---------------------------------------------------------------------------
+-- Highlight application
+---------------------------------------------------------------------------
 local function apply_highlights()
-  if theme_cfg.transparency then
+  if transparent then
     for _, group in ipairs(TRANSPARENT_GROUPS) do
       vim.api.nvim_set_hl(0, group, { bg = "none" })
     end
@@ -266,24 +197,41 @@ local function apply_highlights()
   end
 end
 
+---------------------------------------------------------------------------
+-- Lazy plugin spec
+---------------------------------------------------------------------------
 return {
   {
-    meta.plugin,
+    "catppuccin/nvim",
+    name = "catppuccin",
     lazy = false,
     priority = 1000,
     config = function()
-      if meta.setup then
-        meta.setup(theme_cfg)
-      end
-
-      vim.cmd.colorscheme(meta.colorscheme)
-
+      -- Sync: apply immediately so the editor is never unstyled
+      setup_catppuccin(base_flavor, initial_palette, transparent)
+      vim.cmd.colorscheme("catppuccin")
       apply_highlights()
 
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = meta.colorscheme,
+        pattern = "catppuccin*",
         callback = apply_highlights,
       })
+
+      -- Async: query terminal for real ANSI colours, then refine the palette
+      terminal.query_colors(function(term_colors, bg)
+        if vim.tbl_isempty(term_colors) and not bg then return end
+
+        -- Re-evaluate flavour based on actual terminal background
+        local flavor = base_flavor
+        if bg then
+          local mode = palette_builder.detect_dark_light(bg)
+          flavor = mode == "dark" and "mocha" or "latte"
+        end
+
+        local full_palette = palette_builder.build(term_colors, ls_palette, bg)
+        setup_catppuccin(flavor, full_palette, transparent)
+        vim.cmd.colorscheme("catppuccin")
+      end)
     end,
   },
 }
