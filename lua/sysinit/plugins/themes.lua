@@ -165,12 +165,12 @@ local function setup_catppuccin(palette, is_transparent)
         -- Cursor line number (always visible)
         CursorLineNr = { fg = colors.lavender, bold = true },
         
-        -- Visual selection - actually visible gray (overlay0 = #6a6a69)
-        Visual = { bg = colors.overlay0, style = { "bold" } },
-        VisualNOS = { bg = colors.overlay0, style = { "bold" } },
+        -- Visual selection - lighter, more white/neutral (overlay2 = #9f9f9e)
+        Visual = { bg = colors.overlay2, style = { "bold" } },
+        VisualNOS = { bg = colors.overlay2, style = { "bold" } },
         
-        -- Cursor line background - lighter gray (surface2 = #4f4f4e)
-        CursorLine = { bg = colors.surface2 },
+        -- Cursor line background - lighter/whiter (overlay1 = #848483)
+        CursorLine = { bg = colors.overlay1 },
       }
     end,
     integrations = {
