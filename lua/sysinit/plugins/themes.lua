@@ -162,7 +162,6 @@ local function setup_catppuccin(palette, is_transparent)
     color_overrides = color_overrides,
     custom_highlights = function(colors)
       return {
-        CursorLine = { bg = colors.surface1 },
         CursorLineNr = { fg = colors.lavender, bold = true },
       }
     end,
