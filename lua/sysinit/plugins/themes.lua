@@ -162,7 +162,15 @@ local function setup_catppuccin(palette, is_transparent)
     color_overrides = color_overrides,
     custom_highlights = function(colors)
       return {
+        -- Cursor line number (always visible)
         CursorLineNr = { fg = colors.lavender, bold = true },
+        
+        -- Visual selection - much lighter and visible
+        Visual = { bg = colors.surface0, style = { "bold" } },
+        VisualNOS = { bg = colors.surface0, style = { "bold" } },
+        
+        -- Cursor line background - subtle but visible
+        CursorLine = { bg = colors.surface0 },
       }
     end,
     integrations = {
