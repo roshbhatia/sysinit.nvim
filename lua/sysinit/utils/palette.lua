@@ -145,6 +145,43 @@ local function max_contrast(base, list)
   return best
 end
 
+local function target_text_contrast(base, candidates)
+  local target = math.min(MAX_TEXT_CONTRAST_TARGET, max_contrast(base, candidates))
+  if target < MIN_TEXT_CONTRAST_FLOOR then
+    target = MIN_TEXT_CONTRAST_FLOOR
+  end
+  return target
+end
+
+local function pick_base_color(candidates, is_dark)
+  local pool = {}
+  for _, cand in ipairs(candidates) do
+    if cand.sat <= 0.2 then
+      pool[#pool + 1] = cand
+    end
+  end
+  if #pool == 0 then
+    pool = candidates
+  end
+
+  local chosen, chosen_lum
+  for _, cand in ipairs(pool) do
+    local lum = relative_luminance(cand.hex)
+    if not chosen then
+      chosen = cand.hex
+      chosen_lum = lum
+    elseif is_dark and lum < chosen_lum then
+      chosen = cand.hex
+      chosen_lum = lum
+    elseif not is_dark and lum > chosen_lum then
+      chosen = cand.hex
+      chosen_lum = lum
+    end
+  end
+
+  return chosen
+end
+
 local function rgb_to_hsl(hex)
   local r, g, b = hex_to_rgb(hex)
   r, g, b = r / 255, g / 255, b / 255
@@ -217,10 +254,7 @@ local function pick_text_color(base, candidates)
 
   local pool = #neutrals > 0 and neutrals or candidates
   local best, best_ratio = pick_from(pool)
-  local target_ratio = math.min(MAX_TEXT_CONTRAST_TARGET, max_contrast(base, pool))
-  if target_ratio < MIN_TEXT_CONTRAST_FLOOR then
-    target_ratio = MIN_TEXT_CONTRAST_FLOOR
-  end
+  local target_ratio = target_text_contrast(base, candidates)
 
   if not best then
     best = "#ffffff"
@@ -318,7 +352,7 @@ function M.build(terminal_colors, ls_palette, bg)
   local candidates = collect_ansi_colors(terminal_colors)
 
   -- Base from terminal background or nearest ANSI endpoint
-  local base = bg
+  local base = bg or pick_base_color(candidates, is_dark)
   if not base then
     local base_index = is_dark and 0 or 15
     base = terminal_colors[base_index] or DEFAULT_ANSI[base_index]

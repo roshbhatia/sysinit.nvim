@@ -215,22 +215,23 @@ return {
 
       -- Fix for snacks dashboard autocommand group cleanup error
       -- Safely handle autocommand group deletion to prevent E367 errors
+      local original_delete_augroup = vim.api.nvim_del_augroup_by_id
       local safe_delete_augroup = function(group_id)
         if group_id and group_id > 0 then
-          local ok, err = pcall(function()
-            vim.api.nvim_del_augroup_by_id(group_id)
-          end)
-          if not ok and err:find("No such group") then
+          local ok, err = pcall(original_delete_augroup, group_id)
+          if ok then
+            return true
+          end
+          if err and err:find("No such group") then
             -- Group already deleted or doesn't exist, silently ignore
             return true
           end
-          return ok
+          return false
         end
         return true
       end
 
       -- Override snacks dashboard cleanup to use safe deletion
-      local original_delete_augroup = vim.api.nvim_del_augroup_by_id
       vim.api.nvim_del_augroup_by_id = function(group_id)
         return safe_delete_augroup(group_id) or original_delete_augroup(group_id)
       end
