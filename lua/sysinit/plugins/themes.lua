@@ -127,24 +127,39 @@ local HIGHLIGHT_OVERRIDES = {
   ["@variable.parameter"] = { link = "Identifier" },
 }
 
--- Sync phase: parse LS_COLORS, detect transparency, pick base flavour
+-- Sync phase: parse LS_COLORS, detect transparency, build palette
 local ls_data = ls_colors.parse()
 local ls_palette = ls_colors.extract_palette(ls_data)
 local transparent = terminal.is_transparent()
-local has_ls_colors = vim.env.LS_COLORS and vim.env.LS_COLORS ~= ""
-local base_flavor = has_ls_colors and "mocha" or "latte"
 
--- Build the initial palette (terminal colours not yet available)
+-- Build initial palette (terminal colours not yet available).
+-- Returns nil when there is no colour data at all.
 local initial_palette = palette_builder.build({}, ls_palette)
 
 -- Catppuccin setup helper
-local function setup_catppuccin(flavor, color_overrides, is_transparent)
+local function setup_catppuccin(palette, is_transparent)
+  local color_overrides = {}
+  -- Flavour is only meaningful as a fallback when we have no palette.
+  -- When palette is set, color_overrides.all replaces every slot.
+  local flavor
+  if palette then
+    color_overrides.all = palette
+    -- Pick flavour so integrations that care about dark/light work
+    if palette.base then
+      flavor = palette_builder.detect_dark_light(palette.base) == "dark" and "mocha" or "latte"
+    else
+      flavor = vim.o.background == "dark" and "mocha" or "latte"
+    end
+  else
+    flavor = vim.o.background == "dark" and "mocha" or "latte"
+  end
+
   require("catppuccin").setup({
     flavour = flavor,
     show_end_of_buffer = false,
     transparent_background = is_transparent,
     styles = SYNTAX_STYLES,
-    color_overrides = { [flavor] = color_overrides },
+    color_overrides = color_overrides,
     custom_highlights = function(colors)
       return {
         CursorLine = { bg = colors.surface0 },
@@ -196,7 +211,7 @@ return {
     priority = 1000,
     config = function()
       -- Sync: apply immediately so the editor is never unstyled
-      setup_catppuccin(base_flavor, initial_palette, transparent)
+      setup_catppuccin(initial_palette, transparent)
       vim.cmd.colorscheme("catppuccin")
       apply_highlights()
 
@@ -211,15 +226,8 @@ return {
           return
         end
 
-        -- Re-evaluate flavour based on actual terminal background
-        local flavor = base_flavor
-        if bg then
-          local mode = palette_builder.detect_dark_light(bg)
-          flavor = mode == "dark" and "mocha" or "latte"
-        end
-
         local full_palette = palette_builder.build(term_colors, ls_palette, bg)
-        setup_catppuccin(flavor, full_palette, transparent)
+        setup_catppuccin(full_palette, transparent)
         vim.cmd.colorscheme("catppuccin")
       end)
     end,

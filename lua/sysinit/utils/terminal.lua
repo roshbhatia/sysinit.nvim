@@ -1,26 +1,6 @@
 -- Terminal color queries (OSC 4/11) and transparency detection
 local M = {}
 
--- ANSI color index → Catppuccin slot mapping
-M.ANSI_TO_CATPPUCCIN = {
-  [0] = "crust",
-  [1] = "red",
-  [2] = "green",
-  [3] = "yellow",
-  [4] = "blue",
-  [5] = "mauve",
-  [6] = "teal",
-  [7] = "subtext1",
-  [8] = "surface2",
-  [9] = "maroon",
-  -- 10 (bright green) skipped — green already covered
-  [11] = "peach",
-  [12] = "sapphire",
-  [13] = "pink",
-  [14] = "sky",
-  [15] = "text",
-}
-
 local TRANSPARENT_TERMINALS = {
   kitty = true,
   alacritty = true,
