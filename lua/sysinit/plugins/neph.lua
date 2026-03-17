@@ -50,11 +50,6 @@ return {
           api.resend,
           desc = "Resend previous prompt",
         },
-        {
-          "<leader>jh",
-          api.history,
-          desc = "Browse prompt history",
-        },
       }
     end,
   },
