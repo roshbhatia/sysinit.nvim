@@ -2,6 +2,10 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
+-- ~/.gitconfig often sets url.git@github.com:.insteadOf=https://github.com/, which forces SSH.
+-- Lazy passes https URLs, but git rewrites them to git@github.com — broken when SSH to GitHub fails.
+vim.env.GIT_CONFIG_GLOBAL = vim.fn.stdpath("config") .. "/gitconfig-lazy"
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
