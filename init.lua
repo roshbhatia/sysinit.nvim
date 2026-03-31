@@ -22,6 +22,10 @@ require("lazy").setup({
       import = "sysinit.plugins",
     },
   },
+  git = {
+    -- Use HTTPS instead of SSH to avoid connection issues
+    url_format = "https://github.com/%s.git",
+  },
   performance = {
     rtp = {
       disabled_plugins = {
