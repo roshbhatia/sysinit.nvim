@@ -41,8 +41,6 @@ return {
           "lua",
           "luadoc",
           "luap",
-          "markdown",
-          "markdown_inline",
           "nix",
           "nu",
           "python",
@@ -70,6 +68,11 @@ return {
           enable = true,
           additional_vim_regex_highlighting = false,
           disable = function(lang, buf)
+            -- Always disable for markdown (use LSP instead)
+            if lang == "markdown" or lang == "markdown_inline" then
+              return true
+            end
+
             -- Disable treesitter for very large files
             local line_count = vim.api.nvim_buf_line_count(buf)
             local file_size = vim.fn.getfsize(vim.api.nvim_buf_get_name(buf))

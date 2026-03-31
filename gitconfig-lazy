@@ -1,3 +1,0 @@
-# Lazy.nvim: minimal global config (no url.insteadOf → HTTPS stays HTTPS).
-[core]
-	quotepath = false
