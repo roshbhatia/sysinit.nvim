@@ -116,9 +116,6 @@ return {
             },
           },
         },
-        image = {
-          enabled = false, -- Disable to prevent treesitter parsing errors
-        },
         dashboard = {
           enabled = true,
           preset = {
