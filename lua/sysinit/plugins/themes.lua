@@ -170,11 +170,15 @@ local function neogit_highlights(c)
     NeogitHunkMergeHeaderHighlight = { bg = U.darken(c.teal, 0.28, c.base),   fg = c.teal,                         bold = true },
     NeogitHunkMergeHeaderCursor    = { bg = U.darken(c.teal, 0.28, c.base),   fg = c.teal,                         bold = true },
 
-    -- Diff file headers
+    -- Diff file headers (+ Highlight/Cursor variants — neogit appends these dynamically on selection)
     NeogitDiffHeader               = { bg = c.base,    fg = c.blue,  bold = true },
-    NeogitDiffHeaderHighlight      = { bg = c.base,    fg = c.peach, bold = true },
+    NeogitDiffHeaderHighlight      = { bg = U.darken(c.blue, 0.12, c.base), fg = c.blue,  bold = true },
+    NeogitDiffHeaderCursor         = { bg = U.darken(c.blue, 0.12, c.base), fg = c.blue,  bold = true },
 
-    -- Normal / float surfaces (keep them transparent so window bg shows through)
+    -- Commit view header (+ Highlight/Cursor variants)
+    NeogitCommitViewHeader         = { bg = U.darken(c.blue, 0.30, c.base), fg = U.lighten(c.blue, 0.80, c.text), bold = true },
+    NeogitCommitViewHeaderHighlight = { bg = U.darken(c.blue, 0.45, c.base), fg = c.blue, bold = true },
+    NeogitCommitViewHeaderCursor   = { bg = U.darken(c.blue, 0.45, c.base), fg = c.blue,  bold = true },
     NeogitNormal                   = { link = "Normal" },
     NeogitNormalFloat              = { link = "NormalFloat" },
     NeogitFloatBorder              = { link = "FloatBorder" },

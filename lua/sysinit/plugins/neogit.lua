@@ -6,7 +6,9 @@ return {
     },
     lazy = false,
     config = function()
-      -- Disable folds in all Neogit buffers
+      -- Disable folds in all Neogit buffers.
+      -- neogit's buffer.lua explicitly sets foldenable=true during render,
+      -- so we defer with vim.schedule to run after the render completes.
       vim.api.nvim_create_autocmd("FileType", {
         pattern = {
           "NeogitStatus",
@@ -22,9 +24,14 @@ return {
           "gitcommit",
           "gitrebase",
         },
-        callback = function()
-          vim.wo.foldenable = false
-          vim.wo.foldcolumn = "0"
+        callback = function(args)
+          local win = vim.api.nvim_get_current_win()
+          vim.schedule(function()
+            if vim.api.nvim_buf_is_valid(args.buf) and vim.api.nvim_win_is_valid(win) then
+              vim.wo[win].foldenable = false
+              vim.wo[win].foldcolumn = "0"
+            end
+          end)
         end,
       })
 
