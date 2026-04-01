@@ -43,23 +43,9 @@ return {
         return ""
       end
 
-      local function lsp_ai_model()
-        -- Check if lsp_ai is attached to current buffer
-        local bufnr = vim.api.nvim_get_current_buf()
-        local clients = vim.lsp.get_clients({ bufnr = bufnr, name = "lsp_ai" })
-        
-        if #clients > 0 and vim.g.lsp_ai_model then
-          -- Show compact model name (remove version suffix)
-          local model = vim.g.lsp_ai_model
-          local short_name = model:match("^([^:]+)") or model
-          return " " .. short_name .. " "
-        end
-        return ""
-      end
-
       require("staline").setup({
         sections = {
-          left = { "mode", "branch", "file_name", neph_status, lsp_ai_model, copilot_status },
+          left = { "mode", "branch", "file_name", neph_status, copilot_status },
           mid = {},
           right = { get_format_status, "lsp", "lsp_name", "file_size", "line_column" },
         },
