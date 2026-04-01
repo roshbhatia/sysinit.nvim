@@ -30,7 +30,6 @@ return {
         { "<leader>g",  group = "Git" },
         { "<leader>j",  group = "Agents" },       -- neph terminal agents
         { "<leader>k",  group = "Avante" },        -- avante AI
-        { "<leader>m",  group = "Marks" },
         { "<leader>q",  group = "Force Quit" },
         { "<leader>r",  group = "Debug" },         -- DAP only
         { "<leader>t",  group = "Terminal" },

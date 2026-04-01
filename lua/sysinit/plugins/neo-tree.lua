@@ -151,15 +151,6 @@ return {
         },
       })
     end,
-    keys = {
-      {
-        "<leader>et",
-        function()
-          vim.cmd("Neotree toggle")
-          vim.cmd("wincmd p")
-        end,
-        desc = "Toggle explorer tree",
-      },
-    },
+    keys = {},
   },
 }
