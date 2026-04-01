@@ -73,7 +73,7 @@ return {
     keys = {
       -- ── Snacks pickers ──────────────────────────────────────────────────────
       {
-        "<leader>rr",
+        "<leader>drr",
         function()
           -- all unstaged + staged changes, side-by-side diff preview
           require("snacks").picker.git_diff()
@@ -81,14 +81,14 @@ return {
         desc = "Review: browse all changed files",
       },
       {
-        "<leader>rs",
+        "<leader>drs",
         function()
           require("snacks").picker.git_diff({ staged = true })
         end,
         desc = "Review: browse staged changes",
       },
       {
-        "<leader>rf",
+        "<leader>drf",
         function()
           -- changed files in the current branch vs main/master
           local base = vim.fn.systemlist("git merge-base HEAD origin/HEAD 2>/dev/null")[1]
@@ -101,7 +101,7 @@ return {
 
       -- ── Avante review ───────────────────────────────────────────────────────
       {
-        "<leader>ra",
+        "<leader>dra",
         function()
           -- all uncommitted changes (staged + unstaged)
           local lines = git({ "--no-pager", "diff", "HEAD" })
@@ -110,7 +110,7 @@ return {
         desc = "Review: ask agent to review all changes (HEAD)",
       },
       {
-        "<leader>rS",
+        "<leader>drS",
         function()
           -- staged only
           local lines = git({ "--no-pager", "diff", "--cached" })
@@ -119,7 +119,7 @@ return {
         desc = "Review: ask agent to review staged changes",
       },
       {
-        "<leader>rb",
+        "<leader>drb",
         function()
           -- current branch vs origin/HEAD
           local base = vim.trim(
@@ -137,7 +137,7 @@ return {
         desc = "Review: ask agent to review entire branch diff",
       },
       {
-        "<leader>rF",
+        "<leader>drF",
         function()
           -- current file vs HEAD
           local file = vim.fn.expand("%:p")
@@ -152,7 +152,7 @@ return {
         desc = "Review: ask agent to review current file diff",
       },
       {
-        "<leader>rh",
+        "<leader>drh",
         function()
           -- current hunk under cursor via gitsigns
           local gs = require("gitsigns")

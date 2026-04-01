@@ -22,32 +22,52 @@ return {
       })
 
       wk.add({
-        { "<leader>c", group = "Code" },
-        { "<leader>cf", group = "Find (Code)" },
-        { "<leader>d", group = "Diff" },
-        { "<leader>e", group = "Explorer" },
-        { "<leader>f", group = "Find" },
-        { "<leader>g", group = "Git" },
+        -- ── Top-level groups ─────────────────────────────────────────────────
+        { "<leader>c",  group = "Code" },
+        { "<leader>d",  group = "Diff" },
+        { "<leader>e",  group = "Explorer" },
+        { "<leader>f",  group = "Find" },
+        { "<leader>g",  group = "Git" },
+        { "<leader>j",  group = "Agents" },       -- neph terminal agents
+        { "<leader>k",  group = "Avante" },        -- avante AI
+        { "<leader>m",  group = "Marks" },
+        { "<leader>q",  group = "Force Quit" },
+        { "<leader>r",  group = "Debug" },         -- DAP only
+        { "<leader>t",  group = "Terminal" },
+
+        -- ── Code subgroups ───────────────────────────────────────────────────
+        { "<leader>cf", group = "Find" },
+
+        -- ── Diff subgroups ───────────────────────────────────────────────────
+        { "<leader>dr", group = "Review" },        -- diff-review (snacks + avante)
+
+        -- ── Git subgroups ────────────────────────────────────────────────────
         { "<leader>gb", group = "Buffer" },
-        { "<leader>gf", group = "Find (Git)" },
+        { "<leader>gf", group = "Find" },
         { "<leader>gh", group = "Hunk" },
-        { "<leader>j", group = "AI Agents" },
-        { "<leader>k", group = "Avante" },
-        { "<leader>m", group = "Marks" },
-        { "<leader>q", group = "Force Quit" },
-        { "<leader>r", group = "Debug" },
-        { "<localleader>x", group = "Filetype Specific" },
-        { "gr", group = "LSP" },
-        { "]", group = "Next" },
-        { "[", group = "Prev" },
-        { "v<leader>", group = "Extras" },
+        { "<leader>gr", group = "PR Review" },     -- octo
+
+        -- ── Avante subgroups ─────────────────────────────────────────────────
+        { "<leader>kt", group = "Toggle" },
+        { "<leader>kF", group = "Files" },
+
+        -- ── Navigation ───────────────────────────────────────────────────────
+        { "]",          group = "Next" },
+        { "[",          group = "Prev" },
+
+        -- ── LSP (no leader) ──────────────────────────────────────────────────
+        { "gr",         group = "LSP" },
+
+        -- ── Visual mode ──────────────────────────────────────────────────────
+        { "v<leader>",  group = "Extras" },
         { "v<leader>c", group = "Code" },
         { "v<leader>g", group = "Git" },
-        { "v<leader>j", group = "AI Agents" },
-        { "vg", group = "Extras" },
-        { "vgr", group = "Code" },
-        { "vv", group = "AST" },
-        { "vz", group = "Fold" },
+        { "v<leader>j", group = "Agents" },
+        { "v<leader>k", group = "Avante" },
+        { "vg",         group = "Extras" },
+        { "vgr",        group = "Code" },
+        { "vv",         group = "AST" },
+        { "vz",         group = "Fold" },
       })
     end,
   },

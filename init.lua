@@ -2,6 +2,14 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
+-- Enable Neovim 0.12+ external UI (messages, cmdline, popupmenu rendered via extmarks)
+require("vim._core.ui2").enable({
+  enable = true,
+  msg = {
+    targets = "msg", -- show messages in a floating window, not the cmdline
+  },
+})
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
