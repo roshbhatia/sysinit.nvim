@@ -6,6 +6,28 @@ return {
     },
     lazy = false,
     config = function()
+      -- Disable folds in all Neogit buffers
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {
+          "NeogitStatus",
+          "NeogitDiffView",
+          "NeogitCommitView",
+          "NeogitLogView",
+          "NeogitRefsView",
+          "NeogitReflogView",
+          "NeogitStashView",
+          "NeogitCommitSelectView",
+          "NeogitConsole",
+          "NeogitGitCommandHistory",
+          "gitcommit",
+          "gitrebase",
+        },
+        callback = function()
+          vim.wo.foldenable = false
+          vim.wo.foldcolumn = "0"
+        end,
+      })
+
       require("neogit").setup({
         graph_style = "kitty",
         commit_editor = {
