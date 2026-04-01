@@ -22,6 +22,10 @@ require("lazy").setup({
       import = "sysinit.plugins",
     },
   },
+  git = {
+    -- Use HTTPS for all plugin clones to avoid SSH port 22 blocks
+    url_format = "https://github.com/%s.git",
+  },
   performance = {
     rtp = {
       disabled_plugins = {

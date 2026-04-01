@@ -1,178 +1,126 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    event = "VimEnter",
-    branch = "master",
-    init = function(plugin)
-      require("lazy.core.loader").add_to_rtp(plugin)
-      require("nvim-treesitter.query_predicates")
-    end,
+    lazy = false,
+    branch = "main",
+    build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = {
-          "bash",
-          "c",
-          "comment",
-          "css",
-          "csv",
-          "cue",
-          "diff",
-          "dockerfile",
-          "git_config",
-          "git_rebase",
-          "gitattributes",
-          "gitcommit",
-          "gitignore",
-          "go",
-          "gomod",
-          "gosum",
-          "gotmpl",
-          "gowork",
-          "hcl",
-          "helm",
-          "html",
-          "java",
-          "javascript",
-          "jinja",
-          "jinja_inline",
-          "jq",
-          "jsdoc",
-          "json",
-          "lua",
-          "luadoc",
-          "luap",
-          "nix",
-          "nu",
-          "python",
-          "query",
-          "regex",
-          "ruby",
-          "rust",
-          "scss",
-          "terraform",
-          "toml",
-          "tsv",
-          "typescript",
-          "vim",
-          "vimdoc",
-          "xml",
-          "yaml",
-        },
-        sync_install = false,
-        auto_install = false,
-        ignore_install = {
-          "org",
-        },
-        modules = {},
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = false,
-          disable = function(lang, buf)
-            -- Always disable for markdown (use LSP instead)
-            if lang == "markdown" or lang == "markdown_inline" then
-              return true
-            end
+      -- New main branch: minimal setup, just set install_dir if desired
+      require("nvim-treesitter").setup({})
 
-            -- Disable treesitter for very large files
-            local line_count = vim.api.nvim_buf_line_count(buf)
-            local file_size = vim.fn.getfsize(vim.api.nvim_buf_get_name(buf))
-
-            -- Disable for files > 5000 lines or > 2MB
-            if line_count > 5000 or file_size > 2 * 1024 * 1024 then
-              return true
-            end
-
-            -- Disable for certain filetypes that don't benefit much
-            local disable_ft = { "log", "txt", "csv", "json" }
-            return vim.tbl_contains(disable_ft, lang)
-          end,
-        },
-        rainbow = {
-          enable = true,
-          extended_mode = true,
-          max_file_lines = nil,
-        },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "vvv",
-            node_incremental = "vvi",
-            scope_incremental = "vvI",
-            node_decremental = "vvd",
-          },
-        },
-        indent = {
-          enable = true,
-        },
-        textobjects = {
-          move = {
-            enable = true,
-            goto_next_start = {
-              ["]m"] = "@function.outer",
-              ["]c"] = "@class.outer",
-              ["]a"] = "@parameter.inner",
-            },
-            goto_next_end = {
-              ["]M"] = "@function.outer",
-              ["]C"] = "@class.outer",
-              ["]A"] = "@parameter.inner",
-            },
-            goto_previous_start = {
-              ["[m"] = "@function.outer",
-              ["[c"] = "@class.outer",
-              ["[a"] = "@parameter.inner",
-            },
-            goto_previous_end = {
-              ["[M"] = "@function.outer",
-              ["[C"] = "@class.outer",
-              ["[A"] = "@parameter.inner",
-            },
-          },
-        },
+      -- Install parsers (no-op if already installed)
+      require("nvim-treesitter").install({
+        "bash",
+        "c",
+        "comment",
+        "css",
+        "csv",
+        "cue",
+        "diff",
+        "dockerfile",
+        "git_config",
+        "git_rebase",
+        "gitattributes",
+        "gitcommit",
+        "gitignore",
+        "go",
+        "gomod",
+        "gosum",
+        "gotmpl",
+        "gowork",
+        "hcl",
+        "html",
+        "java",
+        "javascript",
+        "jq",
+        "jsdoc",
+        "json",
+        "lua",
+        "luadoc",
+        "luap",
+        "nix",
+        "python",
+        "query",
+        "regex",
+        "ruby",
+        "rust",
+        "scss",
+        "terraform",
+        "toml",
+        "tsv",
+        "typescript",
+        "vim",
+        "vimdoc",
+        "xml",
+        "yaml",
       })
 
-      -- Auto-fix treesitter highlighting if not active
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufEnter" }, {
-        group = vim.api.nvim_create_augroup("TreesitterHighlightFix", { clear = true }),
+      -- Enable treesitter highlighting and indentation per FileType
+      -- (highlighting is now native to Neovim; nvim-treesitter just provides queries)
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),
         callback = function(args)
+          local ft = args.match
           local buf = args.buf
 
-          -- Skip if we've already tried to fix this buffer
-          if vim.b[buf].treesitter_highlight_fixed then
+          -- Skip markdown (use LSP/render-markdown instead)
+          if ft == "markdown" or ft == "markdown_inline" then
             return
           end
 
-          -- Only process real files
-          local bufname = vim.api.nvim_buf_get_name(buf)
-          if bufname == "" or vim.fn.filereadable(bufname) ~= 1 then
+          -- Disable for large files
+          local line_count = vim.api.nvim_buf_line_count(buf)
+          local file_size = vim.fn.getfsize(vim.api.nvim_buf_get_name(buf))
+          if line_count > 5000 or file_size > 2 * 1024 * 1024 then
             return
           end
 
-          -- Skip special buffer types
-          local buftype = vim.bo[buf].buftype
-          if buftype ~= "" and buftype ~= "acwrite" then
+          -- Disable for certain filetypes
+          local disable_ft = { "log", "txt", "csv", "json" }
+          if vim.tbl_contains(disable_ft, ft) then
             return
           end
 
-          -- Check if treesitter highlighting is active
-          vim.defer_fn(function()
-            if not vim.api.nvim_buf_is_valid(buf) then
-              return
-            end
+          -- Start treesitter highlighting (built into Neovim 0.12+)
+          pcall(vim.treesitter.start, buf)
 
-            local has_ts = vim.treesitter.highlighter.active[buf] ~= nil
-            if not has_ts then
-              -- Mark that we've attempted to fix this buffer
-              vim.b[buf].treesitter_highlight_fixed = true
-
-              -- Reload the buffer to trigger treesitter
-              pcall(vim.cmd.edit)
-            else
-              -- Highlighting is active, mark as fixed to skip future checks
-              vim.b[buf].treesitter_highlight_fixed = true
-            end
-          end, 100)
+          -- Enable treesitter-based indentation (experimental, from nvim-treesitter)
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
         end,
+      })
+    end,
+  },
+
+  -- Treesitter textobjects (still a separate plugin, compatible with main branch)
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    lazy = false,
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = function()
+      require("nvim-treesitter-textobjects").setup({
+        move = {
+          enable = true,
+          goto_next_start = {
+            ["]m"] = "@function.outer",
+            ["]c"] = "@class.outer",
+            ["]a"] = "@parameter.inner",
+          },
+          goto_next_end = {
+            ["]M"] = "@function.outer",
+            ["]C"] = "@class.outer",
+            ["]A"] = "@parameter.inner",
+          },
+          goto_previous_start = {
+            ["[m"] = "@function.outer",
+            ["[c"] = "@class.outer",
+            ["[a"] = "@parameter.inner",
+          },
+          goto_previous_end = {
+            ["[M"] = "@function.outer",
+            ["[C"] = "@class.outer",
+            ["[A"] = "@parameter.inner",
+          },
+        },
       })
     end,
   },
