@@ -148,21 +148,38 @@ local function neogit_highlights(c)
 
   return {
     -- ── Window / float surfaces ──────────────────────────────────────────────
+    -- Both NeogitFloat AND NeogitNormalFloat must exist: neogit's hl.lua
+    -- defines NeogitNormalFloat = { link = "NeogitNormal" } with default=true,
+    -- and then NeogitFloatBorder = { link = "NeogitNormalFloat" }.
+    -- We take ownership of both so neither falls through to a dark background.
     NeogitNormal             = { link = "Normal" },
-    NeogitFloat              = { link = "NormalFloat" },   -- NOT NormalFloat (was wrong before)
+    NeogitFloat              = { link = "NormalFloat" },
+    NeogitNormalFloat        = { link = "NormalFloat" },
     NeogitFloatBorder        = { link = "FloatBorder" },
-    NeogitFloatHeader        = { fg = c.blue,   bg = U.darken(c.blue,   0.12, c.base), bold = true },
+    NeogitFloatHeader        = { fg = c.blue,      bg = U.darken(c.blue, 0.12, c.base), bold = true },
     NeogitFloatHeaderHighlight = { fg = c.sapphire, bg = U.darken(c.blue, 0.20, c.base), bold = true },
     NeogitWinSeparator       = { link = "WinSeparator" },
-    NeogitSignColumn         = { fg = "NONE",   bg = "NONE" },
-    NeogitFoldColumn         = { fg = "NONE",   bg = "NONE" },
+    NeogitSignColumn         = { fg = "NONE", bg = "NONE" },
+    NeogitFoldColumn         = { fg = "NONE", bg = "NONE" },
     NeogitCursorLine         = { link = "CursorLine" },
     NeogitCursorLineNr       = { link = "CursorLineNr" },
 
-    -- ── Diff context (the "black bar" fix) ───────────────────────────────────
-    NeogitDiffContext        = { bg = c.base },          -- no background = no bar
-    NeogitDiffContextHighlight = { bg = c.surface0 },    -- subtle tint when context is active
-    NeogitDiffContextCursor  = { bg = c.base },
+    -- ── Commit view description ───────────────────────────────────────────────
+    -- Applied as a col-level container highlight on the commit message body.
+    -- MUST be explicitly defined — undefined = stacked bg inheritance = black block.
+    NeogitCommitViewDescription = { link = "Normal" },
+
+    -- ── Diff stats overview ("+5 -3" inline in file list) ────────────────────
+    NeogitDiffAdditions      = { fg = c.green },
+    NeogitDiffDeletions      = { fg = c.red },
+
+    -- ── Diff context ─────────────────────────────────────────────────────────
+    -- ContextHighlight covers ALL lines in the active hunk (not just cursor),
+    -- so it must be nearly invisible — a tiny step off base, not surface0.
+    -- surface0 at this density creates the "black bar" banding on every context line.
+    NeogitDiffContext          = { bg = c.base },
+    NeogitDiffContextHighlight = { bg = U.darken(c.overlay0, 0.06, c.base) },
+    NeogitDiffContextCursor    = { bg = U.darken(c.overlay0, 0.14, c.base) },
 
     -- ── Diff additions ───────────────────────────────────────────────────────
     NeogitDiffAdd            = { bg = U.darken(c.green, 0.10, c.base), fg = U.darken(c.green, 0.80, c.base) },
