@@ -174,44 +174,52 @@ local function neogit_highlights(c)
     NeogitDiffDeletions      = { fg = c.red },
 
     -- ── Diff context ─────────────────────────────────────────────────────────
-    -- ContextHighlight covers ALL lines in the active hunk (not just cursor),
-    -- so it must be nearly invisible — a tiny step off base, not surface0.
-    -- surface0 at this density creates the "black bar" banding on every context line.
-    NeogitDiffContext          = { bg = c.base },
-    NeogitDiffContextHighlight = { bg = U.darken(c.overlay0, 0.06, c.base) },
-    NeogitDiffContextCursor    = { bg = U.darken(c.overlay0, 0.14, c.base) },
+    -- MUST use `link` (not `bg = "NONE"`) because neogit's hl.lua calls
+    -- is_set() which does nvim_get_hl and checks tbl_isempty. An empty-attr
+    -- group (bg="NONE", no fg) returns an empty table → is_set=false →
+    -- neogit overwrites with palette.bg1 (#26292e) via default=true.
+    -- link="Normal" guarantees is_set=true and adapts to float vs normal windows.
+    -- ContextHighlight covers ALL lines in the focused hunk, so it must be
+    -- very subtle — CursorLine is perfect: catppuccin already tunes it well.
+    NeogitDiffContext          = { link = "Normal" },
+    NeogitDiffContextHighlight = { link = "CursorLine" },
+    NeogitDiffContextCursor    = { link = "CursorLine" },
 
     -- ── Diff additions ───────────────────────────────────────────────────────
-    NeogitDiffAdd            = { bg = U.darken(c.green, 0.10, c.base), fg = U.darken(c.green, 0.80, c.base) },
-    NeogitDiffAddHighlight   = { bg = U.darken(c.green, 0.25, c.base), fg = c.green },
-    NeogitDiffAddCursor      = { bg = c.surface0,                       fg = c.green },
-    NeogitDiffAddInline      = { bg = U.darken(c.green, 0.40, c.base), fg = c.green, bold = true },
+    -- Link to Neovim's DiffAdd/DiffDelete so the colours scale with the
+    -- terminal palette automatically (catppuccin already styles these).
+    -- Inline variants get an explicit, slightly more saturated bg.
+    NeogitDiffAdd            = { link = "DiffAdd" },
+    NeogitDiffAddHighlight   = { link = "DiffAdd" },
+    NeogitDiffAddCursor      = { link = "DiffAdd" },
+    NeogitDiffAddInline      = { bg = c.surface1, fg = c.green, bold = true },
 
     -- ── Diff deletions ───────────────────────────────────────────────────────
-    NeogitDiffDelete         = { bg = U.darken(c.red, 0.10, c.base),   fg = U.darken(c.red, 0.80, c.base) },
-    NeogitDiffDeleteHighlight = { bg = U.darken(c.red, 0.25, c.base),  fg = c.red },
-    NeogitDiffDeleteCursor   = { bg = c.surface0,                       fg = c.red },
-    NeogitDiffDeleteInline   = { bg = U.darken(c.red,   0.40, c.base), fg = c.red,   bold = true },
+    NeogitDiffDelete         = { link = "DiffDelete" },
+    NeogitDiffDeleteHighlight = { link = "DiffDelete" },
+    NeogitDiffDeleteCursor   = { link = "DiffDelete" },
+    NeogitDiffDeleteInline   = { bg = c.surface1, fg = c.red,   bold = true },
 
     -- ── Diff file header ─────────────────────────────────────────────────────
-    NeogitDiffHeader         = { bg = c.base,                           fg = c.blue,  bold = true },
-    NeogitDiffHeaderHighlight = { bg = U.darken(c.blue, 0.12, c.base), fg = c.blue,  bold = true },
-    NeogitDiffHeaderCursor   = { bg = U.darken(c.blue, 0.12, c.base),  fg = c.blue,  bold = true },
+    -- No bg attr → would be empty → neogit default wins. Use link="Normal" as base.
+    NeogitDiffHeader          = { fg = c.blue, bold = true },
+    NeogitDiffHeaderHighlight = { fg = c.blue, bg = c.surface0, bold = true },
+    NeogitDiffHeaderCursor    = { fg = c.blue, bg = c.surface1, bold = true },
 
-    -- ── Hunk header (neogit appends Highlight/Cursor dynamically) ────────────
-    NeogitHunkHeader         = { bg = U.darken(c.blue, 0.12, c.base),  fg = U.darken(c.blue, 0.55, c.base), bold = true },
-    NeogitHunkHeaderHighlight = { bg = U.darken(c.blue, 0.28, c.base), fg = c.blue,  bold = true },
-    NeogitHunkHeaderCursor   = { bg = U.darken(c.blue, 0.28, c.base),  fg = c.blue,  bold = true },
+    -- ── Hunk header ──────────────────────────────────────────────────────────
+    NeogitHunkHeader          = { fg = c.blue,  bg = c.surface0, bold = true },
+    NeogitHunkHeaderHighlight = { fg = c.blue,  bg = c.surface1, bold = true },
+    NeogitHunkHeaderCursor    = { fg = c.sapphire, bg = c.surface1, bold = true },
 
     -- ── Merge hunk header ────────────────────────────────────────────────────
-    NeogitHunkMergeHeader         = { bg = U.darken(c.teal, 0.12, c.base),  fg = U.darken(c.teal, 0.55, c.base), bold = true },
-    NeogitHunkMergeHeaderHighlight = { bg = U.darken(c.teal, 0.28, c.base), fg = c.teal, bold = true },
-    NeogitHunkMergeHeaderCursor   = { bg = U.darken(c.teal, 0.28, c.base),  fg = c.teal, bold = true },
+    NeogitHunkMergeHeader          = { fg = c.teal, bg = c.surface0, bold = true },
+    NeogitHunkMergeHeaderHighlight = { fg = c.teal, bg = c.surface1, bold = true },
+    NeogitHunkMergeHeaderCursor    = { fg = c.teal, bg = c.surface1, bold = true },
 
     -- ── Commit view header ───────────────────────────────────────────────────
-    NeogitCommitViewHeader        = { bg = U.darken(c.blue, 0.30, c.base), fg = U.lighten(c.blue, 0.80, c.text), bold = true },
-    NeogitCommitViewHeaderHighlight = { bg = U.darken(c.blue, 0.45, c.base), fg = c.blue, bold = true },
-    NeogitCommitViewHeaderCursor  = { bg = U.darken(c.blue, 0.45, c.base),  fg = c.blue, bold = true },
+    NeogitCommitViewHeader          = { fg = c.blue,    bg = c.surface0, bold = true },
+    NeogitCommitViewHeaderHighlight = { fg = c.sapphire, bg = c.surface1, bold = true },
+    NeogitCommitViewHeaderCursor    = { fg = c.sapphire, bg = c.surface1, bold = true },
 
     -- ── Section headers ──────────────────────────────────────────────────────
     NeogitSectionHeader      = section,
@@ -264,7 +272,7 @@ local function neogit_highlights(c)
     NeogitChangeUpdated      = { fg = c.peach,   bold = true },
     NeogitChangeCopied       = { fg = c.pink,    bold = true },
     NeogitChangeNewFile      = { fg = c.green,   bold = true },
-    NeogitChangeUnmerged     = { fg = c.yellow,  bold = true },  -- was wrongly NeogitChangeBothModified
+    NeogitChangeUnmerged     = { fg = c.yellow,  bold = true },
 
     -- ── Commit graph ─────────────────────────────────────────────────────────
     NeogitGraphAuthor        = { fg = c.peach },
