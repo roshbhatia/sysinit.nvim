@@ -136,130 +136,178 @@ local transparent = terminal.is_transparent()
 -- Returns nil when there is no colour data at all.
 local initial_palette = palette_builder.build({}, ls_palette)
 
--- Comprehensive neogit highlight overrides.
--- Catppuccin's built-in neogit integration is incomplete and uses surface0 for
--- diff context backgrounds, which maps to near-black with terminal-derived palettes
--- and creates the "black bar" effect. We take full ownership here.
+-- Comprehensive neogit highlight overrides, based on the authoritative group list
+-- in neogit's built-in :help docs. Catppuccin's integration is incomplete (missing
+-- ~40 groups) and uses surface0 for diff context, which maps near-black with
+-- terminal-derived palettes causing "black bar" artifacts.
 local function neogit_highlights(c)
   local U = require("catppuccin.utils.colors")
+
+  -- Shared section-header style — all status-buffer section labels link here
+  local section = { fg = c.mauve, bold = true }
+
   return {
-    -- Diff context: match normal buffer bg (no black bars)
-    NeogitDiffContext              = { bg = c.base },
-    NeogitDiffContextHighlight     = { bg = c.surface0 },
-    NeogitDiffContextCursor        = { bg = c.base },
+    -- ── Window / float surfaces ──────────────────────────────────────────────
+    NeogitNormal             = { link = "Normal" },
+    NeogitFloat              = { link = "NormalFloat" },   -- NOT NormalFloat (was wrong before)
+    NeogitFloatBorder        = { link = "FloatBorder" },
+    NeogitFloatHeader        = { fg = c.blue,   bg = U.darken(c.blue,   0.12, c.base), bold = true },
+    NeogitFloatHeaderHighlight = { fg = c.sapphire, bg = U.darken(c.blue, 0.20, c.base), bold = true },
+    NeogitWinSeparator       = { link = "WinSeparator" },
+    NeogitSignColumn         = { fg = "NONE",   bg = "NONE" },
+    NeogitFoldColumn         = { fg = "NONE",   bg = "NONE" },
+    NeogitCursorLine         = { link = "CursorLine" },
+    NeogitCursorLineNr       = { link = "CursorLineNr" },
 
-    -- Diff additions
-    NeogitDiffAdd                  = { bg = U.darken(c.green, 0.10, c.base),  fg = U.darken(c.green, 0.80, c.base) },
-    NeogitDiffAddHighlight         = { bg = U.darken(c.green, 0.25, c.base),  fg = c.green },
-    NeogitDiffAddCursor            = { bg = c.surface0,                        fg = c.green },
-    NeogitDiffAdditions            = { fg = U.darken(c.green, 0.60, c.base) },
+    -- ── Diff context (the "black bar" fix) ───────────────────────────────────
+    NeogitDiffContext        = { bg = c.base },          -- no background = no bar
+    NeogitDiffContextHighlight = { bg = c.surface0 },    -- subtle tint when context is active
+    NeogitDiffContextCursor  = { bg = c.base },
 
-    -- Diff deletions
-    NeogitDiffDelete               = { bg = U.darken(c.red, 0.10, c.base),    fg = U.darken(c.red, 0.80, c.base) },
-    NeogitDiffDeleteHighlight      = { bg = U.darken(c.red, 0.25, c.base),    fg = c.red },
-    NeogitDiffDeleteCursor         = { bg = c.surface0,                        fg = c.red },
-    NeogitDiffDeletions            = { fg = U.darken(c.red, 0.60, c.base) },
+    -- ── Diff additions ───────────────────────────────────────────────────────
+    NeogitDiffAdd            = { bg = U.darken(c.green, 0.10, c.base), fg = U.darken(c.green, 0.80, c.base) },
+    NeogitDiffAddHighlight   = { bg = U.darken(c.green, 0.25, c.base), fg = c.green },
+    NeogitDiffAddCursor      = { bg = c.surface0,                       fg = c.green },
+    NeogitDiffAddInline      = { bg = U.darken(c.green, 0.40, c.base), fg = c.green, bold = true },
 
-    -- Hunk headers
-    NeogitHunkHeader               = { bg = U.darken(c.blue, 0.12, c.base),   fg = U.darken(c.blue, 0.55, c.base), bold = true },
-    NeogitHunkHeaderHighlight      = { bg = U.darken(c.blue, 0.28, c.base),   fg = c.blue,                         bold = true },
-    NeogitHunkHeaderCursor         = { bg = U.darken(c.blue, 0.28, c.base),   fg = c.blue,                         bold = true },
+    -- ── Diff deletions ───────────────────────────────────────────────────────
+    NeogitDiffDelete         = { bg = U.darken(c.red, 0.10, c.base),   fg = U.darken(c.red, 0.80, c.base) },
+    NeogitDiffDeleteHighlight = { bg = U.darken(c.red, 0.25, c.base),  fg = c.red },
+    NeogitDiffDeleteCursor   = { bg = c.surface0,                       fg = c.red },
+    NeogitDiffDeleteInline   = { bg = U.darken(c.red,   0.40, c.base), fg = c.red,   bold = true },
 
-    -- Merge hunk headers
-    NeogitHunkMergeHeader          = { bg = U.darken(c.teal, 0.12, c.base),   fg = U.darken(c.teal, 0.55, c.base), bold = true },
-    NeogitHunkMergeHeaderHighlight = { bg = U.darken(c.teal, 0.28, c.base),   fg = c.teal,                         bold = true },
-    NeogitHunkMergeHeaderCursor    = { bg = U.darken(c.teal, 0.28, c.base),   fg = c.teal,                         bold = true },
+    -- ── Diff file header ─────────────────────────────────────────────────────
+    NeogitDiffHeader         = { bg = c.base,                           fg = c.blue,  bold = true },
+    NeogitDiffHeaderHighlight = { bg = U.darken(c.blue, 0.12, c.base), fg = c.blue,  bold = true },
+    NeogitDiffHeaderCursor   = { bg = U.darken(c.blue, 0.12, c.base),  fg = c.blue,  bold = true },
 
-    -- Diff file headers (+ Highlight/Cursor variants — neogit appends these dynamically on selection)
-    NeogitDiffHeader               = { bg = c.base,    fg = c.blue,  bold = true },
-    NeogitDiffHeaderHighlight      = { bg = U.darken(c.blue, 0.12, c.base), fg = c.blue,  bold = true },
-    NeogitDiffHeaderCursor         = { bg = U.darken(c.blue, 0.12, c.base), fg = c.blue,  bold = true },
+    -- ── Hunk header (neogit appends Highlight/Cursor dynamically) ────────────
+    NeogitHunkHeader         = { bg = U.darken(c.blue, 0.12, c.base),  fg = U.darken(c.blue, 0.55, c.base), bold = true },
+    NeogitHunkHeaderHighlight = { bg = U.darken(c.blue, 0.28, c.base), fg = c.blue,  bold = true },
+    NeogitHunkHeaderCursor   = { bg = U.darken(c.blue, 0.28, c.base),  fg = c.blue,  bold = true },
 
-    -- Commit view header (+ Highlight/Cursor variants)
-    NeogitCommitViewHeader         = { bg = U.darken(c.blue, 0.30, c.base), fg = U.lighten(c.blue, 0.80, c.text), bold = true },
+    -- ── Merge hunk header ────────────────────────────────────────────────────
+    NeogitHunkMergeHeader         = { bg = U.darken(c.teal, 0.12, c.base),  fg = U.darken(c.teal, 0.55, c.base), bold = true },
+    NeogitHunkMergeHeaderHighlight = { bg = U.darken(c.teal, 0.28, c.base), fg = c.teal, bold = true },
+    NeogitHunkMergeHeaderCursor   = { bg = U.darken(c.teal, 0.28, c.base),  fg = c.teal, bold = true },
+
+    -- ── Commit view header ───────────────────────────────────────────────────
+    NeogitCommitViewHeader        = { bg = U.darken(c.blue, 0.30, c.base), fg = U.lighten(c.blue, 0.80, c.text), bold = true },
     NeogitCommitViewHeaderHighlight = { bg = U.darken(c.blue, 0.45, c.base), fg = c.blue, bold = true },
-    NeogitCommitViewHeaderCursor   = { bg = U.darken(c.blue, 0.45, c.base), fg = c.blue,  bold = true },
-    NeogitNormal                   = { link = "Normal" },
-    NeogitNormalFloat              = { link = "NormalFloat" },
-    NeogitFloatBorder              = { link = "FloatBorder" },
-    NeogitSignColumn               = { fg = "NONE", bg = "NONE" },
-    NeogitCursorLine               = { link = "CursorLine" },
-    NeogitCursorLineNr             = { link = "CursorLineNr" },
-    NeogitWinSeparator             = { link = "WinSeparator" },
+    NeogitCommitViewHeaderCursor  = { bg = U.darken(c.blue, 0.45, c.base),  fg = c.blue, bold = true },
 
-    -- Section headers / commit view
-    NeogitSectionHeader            = { fg = c.mauve,   bold = true },
-    NeogitCommitViewHeader         = { bg = U.darken(c.blue, 0.30, c.base), fg = U.lighten(c.blue, 0.80, c.text), bold = true },
+    -- ── Section headers ──────────────────────────────────────────────────────
+    NeogitSectionHeader      = section,
+    NeogitSectionHeaderCount = { fg = c.subtext1, bold = true },
+    -- All status-buffer section labels link to the shared style
+    NeogitUntrackedfiles     = section,
+    NeogitUnstagedchanges    = section,
+    NeogitUnmergedchanges    = section,
+    NeogitUnpulledchanges    = section,
+    NeogitUnpushedchanges    = section,  -- the section variant (different from NeogitUnpushedTo)
+    NeogitStagedchanges      = section,
+    NeogitRecentcommits      = section,
+    NeogitStashes            = section,
+    NeogitRebasing           = section,
+    NeogitReverting          = section,
+    NeogitPicking            = section,
+    NeogitMerging            = section,
+    NeogitBisecting          = section,
+    -- These link to Function in neogit's own hl.lua (keep parity)
+    NeogitUnmergedInto       = { link = "Function" },
+    NeogitUnpulledFrom       = { link = "Function" },
+    NeogitUnpushedTo         = { fg = c.lavender, bold = true },
 
-    -- Fold marker: fully transparent so it never creates a black bar
-    NeogitFold                     = { fg = "NONE", bg = "NONE" },
+    -- ── Status HEAD / active item ────────────────────────────────────────────
+    NeogitStatusHEAD         = { fg = c.text,    bold = true },
+    NeogitActiveItem         = { fg = c.peach,   bold = true },
+    NeogitBranchHead         = { fg = c.sapphire, bold = true },
 
-    -- Change-type labels
-    NeogitChangeModified           = { fg = c.blue,    bold = true },
-    NeogitChangeDeleted            = { fg = c.red,     bold = true },
-    NeogitChangeAdded              = { fg = c.green,   bold = true },
-    NeogitChangeRenamed            = { fg = c.mauve,   bold = true },
-    NeogitChangeUpdated            = { fg = c.peach,   bold = true },
-    NeogitChangeCopied             = { fg = c.pink,    bold = true },
-    NeogitChangeBothModified       = { fg = c.yellow,  bold = true },
-    NeogitChangeNewFile            = { fg = c.green,   bold = true },
+    -- ── Fold ─────────────────────────────────────────────────────────────────
+    NeogitFold               = { fg = "NONE", bg = "NONE" },  -- never create a black bar
 
-    -- Section labels
-    NeogitUntrackedfiles           = { fg = c.mauve,   bold = true },
-    NeogitUnstagedchanges          = { fg = c.mauve,   bold = true },
-    NeogitUnmergedchanges          = { fg = c.mauve,   bold = true },
-    NeogitUnpulledchanges          = { fg = c.mauve,   bold = true },
-    NeogitRecentcommits            = { fg = c.mauve,   bold = true },
-    NeogitStagedchanges            = { fg = c.mauve,   bold = true },
-    NeogitStashes                  = { fg = c.mauve,   bold = true },
-    NeogitRebasing                 = { fg = c.mauve,   bold = true },
+    -- ── Branch / remote / tag ────────────────────────────────────────────────
+    NeogitBranch             = { fg = c.peach,   bold = true },
+    NeogitRemote             = { fg = c.green,   bold = true },
+    NeogitTagName            = { fg = c.yellow },
+    NeogitTagDistance        = { fg = c.blue },
 
-    -- Misc
-    NeogitBranch                   = { fg = c.peach,   bold = true },
-    NeogitRemote                   = { fg = c.green,   bold = true },
-    NeogitTagName                  = { fg = c.yellow },
-    NeogitTagDistance              = { fg = c.blue },
-    NeogitFilePath                 = { fg = c.blue,    italic = true },
-    NeogitObjectId                 = { link = "Comment" },
-    NeogitStash                    = { link = "Comment" },
-    NeogitSubtleText               = { link = "Comment" },
-    NeogitRebaseDone               = { link = "Comment" },
-    NeogitUnmergedInto             = { link = "Function" },
-    NeogitUnpulledFrom             = { link = "Function" },
-    NeogitUnpushedTo               = { fg = c.lavender, bold = true },
+    -- ── Misc labels ──────────────────────────────────────────────────────────
+    NeogitFilePath           = { fg = c.blue,    italic = true },
+    NeogitObjectId           = { link = "Comment" },
+    NeogitStash              = { link = "Comment" },
+    NeogitSubtleText         = { link = "Comment" },
+    NeogitRebaseDone         = { link = "Comment" },
 
-    -- Popups
-    NeogitPopupBold                = { bold = true },
-    NeogitPopupSwitchKey           = { fg = c.lavender },
-    NeogitPopupOptionKey           = { fg = c.lavender },
-    NeogitPopupConfigKey           = { fg = c.lavender },
-    NeogitPopupActionKey           = { fg = c.lavender },
+    -- ── Change-type labels ───────────────────────────────────────────────────
+    NeogitChangeModified     = { fg = c.blue,    bold = true },
+    NeogitChangeAdded        = { fg = c.green,   bold = true },
+    NeogitChangeDeleted      = { fg = c.red,     bold = true },
+    NeogitChangeRenamed      = { fg = c.mauve,   bold = true },
+    NeogitChangeUpdated      = { fg = c.peach,   bold = true },
+    NeogitChangeCopied       = { fg = c.pink,    bold = true },
+    NeogitChangeNewFile      = { fg = c.green,   bold = true },
+    NeogitChangeUnmerged     = { fg = c.yellow,  bold = true },  -- was wrongly NeogitChangeBothModified
 
-    -- Notifications
-    NeogitNotificationInfo         = { fg = c.blue },
-    NeogitNotificationWarning      = { fg = c.yellow },
-    NeogitNotificationError        = { fg = c.red },
+    -- ── Commit graph ─────────────────────────────────────────────────────────
+    NeogitGraphAuthor        = { fg = c.peach },
+    NeogitGraphBlack         = { fg = c.surface2 },
+    NeogitGraphBoldBlack     = { fg = c.surface2,  bold = true },
+    NeogitGraphRed           = { fg = c.red },
+    NeogitGraphBoldRed       = { fg = c.red,       bold = true },
+    NeogitGraphGreen         = { fg = c.green },
+    NeogitGraphBoldGreen     = { fg = c.green,     bold = true },
+    NeogitGraphYellow        = { fg = c.yellow },
+    NeogitGraphBoldYellow    = { fg = c.yellow,    bold = true },
+    NeogitGraphBlue          = { fg = c.blue },
+    NeogitGraphBoldBlue      = { fg = c.blue,      bold = true },
+    NeogitGraphPurple        = { fg = c.lavender },
+    NeogitGraphBoldPurple    = { fg = c.lavender,  bold = true },
+    NeogitGraphCyan          = { fg = c.teal },
+    NeogitGraphBoldCyan      = { fg = c.teal,      bold = true },
+    NeogitGraphWhite         = { fg = c.text },
+    NeogitGraphBoldWhite     = { fg = c.text,      bold = true },
+    NeogitGraphGray          = { fg = c.subtext1 },
+    NeogitGraphBoldGray      = { fg = c.subtext1,  bold = true },
+    NeogitGraphOrange        = { fg = c.peach },
+    NeogitGraphBoldOrange    = { fg = c.peach,     bold = true },
 
-    -- Commit graph
-    NeogitGraphAuthor              = { fg = c.peach },
-    NeogitGraphRed                 = { fg = c.red },
-    NeogitGraphWhite               = { fg = c.text },
-    NeogitGraphYellow              = { fg = c.yellow },
-    NeogitGraphGreen               = { fg = c.green },
-    NeogitGraphCyan                = { fg = c.teal },
-    NeogitGraphBlue                = { fg = c.blue },
-    NeogitGraphPurple              = { fg = c.lavender },
-    NeogitGraphGray                = { fg = c.subtext1 },
-    NeogitGraphOrange              = { fg = c.peach },
-    NeogitGraphBoldRed             = { fg = c.red,      bold = true },
-    NeogitGraphBoldWhite           = { fg = c.text,     bold = true },
-    NeogitGraphBoldYellow          = { fg = c.yellow,   bold = true },
-    NeogitGraphBoldGreen           = { fg = c.green,    bold = true },
-    NeogitGraphBoldCyan            = { fg = c.teal,     bold = true },
-    NeogitGraphBoldBlue            = { fg = c.blue,     bold = true },
-    NeogitGraphBoldPurple          = { fg = c.lavender, bold = true },
-    NeogitGraphBoldGray            = { fg = c.subtext1, bold = true },
-    NeogitGraphBoldOrange          = { fg = c.peach,    bold = true },
+    -- ── GPG signatures ───────────────────────────────────────────────────────
+    NeogitSignatureGood           = { fg = c.green },
+    NeogitSignatureGoodUnknown    = { fg = c.teal },
+    NeogitSignatureGoodExpired    = { fg = c.yellow },
+    NeogitSignatureGoodExpiredKey = { fg = c.yellow },
+    NeogitSignatureGoodRevokedKey = { fg = c.peach },
+    NeogitSignatureBad            = { fg = c.red,     bold = true },
+    NeogitSignatureMissing        = { fg = c.subtext1 },
+    NeogitSignatureNone           = { fg = c.subtext0 },
+
+    -- ── Popup keys & states ──────────────────────────────────────────────────
+    NeogitPopupSectionTitle  = { fg = c.mauve,    bold = true },
+    NeogitPopupBranchName    = { fg = c.peach,    bold = true },
+    NeogitPopupBold          = { bold = true },
+    NeogitPopupSwitchKey     = { fg = c.lavender },
+    NeogitPopupSwitchEnabled = { fg = c.green },
+    NeogitPopupSwitchDisabled = { fg = c.subtext0 },
+    NeogitPopupOptionKey     = { fg = c.lavender },
+    NeogitPopupOptionEnabled = { fg = c.green },
+    NeogitPopupOptionDisabled = { fg = c.subtext0 },
+    NeogitPopupConfigKey     = { fg = c.lavender },
+    NeogitPopupConfigEnabled = { fg = c.green },
+    NeogitPopupConfigDisabled = { fg = c.subtext0 },
+    NeogitPopupActionKey     = { fg = c.lavender },
+    NeogitPopupActionDisabled = { fg = c.subtext0 },
+
+    -- ── Command history console ───────────────────────────────────────────────
+    NeogitCommandText        = { fg = c.text },
+    NeogitCommandTime        = { fg = c.subtext1,  italic = true },
+    NeogitCommandCodeNormal  = { fg = c.green },
+    NeogitCommandCodeError   = { fg = c.red,       bold = true },
+
+    -- ── Notifications (internal snacks/nvim-notify bridge) ───────────────────
+    NeogitNotificationInfo   = { fg = c.blue },
+    NeogitNotificationWarning = { fg = c.yellow },
+    NeogitNotificationError  = { fg = c.red },
   }
 end
 
