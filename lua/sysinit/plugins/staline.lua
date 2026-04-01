@@ -91,6 +91,12 @@ return {
           cv = "VIM EX",
         },
       })
+
+      -- VeryLazy fires after the initial buffer's BufEnter/BufWinEnter events
+      -- have already run, so staline never gets its first draw. Force it.
+      vim.defer_fn(function()
+        vim.cmd("redrawstatus!")
+      end, 0)
     end,
   },
 }

@@ -12,9 +12,9 @@ return {
       -- whether key press is required to restore cmdheight.
       remove_on_key = true,
 
-      -- always clear the cmdline after duration and key press.
-      -- by default it will only happen when cmdheight changed.
-      clear_always = false,
+      -- always clear the cmdline after duration and key press so stale
+      -- message text doesn't linger after cmdheight collapses back to 0.
+      clear_always = true,
     },
   },
 }
