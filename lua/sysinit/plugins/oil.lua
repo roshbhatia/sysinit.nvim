@@ -60,14 +60,14 @@ return {
         {
           "<leader>ef",
           function()
-            vim.cmd("Oil")
+            vim.cmd("Oil --float")
           end,
           desc = "Explore current directory",
         },
         {
           "<leader>eF",
           function()
-            vim.cmd("Oil .")
+            vim.cmd("Oil . --float")
           end,
           desc = "Explore project root",
         },

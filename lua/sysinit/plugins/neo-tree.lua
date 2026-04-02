@@ -2,7 +2,7 @@ return {
   {
     "s1n7ax/nvim-window-picker",
     version = "2.*",
-    cmd = "Neotree",
+    lazy = true,
     config = function()
       require("window-picker").setup({
         hint = "floating-big-letter",
@@ -41,6 +41,7 @@ return {
       "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
       "folke/snacks.nvim",
+      "s1n7ax/nvim-window-picker",
     },
     config = function()
       vim.g.neo_tree_remove_legacy_commands = 1
