@@ -247,9 +247,20 @@ return {
         {
           "<leader>ff",
           function()
-            Snacks.picker.files()
+            Snacks.picker.smart()
           end,
-          desc = "Files",
+          desc = "Files, recent, and buffers",
+        },
+        {
+          "<leader>fF",
+          function()
+            Snacks.picker.files({
+              dirs = {
+                "~/github",
+              },
+            })
+          end,
+          desc = "Files (accross all projects)",
         },
         {
           "<leader>fg",
