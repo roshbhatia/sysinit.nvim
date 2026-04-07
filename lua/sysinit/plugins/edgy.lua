@@ -102,18 +102,6 @@ return {
             return vim.bo[buf].buftype == "help"
           end,
         },
-        {
-          ft = "Avante",
-          size = { width = 0.3, height = 0.7 },
-        },
-        {
-          ft = "AvanteSelectedFiles",
-          size = { width = 0.3, height = 0.1 },
-        },
-        {
-          ft = "AvanteInput",
-          size = { width = 0.3, height = 0.2 },
-        },
       },
     },
   },

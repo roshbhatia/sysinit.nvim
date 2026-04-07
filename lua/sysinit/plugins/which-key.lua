@@ -29,7 +29,8 @@ return {
         { "<leader>f",  group = "Find" },
         { "<leader>g",  group = "Git" },
         { "<leader>j",  group = "Agents" },       -- neph terminal agents
-        { "<leader>k",  group = "Avante" },        -- avante AI
+        { "<leader>k",  group = "Claude" },       -- Claude Code
+        { "<leader>o",  group = "OpenCode" },     -- opencode.nvim
         { "<leader>q",  group = "Force Quit" },
         { "<leader>r",  group = "Debug" },         -- DAP only
         { "<leader>t",  group = "Terminal" },
@@ -38,17 +39,13 @@ return {
         { "<leader>cf", group = "Find" },
 
         -- ── Diff subgroups ───────────────────────────────────────────────────
-        { "<leader>dr", group = "Review" },        -- diff-review (snacks + avante)
+        { "<leader>dr", group = "Review" },        -- diff-review (snacks + opencode)
 
         -- ── Git subgroups ────────────────────────────────────────────────────
         { "<leader>gb", group = "Buffer" },
         { "<leader>gf", group = "Find" },
         { "<leader>gh", group = "Hunk" },
         { "<leader>gr", group = "PR Review" },     -- octo
-
-        -- ── Avante subgroups ─────────────────────────────────────────────────
-        { "<leader>kt", group = "Toggle" },
-        { "<leader>kF", group = "Files" },
 
         -- ── Navigation ───────────────────────────────────────────────────────
         { "]",          group = "Next" },
@@ -62,7 +59,8 @@ return {
         { "v<leader>c", group = "Code" },
         { "v<leader>g", group = "Git" },
         { "v<leader>j", group = "Agents" },
-        { "v<leader>k", group = "Avante" },
+        { "v<leader>k", group = "Claude" },
+        { "v<leader>o", group = "OpenCode" },
         { "vg",         group = "Extras" },
         { "vgr",        group = "Code" },
         { "vv",         group = "AST" },

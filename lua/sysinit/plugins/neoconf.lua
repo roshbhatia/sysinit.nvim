@@ -13,21 +13,6 @@ return {
     require("neoconf.plugins").register({
       name = "sysinit",
       on_schema = function(schema)
-        -- Avante schema
-        schema:import("avante", {
-          provider = "copilot",
-          openai = {
-            model = "gpt-4o",
-            temperature = 0,
-            max_tokens = 4096,
-          },
-          claude = {
-            model = "claude-3-5-sonnet-20240620",
-            temperature = 0,
-            max_tokens = 4096,
-          },
-        })
-
         -- Conform schema
         schema:import("conform", {
           autoformat = true,
