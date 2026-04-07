@@ -33,6 +33,12 @@ return {
         },
       }
     end,
+    config = function(_, opts)
+      require("neph").setup(opts)
+      -- Ensure the review queue has its UI opener registered before fs_watcher
+      -- emits post-write reviews, preventing "set_open_fn not called" spam.
+      require("neph.api.review")
+    end,
     keys = function()
       local api = require("neph.api")
       return {
