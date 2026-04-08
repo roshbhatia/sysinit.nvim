@@ -1,5 +1,25 @@
 return {
   {
+    "mason-org/mason.nvim",
+    opts = {},
+  },
+  {
+    "b0o/SchemaStore.nvim",
+    version = "*",
+  },
+  {
+    "onsails/lspkind.nvim",
+  },
+  {
+    "Chaitanyabsprip/fastaction.nvim",
+    event = "LspAttach",
+    opts = {
+      keys = "fjdkslaghrueiwoncmv",
+      dismiss_keys = { "j", "k", "<c-c>", "q" },
+      register_ui_select = false,
+    },
+  },
+  {
     "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
     event = "LSPAttach",
     config = function()
@@ -35,6 +55,24 @@ return {
             require("lsp_lines").toggle()
           end,
           desc = "Toggle lsp lines",
+        },
+      }
+    end,
+  },
+  {
+    "Fildo7525/pretty_hover",
+    opts = {
+      max_width = math.floor(vim.o.columns * 0.7),
+      max_height = math.floor(vim.o.lines * 0.3),
+    },
+    keys = function()
+      return {
+        {
+          "<S-k>",
+          function()
+            require("pretty_hover").hover()
+          end,
+          desc = "Hover documentation",
         },
       }
     end,

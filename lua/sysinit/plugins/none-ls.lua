@@ -11,6 +11,7 @@ local function hex_color_generator()
         local hex_patterns = {
           "#%x%x%x%x%x%x%x%x",
           "#%x%x%x%x%x%x",
+          "#%x%x%x%x",
           "#%x%x%x",
         }
 
@@ -23,30 +24,35 @@ local function hex_color_generator()
         return nil
       end
 
-      local function find_colorizer_hex()
-        local ns_id = vim.api.nvim_get_namespaces()["colorizer"]
-        if not ns_id then
+      local function find_hipatterns_hex()
+        local ok, hipatterns = pcall(require, "mini.hipatterns")
+        if not ok or type(hipatterns.get_matches) ~= "function" then
           return nil
         end
 
-        local extmarks = vim.api.nvim_buf_get_extmarks(
-          context.bufnr,
-          ns_id,
-          { row, 0 },
-          { row, -1 },
-          { details = true }
-        )
+        local ok_matches, matches = pcall(hipatterns.get_matches, context.bufnr, {
+          "hex_color",
+          "hex_color_short",
+          "hex_color_short_alpha",
+          "hex_color_alpha",
+        })
+        if not ok_matches or type(matches) ~= "table" then
+          return nil
+        end
 
-        for _, mark in ipairs(extmarks) do
-          local mark_col = mark[3]
-          local details = mark[4]
+        local line = vim.api.nvim_buf_get_lines(context.bufnr, row, row + 1, false)[1]
+        if not line then
+          return nil
+        end
 
-          if details and details.end_col then
-            local start_col, end_col = mark_col, details.end_col
-            if col >= start_col and col < end_col then
-              local line = vim.api.nvim_buf_get_lines(context.bufnr, row, row + 1, false)[1]
-              if line then
-                return extract_hex_at_pos(line, start_col, end_col)
+        local cursor_col = col + 1
+        for _, match in ipairs(matches) do
+          if match.lnum == row + 1 and type(match.col) == "number" and type(match.end_col) == "number" then
+            if cursor_col >= match.col and cursor_col < match.end_col then
+              local hex_text = line:sub(match.col, match.end_col - 1)
+              local hex = extract_hex_at_pos(hex_text, 0, #hex_text)
+              if hex then
+                return hex
               end
             end
           end
@@ -97,7 +103,7 @@ local function hex_color_generator()
         return nil
       end
 
-      local hex_color = find_colorizer_hex() or find_string_hex()
+      local hex_color = find_hipatterns_hex() or find_string_hex()
 
       if not hex_color then
         local word = vim.fn.expand("<cWORD>")
@@ -184,7 +190,6 @@ return {
           null_ls.builtins.code_actions.gitsigns,
           null_ls.builtins.code_actions.gomodifytags,
           null_ls.builtins.code_actions.impl,
-          null_ls.builtins.code_actions.refactoring,
           null_ls.builtins.code_actions.statix,
           null_ls.builtins.code_actions.textlint,
           null_ls.builtins.code_actions.ts_node_action,
