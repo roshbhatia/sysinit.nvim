@@ -1,16 +1,14 @@
-if vim.loader and vim.loader.enable then
-  vim.loader.enable()
-end
+vim.loader.enable()
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
+
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
--- Enable Neovim 0.12+ external UI (messages, cmdline, popupmenu rendered via extmarks)
 require("vim._core.ui2").enable({
   enable = true,
   msg = {
-    targets = "msg", -- show messages in a floating window, not the cmdline
+    targets = "msg",
   },
 })
 
@@ -35,11 +33,9 @@ require("lazy").setup({
     },
   },
   install = {
-    colorscheme = { "catppuccin", "habamax" },
-  },
-  git = {
-    -- Use HTTPS for all plugin clones to avoid SSH port 22 blocks
-    url_format = "https://github.com/%s.git",
+    colorscheme = {
+      "catppuccin",
+    },
   },
   performance = {
     rtp = {

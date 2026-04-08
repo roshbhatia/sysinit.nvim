@@ -1,5 +1,6 @@
 return {
   "folke/sidekick.nvim",
+  event = "BufReadPost",
   opts = {},
   keys = {
     {

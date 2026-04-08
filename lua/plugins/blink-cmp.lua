@@ -2,7 +2,7 @@ return {
   {
     "saghen/blink.cmp",
     version = "1.*",
-    event = "InsertEnter",
+    event = { "InsertEnter", "CmdlineEnter" },
     priority = 1000,
     dependencies = {
       "L3MON4D3/LuaSnip",
@@ -175,15 +175,9 @@ return {
           },
         },
         cmdline = {
-          enabled = true,
-          keymap = {
-            preset = "inherit",
-          },
           completion = {
             menu = {
-              auto_show = function()
-                return vim.fn.getcmdtype() == ":"
-              end,
+              auto_show = true,
             },
           },
         },
