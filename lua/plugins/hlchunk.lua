@@ -1,5 +1,5 @@
 local function get_palette_colors()
-  local hl_utils = require("sysinit.utils.highlight")
+  local hl_utils = require("utils.highlight")
   return {
     good = hl_utils.get_fg("@variable"),
     error = hl_utils.get_fg("Error"),

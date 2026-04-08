@@ -3,7 +3,7 @@ return {
     "rachartier/tiny-glimmer.nvim",
     event = "VeryLazy",
     config = function()
-      local hl_utils = require("sysinit.utils.highlight")
+      local hl_utils = require("utils.highlight")
 
       require("tiny-glimmer").setup({
         transparency_color = hl_utils.get_fg("Normal"),

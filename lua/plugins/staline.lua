@@ -2,9 +2,9 @@ return {
   {
     "tamton-aquib/staline.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    event = "VeryLazy",
+    lazy = false,
     config = function()
-      local hl_utils = require("sysinit.utils.highlight")
+      local hl_utils = require("utils.highlight")
       local get_fg = hl_utils.get_fg
 
       -- Helper to show format disabled icon only when relevant
@@ -53,16 +53,14 @@ return {
 
       require("staline").setup({
         sections = {
-          left = { "mode", "branch", "file_name", neph_gate_status, copilot_status },
-          mid = {},
-          right = { get_format_status, "lsp", "lsp_name", "file_size", "line_column" },
+          left = { "mode", "branch", "file_name" },
+          mid = { neph_gate_status, copilot_status, get_format_status },
+          right = { "file_size", "line_column" },
         },
         defaults = {
           inactive_color = get_fg("Normal"),
           expand_null_ls = false,
           line_column = ":%c [%l/%L]",
-          lsp_client_symbol = "󰘧 ",
-          lsp_client_character_length = 16,
           file_size_suffix = true,
           branch_symbol = " ",
         },

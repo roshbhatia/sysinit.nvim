@@ -28,9 +28,4 @@ return {
       })
     end,
   },
-  {
-    "yorickpeterse/nvim-pqf",
-    event = "VeryLazy",
-    opts = {},
-  },
 }
