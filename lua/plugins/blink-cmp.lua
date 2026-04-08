@@ -6,7 +6,6 @@ return {
     priority = 1000,
     dependencies = {
       "L3MON4D3/LuaSnip",
-      "rafamadriz/friendly-snippets",
       "xzbdmw/colorful-menu.nvim",
       "neovim/nvim-lspconfig",
       "fang2hou/blink-copilot",
@@ -176,7 +175,17 @@ return {
           },
         },
         cmdline = {
-          enabled = false,
+          enabled = true,
+          keymap = {
+            preset = "inherit",
+          },
+          completion = {
+            menu = {
+              auto_show = function()
+                return vim.fn.getcmdtype() == ":"
+              end,
+            },
+          },
         },
         fuzzy = {
           implementation = "prefer_rust",

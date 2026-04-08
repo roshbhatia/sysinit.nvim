@@ -23,15 +23,15 @@ return {
 
       wk.add({
         -- ── Top-level groups ─────────────────────────────────────────────────
-        { "<leader>c",  group = "Code" },
-        { "<leader>d",  group = "Diff" },
-        { "<leader>e",  group = "Explorer" },
-        { "<leader>f",  group = "Find" },
-        { "<leader>g",  group = "Git" },
-        { "<leader>j",  group = "Agents" },       -- neph terminal agents
-        { "<leader>q",  group = "Force Quit" },
-        { "<leader>r",  group = "Debug" },         -- DAP only
-        { "<leader>t",  group = "Terminal" },
+        { "<leader>c", group = "Code" },
+        { "<leader>d", group = "Diff" },
+        { "<leader>e", group = "Explorer" },
+        { "<leader>f", group = "Find" },
+        { "<leader>g", group = "Git" },
+        { "<leader>j", group = "Agents" }, -- neph terminal agents
+        { "<leader>q", group = "Force Quit" },
+        { "<leader>r", group = "Debug" }, -- DAP only
+        { "<leader>t", group = "Terminal" },
 
         -- ── Code subgroups ───────────────────────────────────────────────────
         { "<leader>cf", group = "Find" },
@@ -43,24 +43,23 @@ return {
         { "<leader>gb", group = "Buffer" },
         { "<leader>gf", group = "Find" },
         { "<leader>gh", group = "Hunk" },
-        { "<leader>gr", group = "PR Review" },     -- octo
 
         -- ── Navigation ───────────────────────────────────────────────────────
-        { "]",          group = "Next" },
-        { "[",          group = "Prev" },
+        { "]", group = "Next" },
+        { "[", group = "Prev" },
 
         -- ── LSP (no leader) ──────────────────────────────────────────────────
-        { "gr",         group = "LSP" },
+        { "gr", group = "LSP" },
 
         -- ── Visual mode ──────────────────────────────────────────────────────
-        { "v<leader>",  group = "Extras" },
+        { "v<leader>", group = "Extras" },
         { "v<leader>c", group = "Code" },
         { "v<leader>g", group = "Git" },
         { "v<leader>j", group = "Agents" },
-        { "vg",         group = "Extras" },
-        { "vgr",        group = "Code" },
-        { "vv",         group = "AST" },
-        { "vz",         group = "Fold" },
+        { "vg", group = "Extras" },
+        { "vgr", group = "Code" },
+        { "vv", group = "AST" },
+        { "vz", group = "Fold" },
       })
     end,
   },

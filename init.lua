@@ -1,3 +1,7 @@
+if vim.loader and vim.loader.enable then
+  vim.loader.enable()
+end
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
@@ -27,8 +31,11 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     {
-      import = "sysinit.plugins",
+      import = "plugins",
     },
+  },
+  install = {
+    colorscheme = { "catppuccin", "habamax" },
   },
   git = {
     -- Use HTTPS for all plugin clones to avoid SSH port 22 blocks

@@ -32,6 +32,13 @@ return {
         schema:import("pyright", { settings = { python = {} } })
         schema:import("yamlls", { settings = { yaml = {} } })
         schema:import("jsonls", { settings = { json = {} } })
+        schema:import("eslint", { settings = {} })
+        schema:import("graphql", {})
+        schema:import("bashls", {})
+        schema:import("dockerls", {})
+        schema:import("docker_compose_language_service", {})
+        schema:import("ruff", { init_options = { settings = {} } })
+        schema:import("typescript_tools", {})
       end,
     })
   end,

@@ -4,7 +4,7 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
     },
-    lazy = false,
+    cmd = "Neogit",
     config = function()
       -- Disable folds in all Neogit buffers.
       -- neogit's buffer.lua explicitly sets foldenable=true during render,
