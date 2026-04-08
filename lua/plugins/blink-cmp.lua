@@ -2,7 +2,7 @@ return {
   {
     "saghen/blink.cmp",
     version = "1.*",
-    event = { "InsertEnter", "CmdlineEnter" },
+    event = { "UIEnter" },
     priority = 1000,
     dependencies = {
       "L3MON4D3/LuaSnip",
