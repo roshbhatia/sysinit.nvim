@@ -36,9 +36,25 @@ return {
         return ""
       end
 
+      local function neph_status()
+        if vim.g.neph_connected then
+          return "󰞇 "
+        end
+        return ""
+      end
+
+      local function neph_gate_status()
+        local ok, gate = pcall(require, "neph.internal.gate")
+        if not ok then return "" end
+        local s = gate.get()
+        if s == "hold" then return "⏸ HOLD " end
+        if s == "bypass" then return "⚡ BYPASS " end
+        return ""
+      end
+
       require("staline").setup({
         sections = {
-          left = { "mode", "branch", "file_name", copilot_status },
+          left = { "mode", "branch", "file_name", neph_status, neph_gate_status, copilot_status },
           mid = {},
           right = { get_format_status, "lsp", "lsp_name", "file_size", "line_column" },
         },
@@ -88,8 +104,8 @@ return {
       -- VeryLazy fires after the initial buffer's BufEnter/BufWinEnter events
       -- have already run, so staline never gets its first draw. Force it.
       vim.defer_fn(function()
-        vim.cmd("silent! redrawstatus!")
-      end, 50)
+        vim.cmd("redrawstatus!")
+      end, 0)
     end,
   },
 }

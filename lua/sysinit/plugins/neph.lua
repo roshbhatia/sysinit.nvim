@@ -50,8 +50,20 @@ return {
         { "<leader>jc", api.comment, mode = { "n", "v" }, desc = "Neph: comment selection" },
         { "<leader>jv", api.resend,        desc = "Neph: resend previous prompt" },
         { "<leader>jr", api.review,        desc = "Neph: review buffer changes" },
-        { "<leader>jg", api.gate,          desc = "Neph: cycle review gate (normal→hold→bypass)" },
+        { "<leader>jg", api.gate,          desc = "Neph: cycle gate (normal→hold→bypass→normal)" },
         { "<leader>jn", api.tools_status,  desc = "Neph: tools/integration status" },
+
+        -- Diff pickers (browse without sending to agent)
+        { "<leader>drr", function() api.diff_picker("head")   end, desc = "Diff: browse HEAD" },
+        { "<leader>drs", function() api.diff_picker("staged") end, desc = "Diff: browse staged" },
+        { "<leader>drf", function() api.diff_picker("branch") end, desc = "Diff: browse branch" },
+
+        -- Diff AI review (send to active agent)
+        { "<leader>dra", function() api.diff_review("head")   end, desc = "Diff: review HEAD" },
+        { "<leader>drS", function() api.diff_review("staged") end, desc = "Diff: review staged" },
+        { "<leader>drb", function() api.diff_review("branch") end, desc = "Diff: review branch" },
+        { "<leader>drF", function() api.diff_review("file")   end, desc = "Diff: review file" },
+        { "<leader>drh", function() api.diff_review("hunk")   end, desc = "Diff: review hunk" },
       }
     end,
   },

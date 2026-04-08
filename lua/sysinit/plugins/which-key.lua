@@ -29,8 +29,6 @@ return {
         { "<leader>f",  group = "Find" },
         { "<leader>g",  group = "Git" },
         { "<leader>j",  group = "Agents" },       -- neph terminal agents
-        { "<leader>k",  group = "Claude" },       -- Claude Code
-        { "<leader>o",  group = "OpenCode" },     -- opencode.nvim
         { "<leader>q",  group = "Force Quit" },
         { "<leader>r",  group = "Debug" },         -- DAP only
         { "<leader>t",  group = "Terminal" },
@@ -39,7 +37,7 @@ return {
         { "<leader>cf", group = "Find" },
 
         -- ── Diff subgroups ───────────────────────────────────────────────────
-        { "<leader>dr", group = "Review" },        -- diff-review (snacks + opencode)
+        { "<leader>dr", group = "Review" },
 
         -- ── Git subgroups ────────────────────────────────────────────────────
         { "<leader>gb", group = "Buffer" },
@@ -59,8 +57,6 @@ return {
         { "v<leader>c", group = "Code" },
         { "v<leader>g", group = "Git" },
         { "v<leader>j", group = "Agents" },
-        { "v<leader>k", group = "Claude" },
-        { "v<leader>o", group = "OpenCode" },
         { "vg",         group = "Extras" },
         { "vgr",        group = "Code" },
         { "vv",         group = "AST" },
