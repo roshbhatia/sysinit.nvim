@@ -175,11 +175,7 @@ return {
           },
         },
         cmdline = {
-          completion = {
-            menu = {
-              auto_show = true,
-            },
-          },
+          enabled = false,
         },
         fuzzy = {
           implementation = "prefer_rust",
