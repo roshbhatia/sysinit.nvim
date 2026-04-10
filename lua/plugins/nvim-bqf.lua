@@ -14,7 +14,6 @@ return {
           vsplit = "<localleader>v",
         },
         preview = {
-          winblend = 0,
           auto_preview = false,
         },
         show_title = {
