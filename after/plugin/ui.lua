@@ -14,7 +14,6 @@ end, {
   desc = "Split pane vertically",
 })
 
--- Horizontal split
 Snacks.keymap.set("n", "<leader>s", function()
   vim.cmd("split")
 end, {
@@ -22,7 +21,7 @@ end, {
 })
 
 Snacks.keymap.set("n", "<leader>v", function()
-  vim.cmd("silent! xit")
+  vim.cmd("silent! xit!")
 end, {
   desc = "Close pane",
 })
