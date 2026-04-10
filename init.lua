@@ -1,11 +1,6 @@
-vim.loader.enable()
-
-vim.g.mapleader = " "
-vim.g.maplocalleader = ","
-
-vim.o.cmdheight = 0
-
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+
+vim.loader.enable()
 
 require("vim._core.ui2").enable({
   enable = true,
@@ -13,6 +8,9 @@ require("vim._core.ui2").enable({
     targets = "msg",
   },
 })
+
+vim.g.mapleader = " "
+vim.g.maplocalleader = ","
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
