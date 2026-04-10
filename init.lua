@@ -3,6 +3,8 @@ vim.loader.enable()
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 
+vim.o.cmdheight = 0
+
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
 require("vim._core.ui2").enable({
