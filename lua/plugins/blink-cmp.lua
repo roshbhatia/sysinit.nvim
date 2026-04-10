@@ -105,9 +105,6 @@ return {
           documentation = {
             auto_show = true,
             auto_show_delay_ms = 0,
-            window = {
-              border = "rounded",
-            },
             draw = function(opts)
               -- Close window if there's no documentation or detail to show
               local item = opts.item
@@ -146,7 +143,6 @@ return {
           },
           menu = {
             max_height = 15,
-            border = "rounded",
             draw = {
               columns = {
                 {
@@ -217,9 +213,6 @@ return {
         },
         signature = {
           enabled = true,
-          window = {
-            border = "rounded",
-          },
         },
         sources = {
           default = sources,

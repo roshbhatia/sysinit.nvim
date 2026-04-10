@@ -8,7 +8,6 @@ vim.diagnostic.config({
   },
   update_in_insert = false,
   float = {
-    border = "rounded",
     source = "if_many",
   },
   underline = {
@@ -87,7 +86,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end, { buffer = bufnr, desc = "Previous error" })
 
     Snacks.keymap.set("n", "<leader>cj", function()
-      vim.lsp.buf.signature_help({ border = "rounded" })
+      vim.lsp.buf.signature_help({})
     end, { buffer = bufnr, desc = "Signature help" })
   end,
 })

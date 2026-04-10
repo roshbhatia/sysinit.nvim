@@ -1,6 +1,6 @@
-vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
-
 vim.loader.enable()
+
+vim.o.sessionoptions = "blank,buffers,curdir,folds,tabpages,winsize,winpos,localoptions"
 
 require("vim._core.ui2").enable({
   enable = true,
@@ -8,6 +8,8 @@ require("vim._core.ui2").enable({
     targets = "msg",
   },
 })
+
+vim.o.winborder = "rounded"
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
@@ -50,8 +52,5 @@ require("lazy").setup({
         "zipPlugin",
       },
     },
-  },
-  ui = {
-    border = "rounded",
   },
 })

@@ -7,7 +7,6 @@ return {
         preview_config = {
           style = "minimal",
           relative = "cursor",
-          border = "rounded",
           row = 0,
           col = 1,
         },

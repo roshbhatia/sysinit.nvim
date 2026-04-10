@@ -22,9 +22,6 @@ return {
         view_options = {
           show_hidden = true,
         },
-        float = {
-          border = "rounded",
-        },
         case_insensitive = true,
         use_default_keymaps = false,
         keymaps = {

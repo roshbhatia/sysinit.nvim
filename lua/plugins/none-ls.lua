@@ -181,7 +181,6 @@ return {
       local null_ls = require("null-ls")
 
       null_ls.setup({
-        border = "rounded",
         debounce = 150,
         default_timeout = 5000,
         temp_dir = vim.fn.stdpath("cache") .. "/null-ls",

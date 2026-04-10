@@ -12,9 +12,6 @@ return {
           separator = " ",
         },
         notify = false,
-        win = {
-          border = "rounded",
-        },
         layout = {
           spacing = 6,
           align = "center",
