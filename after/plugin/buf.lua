@@ -46,3 +46,9 @@ vim.api.nvim_create_user_command("Bufonly", function()
 end, {
   desc = "Delete all other buffers",
 })
+
+Snacks.keymap.set("n", "<leader>w", function()
+  vim.cmd("silent! write!")
+end, {
+  desc = "Write buffer",
+})

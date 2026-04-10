@@ -247,9 +247,9 @@ return {
         {
           "<leader>ff",
           function()
-            Snacks.picker.smart()
+            Snacks.picker.files()
           end,
-          desc = "Files, recent, and buffers",
+          desc = "Files",
         },
         {
           "<leader>fF",
