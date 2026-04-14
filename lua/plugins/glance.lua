@@ -22,28 +22,10 @@ return {
         cursorline = false,
       },
     },
-    keys = function()
-      return {
-        {
-          "<leader>gd",
-          function()
-            vim.cmd("Glance definitions")
-          end,
-          desc = "Peek definition",
-        },
-        {
-          "<leader>gi",
-          "<CMD>Glance implementations<CR>",
-          desc = "Peek implementation",
-        },
-        {
-          "<leader>gu",
-          function()
-            vim.cmd("Glance references")
-          end,
-          desc = "Peek references",
-        },
-      }
-    end,
+    keys = {
+      { "<leader>gd", "<cmd>Glance definitions<cr>", desc = "Peek definition" },
+      { "<leader>gi", "<cmd>Glance implementations<cr>", desc = "Peek implementation" },
+      { "<leader>gu", "<cmd>Glance references<cr>", desc = "Peek references" },
+    },
   },
 }

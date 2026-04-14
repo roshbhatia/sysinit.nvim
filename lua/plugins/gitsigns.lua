@@ -13,8 +13,7 @@ return {
         numhl = false,
       })
     end,
-    keys = function()
-      return {
+    keys = {
         {
           "]c",
           function()
@@ -111,7 +110,6 @@ return {
           desc = "Quickfix hunks",
           mode = "n",
         },
-      }
-    end,
+    },
   },
 }

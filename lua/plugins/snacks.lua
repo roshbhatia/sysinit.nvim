@@ -233,8 +233,7 @@ return {
         return safe_delete_augroup(group_id) or original_delete_augroup(group_id)
       end
     end,
-    keys = function()
-      local default_keys = {
+    keys = {
         -- Terminal
         {
           "<leader>t",
@@ -436,7 +435,6 @@ return {
         },
       }
 
-      return default_keys
-    end,
+    },
   },
 }

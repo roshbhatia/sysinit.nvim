@@ -27,16 +27,8 @@ return {
 
       lsp_lines.setup()
     end,
-    keys = function()
-      return {
-        {
-          "<leader>cL",
-          function()
-            require("lsp_lines").toggle()
-          end,
-          desc = "Toggle lsp lines",
-        },
-      }
-    end,
+    keys = {
+      { "<leader>cL", function() require("lsp_lines").toggle() end, desc = "Toggle lsp lines" },
+    },
   },
 }

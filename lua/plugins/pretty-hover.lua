@@ -6,16 +6,8 @@ return {
       max_width = math.floor(vim.o.columns * 0.7),
       max_height = math.floor(vim.o.lines * 0.3),
     },
-    keys = function()
-      return {
-        {
-          "<S-k>",
-          function()
-            require("pretty_hover").hover()
-          end,
-          desc = "Hover documentation",
-        },
-      }
-    end,
+    keys = {
+      { "<S-k>", function() require("pretty_hover").hover() end, desc = "Hover documentation" },
+    },
   },
 }

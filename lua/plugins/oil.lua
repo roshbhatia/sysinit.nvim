@@ -52,23 +52,9 @@ return {
         end,
       })
     end,
-    keys = function()
-      return {
-        {
-          "<leader>ef",
-          function()
-            vim.cmd("Oil --float")
-          end,
-          desc = "Explore current directory",
-        },
-        {
-          "<leader>eF",
-          function()
-            vim.cmd("Oil . --float")
-          end,
-          desc = "Explore project root",
-        },
-      }
-    end,
+    keys = {
+      { "<leader>ef", "<cmd>Oil --float<cr>", desc = "Explore current directory" },
+      { "<leader>eF", "<cmd>Oil . --float<cr>", desc = "Explore project root" },
+    },
   },
 }

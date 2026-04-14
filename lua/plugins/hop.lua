@@ -12,41 +12,11 @@ return {
       jump_on_sole_occurrence = false,
       case_sensitive = false,
     },
-    keys = function()
-      return {
-        {
-          "f",
-          function()
-            vim.cmd("HopWord")
-          end,
-          mode = { "n", "v" },
-          desc = "Jump to word",
-        },
-        {
-          "t",
-          function()
-            vim.cmd("HopAnywhere")
-          end,
-          mode = { "n", "v" },
-          desc = "Jump to anywhere",
-        },
-        {
-          "@",
-          function()
-            vim.cmd("HopNodes")
-          end,
-          mode = { "v" },
-          desc = "Jump to node",
-        },
-        {
-          "F",
-          function()
-            vim.cmd("HopLine")
-          end,
-          mode = { "n", "v" },
-          desc = "Jump to line",
-        },
-      }
-    end,
+    keys = {
+      { "f", "<cmd>HopWord<cr>", mode = { "n", "v" }, desc = "Jump to word" },
+      { "t", "<cmd>HopAnywhere<cr>", mode = { "n", "v" }, desc = "Jump to anywhere" },
+      { "@", "<cmd>HopNodes<cr>", mode = { "v" }, desc = "Jump to node" },
+      { "F", "<cmd>HopLine<cr>", mode = { "n", "v" }, desc = "Jump to line" },
+    },
   },
 }
