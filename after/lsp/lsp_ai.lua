@@ -1,7 +1,24 @@
--- lsp-ai: AI coding assistant LSP
--- Primary model: Anthropic Claude (when ANTHROPIC_API_KEY is set)
--- Fallback: Ollama (first available model)
--- Per-project overrides: neoconf keys lsp_ai.active_model / lsp_ai.claude_model
+-- lsp-ai: multi-provider AI coding assistant
+-- Models are auto-detected from the environment and merged with neoconf overrides.
+--
+-- Supported providers: anthropic, openai, openai_compatible, ollama, gemini, mistral
+--
+-- neoconf keys (under "lsp_ai"):
+--   active_model  — key into the models table (string)
+--   models        — object of named model definitions; merged over auto-detected defaults
+--
+-- Example .sysinit/neoconf.json:
+--   "lsp_ai": {
+--     "active_model": "groq",
+--     "models": {
+--       "groq": {
+--         "type": "openai_compatible",
+--         "model": "llama-3.1-8b-instant",
+--         "api_key_env_var": "GROQ_API_KEY",
+--         "base_url": "https://api.groq.com/openai/v1/chat/completions"
+--       }
+--     }
+--   }
 local neoconf = require("neoconf")
 
 local function list_ollama_models()
@@ -12,39 +29,76 @@ local function list_ollama_models()
   if vim.v.shell_error ~= 0 then
     return {}
   end
-  local models = {}
+  local names = {}
   for _, line in ipairs(lines) do
     local name = line:match("^(%S+)")
     if name and name ~= "NAME" then
-      table.insert(models, name)
+      table.insert(names, name)
     end
   end
-  return models
+  return names
 end
 
-local function build_init_options()
-  local nc = neoconf.get("lsp_ai") or {}
+-- Build models from the current environment (no neoconf involved).
+local function detect_models()
   local models = {}
 
-  -- Anthropic: prefer when API key is available
   if vim.env.ANTHROPIC_API_KEY and vim.env.ANTHROPIC_API_KEY ~= "" then
     models["claude"] = {
       type = "anthropic",
-      model = nc.claude_model or "claude-sonnet-4-6",
+      model = "claude-sonnet-4-6",
       api_key_env_var = "ANTHROPIC_API_KEY",
     }
   end
 
-  -- Ollama: register all locally available models
+  if vim.env.OPENAI_API_KEY and vim.env.OPENAI_API_KEY ~= "" then
+    models["openai"] = {
+      type = "openai",
+      model = "gpt-4o",
+      api_key_env_var = "OPENAI_API_KEY",
+    }
+  end
+
+  if vim.env.GEMINI_API_KEY and vim.env.GEMINI_API_KEY ~= "" then
+    models["gemini"] = {
+      type = "gemini",
+      model = "gemini-2.0-flash",
+      api_key_env_var = "GEMINI_API_KEY",
+    }
+  end
+
+  if vim.env.OPENROUTER_API_KEY and vim.env.OPENROUTER_API_KEY ~= "" then
+    models["openrouter"] = {
+      type = "openai_compatible",
+      model = "anthropic/claude-sonnet-4-6",
+      api_key_env_var = "OPENROUTER_API_KEY",
+      base_url = "https://openrouter.ai/api/v1/chat/completions",
+    }
+  end
+
   for _, name in ipairs(list_ollama_models()) do
     models[name] = { type = "ollama", model = name }
   end
 
-  -- Resolve active model: neoconf > global > env > claude > first ollama > fallback
+  return models
+end
+
+local function resolve_models()
+  local nc = neoconf.get("lsp_ai") or {}
+  -- neoconf.models wins over auto-detected (deep merge, so you can tweak a field
+  -- on an auto-detected entry by only specifying that field)
+  return vim.tbl_deep_extend("force", detect_models(), nc.models or {})
+end
+
+local function resolve_active(models)
+  local nc = neoconf.get("lsp_ai") or {}
   local active = nc.active_model
     or vim.g.lsp_ai_model
     or vim.env.LSP_AI_MODEL
     or (models["claude"] and "claude")
+    or (models["openrouter"] and "openrouter")
+    or (models["openai"] and "openai")
+    or (models["gemini"] and "gemini")
     or next(models)
     or "llama3.2:3b"
 
@@ -53,6 +107,12 @@ local function build_init_options()
   end
 
   vim.g.lsp_ai_model = active
+  return active
+end
+
+local function build_init_options()
+  local models = resolve_models()
+  local active = resolve_active(models)
 
   local opts = {
     memory = { file_store = vim.empty_dict() },
@@ -109,12 +169,12 @@ local function build_init_options()
     },
   }
 
-  -- json round-trip: preserves file_store as object not array
+  -- json round-trip preserves file_store as {} not []
   return vim.fn.json_decode(vim.fn.json_encode(opts))
 end
 
 local function build_config()
-  return vim.tbl_deep_extend("force", {
+  return {
     cmd = { "lsp-ai", "--stdio" },
     filetypes = {
       "c", "cpp", "cs", "clojure", "cmake", "dart", "go", "haskell",
@@ -124,14 +184,14 @@ local function build_config()
     },
     root_markers = { ".git" },
     init_options = build_init_options(),
-  }, {})
+  }
 end
 
--- LspAiModel: switch active model at runtime (no args → picker)
+-- LspAiModel: switch model at runtime; picker shows provider/model for each entry
 if vim.fn.exists(":LspAiModel") == 0 then
   vim.api.nvim_create_user_command("LspAiModel", function(opts)
-    local function apply(model)
-      vim.g.lsp_ai_model = model
+    local function apply(key)
+      vim.g.lsp_ai_model = key
       vim.lsp.config("lsp_ai", build_config())
       for _, client in ipairs(vim.lsp.get_clients({ name = "lsp_ai" })) do
         client.stop()
@@ -139,7 +199,7 @@ if vim.fn.exists(":LspAiModel") == 0 then
       vim.defer_fn(function()
         vim.lsp.enable("lsp_ai")
       end, 100)
-      vim.notify(("lsp-ai: model → %s"):format(model))
+      vim.notify(("lsp-ai: model → %s"):format(key))
     end
 
     if opts.args ~= "" then
@@ -147,20 +207,22 @@ if vim.fn.exists(":LspAiModel") == 0 then
       return
     end
 
-    local choices = {}
-    if vim.env.ANTHROPIC_API_KEY and vim.env.ANTHROPIC_API_KEY ~= "" then
-      table.insert(choices, "claude")
-    end
-    for _, m in ipairs(list_ollama_models()) do
-      table.insert(choices, m)
-    end
+    local models = resolve_models()
+    local keys = vim.tbl_keys(models)
+    table.sort(keys)
 
-    if #choices == 0 then
+    if #keys == 0 then
       vim.notify("lsp-ai: no models available", vim.log.levels.WARN)
       return
     end
 
-    vim.ui.select(choices, { prompt = "lsp-ai model" }, function(choice)
+    vim.ui.select(keys, {
+      prompt = "lsp-ai model",
+      format_item = function(key)
+        local m = models[key]
+        return ("%s  [%s · %s]"):format(key, m.type, m.model)
+      end,
+    }, function(choice)
       if choice then
         apply(choice)
       end
@@ -168,19 +230,13 @@ if vim.fn.exists(":LspAiModel") == 0 then
   end, {
     nargs = "?",
     complete = function(arg_lead)
-      local choices = {}
-      if vim.env.ANTHROPIC_API_KEY and vim.env.ANTHROPIC_API_KEY ~= "" then
-        table.insert(choices, "claude")
-      end
-      for _, m in ipairs(list_ollama_models()) do
-        table.insert(choices, m)
-      end
+      local keys = vim.tbl_keys(resolve_models())
       if arg_lead == "" then
-        return choices
+        return keys
       end
-      return vim.tbl_filter(function(m)
-        return m:sub(1, #arg_lead) == arg_lead
-      end, choices)
+      return vim.tbl_filter(function(k)
+        return k:sub(1, #arg_lead) == arg_lead
+      end, keys)
     end,
   })
 end

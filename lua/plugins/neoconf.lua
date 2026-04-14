@@ -20,18 +20,41 @@ return {
           default = true,
         })
 
-        -- LSP AI: expose per-project model selection
+        -- LSP AI: per-project provider/model selection
         schema:set("lsp_ai", {
           type = "object",
+          description = "lsp-ai config. Models defined here merge over auto-detected defaults.",
           properties = {
             active_model = {
-              description = "Active model key (e.g. 'claude' or an ollama model name)",
+              description = "Key of the active model in the models table",
               type = "string",
             },
-            claude_model = {
-              description = "Anthropic model ID when active_model is 'claude'",
-              type = "string",
-              default = "claude-sonnet-4-6",
+            models = {
+              description = "Named model definitions (merged over env-detected defaults)",
+              type = "object",
+              additionalProperties = {
+                type = "object",
+                required = { "type", "model" },
+                properties = {
+                  type = {
+                    description = "Provider type",
+                    type = "string",
+                    enum = { "anthropic", "openai", "openai_compatible", "ollama", "gemini", "mistral" },
+                  },
+                  model = {
+                    description = "Model name or ID",
+                    type = "string",
+                  },
+                  api_key_env_var = {
+                    description = "Env var holding the API key",
+                    type = "string",
+                  },
+                  base_url = {
+                    description = "API base URL (required for openai_compatible)",
+                    type = "string",
+                  },
+                },
+              },
             },
           },
         })
