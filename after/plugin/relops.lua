@@ -50,7 +50,7 @@ end
 
 -- Reset on ESC
 vim.keymap.set("n", "<Esc>", function()
-  vim.cmd("nohlsearch") -- Note: Remove this if you don't want to clear highlights on ESC
+  vim.cmd.nohlsearch()
   if vim.g.RELOPS_ACTIVE then
     vim.opt_local.relativenumber = false
   end

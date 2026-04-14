@@ -1,40 +1,28 @@
--- As we use extramarks to make the folds display, we need to disable based on filetype
+-- Disable fold/sign column decorations on floating windows and special filetypes
+local special_filetypes = { "oil", "oil_preview", "quickfix", "help" }
+
+local function disable_decorations(win)
+  local config = vim.api.nvim_win_get_config(win)
+  local buf = vim.api.nvim_win_get_buf(win)
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+  if config.relative ~= "" or vim.tbl_contains(special_filetypes, ft) then
+    vim.wo[win].foldcolumn = "0"
+    vim.wo[win].signcolumn = "no"
+  end
+end
+
 vim.api.nvim_create_autocmd("WinEnter", {
   callback = function()
-    local win = vim.api.nvim_get_current_win()
-    local config = vim.api.nvim_win_get_config(win)
-    local buf = vim.api.nvim_win_get_buf(win)
-    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-
-    local special_filetypes = {
-      "oil",
-      "oil_preview",
-      "quickfix",
-      "help",
-    }
-
-    local should_disable = config.relative ~= "" or vim.tbl_contains(special_filetypes, ft)
-
-    if should_disable then
-      vim.wo[win].foldcolumn = "0"
-      vim.wo[win].signcolumn = "no"
-    end
+    disable_decorations(vim.api.nvim_get_current_win())
   end,
 })
 
+-- OilEnter fires before WinEnter so re-apply to all windows on oil open
 vim.api.nvim_create_autocmd("User", {
   pattern = "OilEnter",
   callback = function()
-    local wins = vim.api.nvim_list_wins()
-    for _, win in ipairs(wins) do
-      local buf = vim.api.nvim_win_get_buf(win)
-      local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-      local config = vim.api.nvim_win_get_config(win)
-
-      if ft == "oil" or config.relative ~= "" then
-        vim.wo[win].foldcolumn = "0"
-        vim.wo[win].signcolumn = "no"
-      end
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      disable_decorations(win)
     end
   end,
 })

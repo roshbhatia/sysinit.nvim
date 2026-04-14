@@ -27,7 +27,6 @@ return {
 
         -- Common LSP server settings (placeholders for autocomplete)
         schema:import("lua_ls", { settings = { Lua = {} } })
-        schema:import("gopls", { settings = { gopls = {} } })
         schema:import("pyright", { settings = { python = {} } })
         schema:import("yamlls", { settings = { yaml = {} } })
         schema:import("jsonls", { settings = { json = {} } })
@@ -47,7 +46,7 @@ return {
 
     -- Scaffold .sysinit/neoconf.json for the current project
     vim.api.nvim_create_user_command("NeoconfInit", function()
-      local root = vim.fn.getcwd()
+      local root = vim.uv.cwd()
       local dir = vim.fs.joinpath(root, ".sysinit")
       local path = vim.fs.joinpath(dir, "neoconf.json")
 
