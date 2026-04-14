@@ -1,15 +1,17 @@
+-- lsp-ai: AI coding assistant LSP
+-- Primary model: Anthropic Claude (when ANTHROPIC_API_KEY is set)
+-- Fallback: Ollama (first available model)
+-- Per-project overrides: neoconf keys lsp_ai.active_model / lsp_ai.claude_model
 local neoconf = require("neoconf")
 
 local function list_ollama_models()
   if vim.fn.executable("ollama") ~= 1 then
     return {}
   end
-
   local lines = vim.fn.systemlist({ "ollama", "ls" })
   if vim.v.shell_error ~= 0 then
     return {}
   end
-
   local models = {}
   for _, line in ipairs(lines) do
     local name = line:match("^(%S+)")
@@ -17,266 +19,168 @@ local function list_ollama_models()
       table.insert(models, name)
     end
   end
-
-  return models
-end
-
-local function resolve_active_model(model_names)
-  local configured = vim.g.lsp_ai_model or vim.env.LSP_AI_MODEL
-  if configured and configured ~= "" then
-    return configured
-  end
-
-  if #model_names > 0 then
-    return model_names[1]
-  end
-
-  return vim.g.lsp_ai_fallback_model or "llama3.2:3b"
-end
-
-local function build_models_table(model_names, active_model)
-  local models = {}
-  for _, model in ipairs(model_names) do
-    models[model] = {
-      type = "ollama",
-      model = model,
-    }
-  end
-
-  if active_model and active_model ~= "" and not models[active_model] then
-    models[active_model] = {
-      type = "ollama",
-      model = active_model,
-    }
-  end
-
   return models
 end
 
 local function build_init_options()
-  local model_names = list_ollama_models()
-  local active_model = resolve_active_model(model_names)
-  if not vim.g.lsp_ai_model or vim.g.lsp_ai_model == "" then
-    vim.g.lsp_ai_model = active_model
+  local nc = neoconf.get("lsp_ai") or {}
+  local models = {}
+
+  -- Anthropic: prefer when API key is available
+  if vim.env.ANTHROPIC_API_KEY and vim.env.ANTHROPIC_API_KEY ~= "" then
+    models["claude"] = {
+      type = "anthropic",
+      model = nc.claude_model or "claude-sonnet-4-6",
+      api_key_env_var = "ANTHROPIC_API_KEY",
+    }
   end
 
-  local options = {
-    -- Use empty_dict so file_store is encoded as an object.
-    memory = {
-      file_store = vim.empty_dict(),
-    },
-    models = build_models_table(model_names, active_model),
+  -- Ollama: register all locally available models
+  for _, name in ipairs(list_ollama_models()) do
+    models[name] = { type = "ollama", model = name }
+  end
+
+  -- Resolve active model: neoconf > global > env > claude > first ollama > fallback
+  local active = nc.active_model
+    or vim.g.lsp_ai_model
+    or vim.env.LSP_AI_MODEL
+    or (models["claude"] and "claude")
+    or next(models)
+    or "llama3.2:3b"
+
+  if not models[active] then
+    models[active] = { type = "ollama", model = active }
+  end
+
+  vim.g.lsp_ai_model = active
+
+  local opts = {
+    memory = { file_store = vim.empty_dict() },
+    models = models,
     actions = {
       {
         trigger = "!C",
         action_display_name = "Complete",
-        model = active_model,
+        model = active,
         parameters = {
           max_context = 4096,
           max_tokens = 4096,
-          system = 'You are an AI coding assistant. Your task is to complete code snippets. The user\'s cursor position is marked by "<CURSOR>". Follow these steps:\n\n1. Analyze the code context and the cursor position.\n2. Provide your chain of thought reasoning, wrapped in <reasoning> tags.\n3. Determine the appropriate code to complete the current thought.\n4. Replace "<CURSOR>" with the necessary code.\n5. Wrap your code solution in <answer> tags.\n\nYour response should always include both the reasoning and the answer.',
-          messages = {
-            {
-              role = "user",
-              content = "{CODE}",
-            },
-          },
+          system = 'Complete the code at "<CURSOR>". Return only the replacement for "<CURSOR>" in <answer> tags.',
+          messages = { { role = "user", content = "{CODE}" } },
         },
-        post_process = {
-          extractor = "(?s)<answer>(.*?)</answer>",
-        },
+        post_process = { extractor = "(?s)<answer>(.*?)</answer>" },
       },
       {
         trigger = "!R",
         action_display_name = "Refactor",
-        model = active_model,
+        model = active,
         parameters = {
           max_context = 4096,
           max_tokens = 4096,
-          system = "You are an AI coding assistant specializing in code refactoring. Your task is to analyze the given code snippet and provide a refactored version. Follow these steps:\n\n1. Analyze the code context and structure.\n2. Identify areas for improvement.\n3. Provide your chain of thought reasoning, wrapped in <reasoning> tags.\n4. Rewrite the entire code snippet with your refactoring applied.\n5. Wrap your refactored code solution in <answer> tags.\n\nYour response should always include both the reasoning and the refactored code.",
-          messages = {
-            {
-              role = "user",
-              content = "{SELECTED_TEXT}",
-            },
-          },
+          system = "Refactor the provided code for clarity and correctness without changing behavior. Return the result in <answer> tags.",
+          messages = { { role = "user", content = "{SELECTED_TEXT}" } },
         },
-        post_process = {
-          extractor = "(?s)<answer>(.*?)</answer>",
-        },
-      },
-      {
-        trigger = "!M",
-        action_display_name = "Comment",
-        model = active_model,
-        parameters = {
-          max_context = 4096,
-          max_tokens = 4096,
-          system = "You are an AI coding assistant specializing in code commenting. Your task is to add concise, helpful comments to the provided code without changing its behavior. Follow these steps:\n\n1. Analyze the code structure and intent.\n2. Add minimal comments that clarify non-obvious logic.\n3. Keep comments short and avoid restating obvious syntax.\n4. Return the full code with comments added.\n5. Wrap your final output in <answer> tags.\n\nYour response should always include both the reasoning and the commented code.",
-          messages = {
-            {
-              role = "user",
-              content = "{SELECTED_TEXT}",
-            },
-          },
-        },
-        post_process = {
-          extractor = "(?s)<answer>(.*?)</answer>",
-        },
+        post_process = { extractor = "(?s)<answer>(.*?)</answer>" },
       },
       {
         trigger = "!E",
         action_display_name = "Explain",
-        model = active_model,
+        model = active,
         parameters = {
           max_context = 4096,
-          max_tokens = 4096,
-          system = "You are an AI coding assistant specializing in explanations. Your task is to explain the provided code clearly and succinctly. Follow these steps:\n\n1. Summarize what the code does at a high level.\n2. Describe key steps or logic in order.\n3. Point out any noteworthy assumptions or edge cases.\n4. Keep the explanation concise and in plain language.\n5. Wrap your final explanation in <answer> tags.\n\nYour response should always include both the reasoning and the explanation.",
-          messages = {
-            {
-              role = "user",
-              content = "{SELECTED_TEXT}",
-            },
-          },
+          max_tokens = 1024,
+          system = "Explain the provided code clearly and concisely. Wrap your explanation in <answer> tags.",
+          messages = { { role = "user", content = "{SELECTED_TEXT}" } },
         },
-        post_process = {
-          extractor = "(?s)<answer>(.*?)</answer>",
-        },
+        post_process = { extractor = "(?s)<answer>(.*?)</answer>" },
       },
       {
         trigger = "!S",
         action_display_name = "Simplify",
-        model = active_model,
+        model = active,
         parameters = {
           max_context = 4096,
           max_tokens = 4096,
-          system = "You are an AI coding assistant specializing in simplification. Your task is to rewrite the provided code to be simpler while preserving behavior. Follow these steps:\n\n1. Identify unnecessary complexity or repetition.\n2. Simplify control flow and naming where appropriate.\n3. Keep the output idiomatic for the language.\n4. Return the full simplified code.\n5. Wrap your final output in <answer> tags.\n\nYour response should always include both the reasoning and the simplified code.",
-          messages = {
-            {
-              role = "user",
-              content = "{SELECTED_TEXT}",
-            },
-          },
+          system = "Simplify the provided code while preserving behavior. Return the result in <answer> tags.",
+          messages = { { role = "user", content = "{SELECTED_TEXT}" } },
         },
-        post_process = {
-          extractor = "(?s)<answer>(.*?)</answer>",
-        },
+        post_process = { extractor = "(?s)<answer>(.*?)</answer>" },
       },
     },
   }
 
-  -- Encode/decode to preserve object shape (avoids file_store as array).
-  return vim.fn.json_decode(vim.fn.json_encode(options))
+  -- json round-trip: preserves file_store as object not array
+  return vim.fn.json_decode(vim.fn.json_encode(opts))
 end
-
-local base_config = {
-  cmd = { "lsp-ai", "--stdio" },
-  filetypes = {
-    "asciidoc",
-    "c",
-    "cpp",
-    "cs",
-    "gitcommit",
-    "go",
-    "html",
-    "java",
-    "javascript",
-    "lua",
-    "markdown",
-    "nix",
-    "python",
-    "ruby",
-    "rust",
-    "swift",
-    "toml",
-    "typescript",
-    "typescriptreact",
-    "haskell",
-    "cmake",
-    "typst",
-    "php",
-    "dart",
-    "clojure",
-    "sh",
-  },
-  root_markers = { ".git" },
-}
 
 local function build_config()
-  local config = vim.tbl_deep_extend("force", base_config, neoconf.get("lsp_ai") or {})
-  config.init_options = build_init_options()
-  return config
+  return vim.tbl_deep_extend("force", {
+    cmd = { "lsp-ai", "--stdio" },
+    filetypes = {
+      "c", "cpp", "cs", "clojure", "cmake", "dart", "go", "haskell",
+      "html", "java", "javascript", "lua", "markdown", "nix", "php",
+      "python", "ruby", "rust", "sh", "swift", "toml", "typescript",
+      "typescriptreact", "typst",
+    },
+    root_markers = { ".git" },
+    init_options = build_init_options(),
+  }, {})
 end
 
-local function restart_lsp_ai()
-  if vim.fn.exists(":LspRestart") == 2 then
-    vim.cmd("LspRestart lsp_ai")
-    return
-  end
-
-  if vim.fn.exists(":LspStop") == 2 and vim.fn.exists(":LspStart") == 2 then
-    vim.cmd("LspStop lsp_ai")
-    vim.cmd("LspStart lsp_ai")
-    return
-  end
-
-  for _, client in ipairs(vim.lsp.get_clients({ name = "lsp_ai" })) do
-    client.stop()
-  end
-
-  vim.defer_fn(function()
-    if vim.lsp.enable then
-      vim.lsp.enable("lsp_ai")
-    end
-  end, 100)
-end
-
-local function set_active_model(model)
-  if not model or model == "" then
-    return
-  end
-
-  vim.g.lsp_ai_model = model
-  if type(vim.lsp.config) == "function" then
-    vim.lsp.config("lsp_ai", build_config())
-  end
-  restart_lsp_ai()
-  vim.notify(("LSP-AI model set to %s"):format(model))
-end
-
-local function select_active_model()
-  local models = list_ollama_models()
-  if #models == 0 then
-    vim.notify("No Ollama models found via `ollama ls`.", vim.log.levels.WARN)
-    return
-  end
-
-  vim.ui.select(models, { prompt = "LSP-AI model" }, function(choice)
-    if choice then
-      set_active_model(choice)
-    end
-  end)
-end
-
+-- LspAiModel: switch active model at runtime (no args → picker)
 if vim.fn.exists(":LspAiModel") == 0 then
   vim.api.nvim_create_user_command("LspAiModel", function(opts)
+    local function apply(model)
+      vim.g.lsp_ai_model = model
+      vim.lsp.config("lsp_ai", build_config())
+      for _, client in ipairs(vim.lsp.get_clients({ name = "lsp_ai" })) do
+        client.stop()
+      end
+      vim.defer_fn(function()
+        vim.lsp.enable("lsp_ai")
+      end, 100)
+      vim.notify(("lsp-ai: model → %s"):format(model))
+    end
+
     if opts.args ~= "" then
-      set_active_model(opts.args)
+      apply(opts.args)
       return
     end
 
-    select_active_model()
+    local choices = {}
+    if vim.env.ANTHROPIC_API_KEY and vim.env.ANTHROPIC_API_KEY ~= "" then
+      table.insert(choices, "claude")
+    end
+    for _, m in ipairs(list_ollama_models()) do
+      table.insert(choices, m)
+    end
+
+    if #choices == 0 then
+      vim.notify("lsp-ai: no models available", vim.log.levels.WARN)
+      return
+    end
+
+    vim.ui.select(choices, { prompt = "lsp-ai model" }, function(choice)
+      if choice then
+        apply(choice)
+      end
+    end)
   end, {
     nargs = "?",
     complete = function(arg_lead)
-      local models = list_ollama_models()
-      if arg_lead == "" then
-        return models
+      local choices = {}
+      if vim.env.ANTHROPIC_API_KEY and vim.env.ANTHROPIC_API_KEY ~= "" then
+        table.insert(choices, "claude")
       end
-
-      return vim.tbl_filter(function(item)
-        return item:sub(1, #arg_lead) == arg_lead
-      end, models)
+      for _, m in ipairs(list_ollama_models()) do
+        table.insert(choices, m)
+      end
+      if arg_lead == "" then
+        return choices
+      end
+      return vim.tbl_filter(function(m)
+        return m:sub(1, #arg_lead) == arg_lead
+      end, choices)
     end,
   })
 end

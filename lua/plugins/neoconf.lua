@@ -20,9 +20,20 @@ return {
           default = true,
         })
 
-        -- LSP AI schema
-        schema:import("lsp_ai", {
-          init_options = {},
+        -- LSP AI: expose per-project model selection
+        schema:set("lsp_ai", {
+          type = "object",
+          properties = {
+            active_model = {
+              description = "Active model key (e.g. 'claude' or an ollama model name)",
+              type = "string",
+            },
+            claude_model = {
+              description = "Anthropic model ID when active_model is 'claude'",
+              type = "string",
+              default = "claude-sonnet-4-6",
+            },
+          },
         })
 
         -- Common LSP server settings (placeholders for autocomplete)
