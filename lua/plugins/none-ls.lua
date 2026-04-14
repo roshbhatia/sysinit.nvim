@@ -251,9 +251,9 @@ return {
           null_ls.builtins.hover.dictionary,
           null_ls.builtins.hover.printenv,
 
-          -- Formatting
+          -- Formatting (only tools without a capable LSP counterpart)
+          -- gopls handles Go, nixd handles Nix, terraformls handles Terraform
           null_ls.builtins.formatting.stylua,
-          null_ls.builtins.formatting.nixpkgs_fmt,
           null_ls.builtins.formatting.prettier.with({
             filetypes = {
               "javascript",
@@ -273,8 +273,6 @@ return {
           null_ls.builtins.formatting.shfmt.with({
             filetypes = { "sh", "bash", "zsh" },
           }),
-          null_ls.builtins.formatting.goimports,
-          null_ls.builtins.formatting.terraform_fmt,
         },
       })
 
@@ -299,6 +297,9 @@ return {
         callback = function(args)
           local bufnr = args.buf
           if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+            return
+          end
+          if require("neoconf").get("autoformat", nil, { bufnr = bufnr }) == false then
             return
           end
           local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(bufnr))

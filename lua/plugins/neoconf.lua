@@ -13,6 +13,13 @@ return {
     require("neoconf.plugins").register({
       name = "sysinit",
       on_schema = function(schema)
+        -- Formatting toggle (read by none-ls BufWritePre)
+        schema:set("autoformat", {
+          description = "Enable autoformat-on-save for this project",
+          type = "boolean",
+          default = true,
+        })
+
         -- LSP AI schema
         schema:import("lsp_ai", {
           init_options = {},
@@ -29,6 +36,10 @@ return {
         schema:import("bashls", {})
         schema:import("dockerls", {})
         schema:import("docker_compose_language_service", {})
+        schema:import("nixd", {})
+        schema:import("gopls", { settings = { gopls = { gofumpt = false } } })
+        schema:import("terraformls", {})
+        schema:import("rust_analyzer", { settings = { ["rust-analyzer"] = {} } })
         schema:import("ruff", { init_options = { settings = {} } })
         schema:import("typescript_tools", {})
       end,
@@ -48,11 +59,16 @@ return {
       vim.fn.mkdir(dir, "p")
 
       local template = [[{
+  "autoformat": true,
   "lua_ls": { "settings": { "Lua": { "workspace": { "checkThirdParty": false } } } },
-  "gopls": { "settings": { "gopls": {} } },
+  "gopls": { "settings": { "gopls": { "gofumpt": false } } },
   "pyright": { "settings": { "python": {} } },
+  "rust_analyzer": { "settings": { "rust-analyzer": {} } },
+  "nixd": {},
+  "terraformls": {},
   "yamlls": { "settings": { "yaml": {} } },
-  "jsonls": { "settings": { "json": {} } }
+  "jsonls": { "settings": { "json": {} } },
+  "eslint": { "settings": {} }
 }
 ]]
 
