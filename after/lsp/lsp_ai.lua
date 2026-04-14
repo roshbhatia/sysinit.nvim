@@ -1,25 +1,22 @@
 -- lsp-ai: multi-provider AI coding assistant
--- Models are auto-detected from the environment and merged with neoconf overrides.
+--
+-- Only activates when a config exists (global or local neoconf).
+-- Global config:  ~/.config/nvim/neoconf.json      (:LspAiConfig global)
+-- Local override: .sysinit/neoconf.json             (:LspAiConfig local)
 --
 -- Supported providers: anthropic, openai, openai_compatible, ollama, gemini, mistral
 --
--- neoconf keys (under "lsp_ai"):
---   active_model  — key into the models table (string)
---   models        — object of named model definitions; merged over auto-detected defaults
---
--- Example .sysinit/neoconf.json:
---   "lsp_ai": {
---     "active_model": "groq",
---     "models": {
---       "groq": {
---         "type": "openai_compatible",
---         "model": "llama-3.1-8b-instant",
---         "api_key_env_var": "GROQ_API_KEY",
---         "base_url": "https://api.groq.com/openai/v1/chat/completions"
---       }
---     }
---   }
+-- Minimal global config example:
+--   { "lsp_ai": { "active_model": "openrouter", "models": { "openrouter": {
+--       "type": "openai_compatible", "model": "deepseek/deepseek-v3.2",
+--       "api_key_env_var": "OPENROUTER_API_KEY",
+--       "base_url": "https://openrouter.ai/api/v1/chat/completions" } } } }
 local neoconf = require("neoconf")
+
+-- No config → disabled (filetypes={} means the server process never starts)
+if not neoconf.get("lsp_ai") then
+  return { filetypes = {} }
+end
 
 local function list_ollama_models()
   if vim.fn.executable("ollama") ~= 1 then
@@ -39,7 +36,7 @@ local function list_ollama_models()
   return names
 end
 
--- Build models from the current environment (no neoconf involved).
+-- Build models from the current environment (baseline; neoconf merges over this)
 local function detect_models()
   local models = {}
 
@@ -48,6 +45,15 @@ local function detect_models()
       type = "anthropic",
       model = "claude-sonnet-4-6",
       api_key_env_var = "ANTHROPIC_API_KEY",
+    }
+  end
+
+  if vim.env.OPENROUTER_API_KEY and vim.env.OPENROUTER_API_KEY ~= "" then
+    models["openrouter"] = {
+      type = "openai_compatible",
+      model = "deepseek/deepseek-v3.2",
+      api_key_env_var = "OPENROUTER_API_KEY",
+      base_url = "https://openrouter.ai/api/v1/chat/completions",
     }
   end
 
@@ -67,15 +73,6 @@ local function detect_models()
     }
   end
 
-  if vim.env.OPENROUTER_API_KEY and vim.env.OPENROUTER_API_KEY ~= "" then
-    models["openrouter"] = {
-      type = "openai_compatible",
-      model = "anthropic/claude-sonnet-4-6",
-      api_key_env_var = "OPENROUTER_API_KEY",
-      base_url = "https://openrouter.ai/api/v1/chat/completions",
-    }
-  end
-
   for _, name in ipairs(list_ollama_models()) do
     models[name] = { type = "ollama", model = name }
   end
@@ -85,8 +82,6 @@ end
 
 local function resolve_models()
   local nc = neoconf.get("lsp_ai") or {}
-  -- neoconf.models wins over auto-detected (deep merge, so you can tweak a field
-  -- on an auto-detected entry by only specifying that field)
   return vim.tbl_deep_extend("force", detect_models(), nc.models or {})
 end
 
@@ -187,7 +182,7 @@ local function build_config()
   }
 end
 
--- LspAiModel: switch model at runtime; picker shows provider/model for each entry
+-- LspAiModel: switch active model at runtime; picker shows provider + model id
 if vim.fn.exists(":LspAiModel") == 0 then
   vim.api.nvim_create_user_command("LspAiModel", function(opts)
     local function apply(key)
@@ -238,6 +233,79 @@ if vim.fn.exists(":LspAiModel") == 0 then
         return k:sub(1, #arg_lead) == arg_lead
       end, keys)
     end,
+    desc = "Switch lsp-ai active model",
+  })
+end
+
+-- LspAiConfig [global|local]: create/open the global or local config file.
+-- global → ~/.config/nvim/neoconf.json
+-- local  → .sysinit/neoconf.json (relative to cwd)
+if vim.fn.exists(":LspAiConfig") == 0 then
+  local global_template = [[{
+  "lsp_ai": {
+    "active_model": "openrouter",
+    "models": {
+      "openrouter": {
+        "type": "openai_compatible",
+        "model": "deepseek/deepseek-v3.2",
+        "api_key_env_var": "OPENROUTER_API_KEY",
+        "base_url": "https://openrouter.ai/api/v1/chat/completions"
+      }
+    }
+  }
+}
+]]
+
+  local local_template = [[{
+  "lsp_ai": {
+    "active_model": "openrouter",
+    "models": {}
+  }
+}
+]]
+
+  local function open_config(path, template)
+    if not vim.uv.fs_stat(path) then
+      local dir = vim.fs.dirname(path)
+      vim.fn.mkdir(dir, "p")
+      local fd = io.open(path, "w")
+      if not fd then
+        vim.notify("lsp-ai: failed to create " .. path, vim.log.levels.ERROR)
+        return
+      end
+      fd:write(template)
+      fd:close()
+    end
+    vim.cmd.edit(path)
+  end
+
+  vim.api.nvim_create_user_command("LspAiConfig", function(opts)
+    local scope = opts.args ~= "" and opts.args or nil
+
+    if not scope then
+      vim.ui.select({ "global", "local" }, { prompt = "lsp-ai config" }, function(choice)
+        if choice then
+          vim.cmd("LspAiConfig " .. choice)
+        end
+      end)
+      return
+    end
+
+    if scope == "global" then
+      local path = vim.fs.joinpath(vim.fn.stdpath("config"), "neoconf.json")
+      open_config(path, global_template)
+    elseif scope == "local" then
+      local path = vim.fs.joinpath(vim.uv.cwd(), ".sysinit", "neoconf.json")
+      open_config(path, local_template)
+    else
+      vim.notify("lsp-ai: usage: LspAiConfig [global|local]", vim.log.levels.WARN)
+    end
+  end, {
+    nargs = "?",
+    complete = function()
+      return { "global", "local" }
+    end,
+    desc = "Edit lsp-ai global or local config",
   })
 end
 
