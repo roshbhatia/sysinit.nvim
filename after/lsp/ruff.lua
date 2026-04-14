@@ -2,7 +2,10 @@ local neoconf = require("neoconf")
 
 local base_config = {
   init_options = {
-    settings = {},
+    settings = {
+      fixAll = true,
+      organizeImports = true,
+    },
   },
 }
 

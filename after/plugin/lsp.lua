@@ -61,6 +61,27 @@ vim.diagnostic.handlers.signs = {
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local bufnr = args.buf
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+    -- Autofix on save
+    if client and client.name == "eslint" then
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = bufnr,
+        command = "EslintFixAll",
+      })
+    end
+
+    if client and client.name == "ruff" then
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = bufnr,
+        callback = function()
+          vim.lsp.buf.code_action({
+            context = { only = { "source.fixAll.ruff", "source.organizeImports.ruff" }, diagnostics = {} },
+            apply = true,
+          })
+        end,
+      })
+    end
 
     Snacks.keymap.set("n", "<leader>cD", vim.lsp.buf.definition, { buffer = bufnr, desc = "Go to definition" })
     Snacks.keymap.set("n", "<leader>cS", vim.lsp.buf.workspace_symbol, { buffer = bufnr, desc = "Workspace symbols" })
@@ -100,7 +121,6 @@ local servers = {
   "awk_ls",
   "bashls",
   "copilot_ls",
-  "cue",
   "dockerls",
   "docker_compose_language_service",
   "eslint",

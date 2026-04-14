@@ -3,7 +3,9 @@ local neoconf = require("neoconf")
 local base_config = {
   filetypes = {
     "graphql",
+    "javascript",
     "javascriptreact",
+    "typescript",
     "typescriptreact",
   },
   root_markers = {

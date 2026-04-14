@@ -20,9 +20,10 @@ local base_config = {
     ".git",
   },
   settings = {
-    workingDirectory = {
-      mode = "auto",
-    },
+    workingDirectory = { mode = "auto" },
+    format = { enable = true },
+    validate = "on",
+    run = "onType",
   },
 }
 

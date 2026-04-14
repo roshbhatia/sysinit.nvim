@@ -1,13 +1,12 @@
 local neoconf = require("neoconf")
 
 local base_config = {
-  filetypes = {
-    "bash",
-    "sh",
-    "zsh",
-  },
-  root_markers = {
-    ".git",
+  filetypes = { "bash", "sh", "zsh" },
+  root_markers = { ".git" },
+  settings = {
+    bashIde = {
+      includeAllWorkspaceSymbols = true,
+    },
   },
 }
 

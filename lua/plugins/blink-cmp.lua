@@ -174,7 +174,7 @@ return {
           enabled = true,
           keymap = {
             preset = "cmdline",
-            ["<CR>"] = { "accept_and_enter", "fallback" },
+            ["<CR>"] = { "accept", "fallback" },
           },
           completion = {
             menu = {
