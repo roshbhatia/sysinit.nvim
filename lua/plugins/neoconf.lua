@@ -42,6 +42,7 @@ return {
         schema:import("rust_analyzer", { settings = { ["rust-analyzer"] = {} } })
         schema:import("ruff", { init_options = { settings = {} } })
         schema:import("typescript_tools", {})
+        schema:import("cue", {})
         schema:import("ast_grep", {})
         schema:import("helm_ls", { settings = { ["helm-ls"] = {} } })
         schema:import("awk_ls", {})

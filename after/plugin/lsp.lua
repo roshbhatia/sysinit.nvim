@@ -121,6 +121,7 @@ local servers = {
   "awk_ls",
   "bashls",
   "copilot_ls",
+  "cue",
   "dockerls",
   "docker_compose_language_service",
   "eslint",
