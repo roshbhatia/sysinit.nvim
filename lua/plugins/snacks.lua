@@ -433,8 +433,6 @@ return {
           desc = "Prev Reference",
           mode = { "n", "t" },
         },
-      }
-
     },
   },
 }
