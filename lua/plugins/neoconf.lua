@@ -35,6 +35,7 @@ return {
         schema:import("bashls", {})
         schema:import("dockerls", {})
         schema:import("docker_compose_language_service", {})
+        schema:import("nil_ls", { settings = { ["nil"] = {} } })
         schema:import("nixd", {})
         schema:import("gopls", { settings = { gopls = { gofumpt = false } } })
         schema:import("terraformls", {})
