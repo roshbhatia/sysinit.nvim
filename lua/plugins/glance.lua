@@ -25,19 +25,19 @@ return {
     keys = function()
       return {
         {
-          "<leader>cd",
+          "<leader>gd",
           function()
             vim.cmd("Glance definitions")
           end,
           desc = "Peek definition",
         },
         {
-          "<leader>ci",
+          "<leader>gi",
           "<CMD>Glance implementations<CR>",
           desc = "Peek implementation",
         },
         {
-          "<leader>cu",
+          "<leader>gu",
           function()
             vim.cmd("Glance references")
           end,

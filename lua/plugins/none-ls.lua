@@ -177,6 +177,47 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
     },
+    init = function()
+      vim.o.formatexpr = "v:lua.vim.lsp.formatexpr()"
+
+      if vim.g.disable_autoformat == nil then
+        vim.g.disable_autoformat = false
+      end
+
+      vim.api.nvim_create_user_command("Format", function(args)
+        local range = nil
+        if args.count ~= -1 then
+          local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+          range = {
+            start = { args.line1, 0 },
+            ["end"] = { args.line2, end_line:len() },
+          }
+        end
+        vim.lsp.buf.format({ async = true, range = range })
+      end, { range = true, desc = "Format buffer or range" })
+
+      vim.api.nvim_create_user_command("FormatDisable", function()
+        vim.g.disable_autoformat = true
+      end, { desc = "Disable autoformat-on-save globally" })
+
+      vim.api.nvim_create_user_command("FormatEnable", function()
+        vim.g.disable_autoformat = false
+      end, { desc = "Re-enable autoformat-on-save globally" })
+
+      vim.api.nvim_create_user_command("FormatBufDisable", function()
+        vim.b.disable_autoformat = true
+      end, { desc = "Disable autoformat-on-save for buffer" })
+
+      vim.api.nvim_create_user_command("FormatBufEnable", function()
+        vim.b.disable_autoformat = false
+      end, { desc = "Re-enable autoformat-on-save for buffer" })
+
+      vim.api.nvim_create_user_command("FormatStatus", function()
+        local global = vim.g.disable_autoformat and "disabled" or "enabled"
+        local buffer = vim.b.disable_autoformat and "disabled" or "enabled"
+        vim.notify(string.format("Autoformat: global=%s, buffer=%s", global, buffer), vim.log.levels.INFO)
+      end, { desc = "Show autoformat status" })
+    end,
     config = function()
       local null_ls = require("null-ls")
 
@@ -185,6 +226,7 @@ return {
         default_timeout = 5000,
         temp_dir = vim.fn.stdpath("cache") .. "/null-ls",
         sources = {
+          -- Code actions
           null_ls.builtins.code_actions.gitrebase,
           null_ls.builtins.code_actions.gitsigns,
           null_ls.builtins.code_actions.gomodifytags,
@@ -192,6 +234,8 @@ return {
           null_ls.builtins.code_actions.statix,
           null_ls.builtins.code_actions.textlint,
           null_ls.builtins.code_actions.ts_node_action,
+
+          -- Diagnostics
           null_ls.builtins.diagnostics.actionlint,
           null_ls.builtins.diagnostics.checkmake,
           null_ls.builtins.diagnostics.commitlint,
@@ -202,8 +246,36 @@ return {
           null_ls.builtins.diagnostics.terraform_validate,
           null_ls.builtins.diagnostics.tfsec,
           null_ls.builtins.diagnostics.zsh,
+
+          -- Hover
           null_ls.builtins.hover.dictionary,
           null_ls.builtins.hover.printenv,
+
+          -- Formatting
+          null_ls.builtins.formatting.stylua,
+          null_ls.builtins.formatting.nixpkgs_fmt,
+          null_ls.builtins.formatting.prettier.with({
+            filetypes = {
+              "javascript",
+              "typescript",
+              "javascriptreact",
+              "typescriptreact",
+              "json",
+              "jsonc",
+              "yaml",
+              "html",
+              "css",
+              "scss",
+              "less",
+              "markdown",
+            },
+          }),
+          null_ls.builtins.formatting.shfmt.with({
+            filetypes = { "sh", "bash", "zsh" },
+          }),
+          null_ls.builtins.formatting.goimports,
+          null_ls.builtins.formatting.rustfmt,
+          null_ls.builtins.formatting.terraform_fmt,
         },
       })
 
@@ -219,6 +291,31 @@ return {
         method = null_ls.methods.CODE_ACTION,
         filetypes = {},
         generator = hex_color_generator(),
+      })
+
+      -- Auto-format on save: prefer null-ls, fall back to attached LSP client
+      local augroup = vim.api.nvim_create_augroup("NullLsFormatting", { clear = true })
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = augroup,
+        callback = function(args)
+          local bufnr = args.buf
+          if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+            return
+          end
+          local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(bufnr))
+          if ok and stats and stats.size and stats.size > 1024 * 1024 then
+            return
+          end
+          local has_null_ls = #vim.lsp.get_clients({ bufnr = bufnr, name = "null-ls" }) > 0
+          vim.lsp.buf.format({
+            bufnr = bufnr,
+            async = false,
+            filter = function(client)
+              if client.name == "null-ls" then return true end
+              return not has_null_ls
+            end,
+          })
+        end,
       })
     end,
   },

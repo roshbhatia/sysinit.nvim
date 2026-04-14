@@ -112,7 +112,6 @@ local servers = {
   "lsp_ai",
   "lua_ls",
   "marksman",
-  "nil_ls",
   "nixd",
   "pyright",
   "ruff",

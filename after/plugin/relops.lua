@@ -44,7 +44,7 @@ for i = 1, 9 do
     if vim.g.RELOPS_ACTIVE then
       vim.opt_local.relativenumber = true
     end
-    return swallow_key and "" or tostring(i) -- Clean return
+    return tostring(i)
   end, { expr = true, silent = true })
 end
 

@@ -2,13 +2,6 @@ vim.loader.enable()
 
 vim.o.sessionoptions = "blank,buffers,curdir,folds,tabpages,winsize,winpos,localoptions"
 
-require("vim._core.ui2").enable({
-  enable = true,
-  msg = {
-    targets = "msg",
-  },
-})
-
 vim.o.winborder = "rounded"
 
 vim.g.mapleader = " "
