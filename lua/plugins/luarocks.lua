@@ -22,6 +22,8 @@ return {
       },
       show_progress = true,
       rocks = {
+        "prec2",
+        "tiktoken_core",
         "wezterm-types",
       },
     },
