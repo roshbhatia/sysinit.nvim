@@ -2,13 +2,14 @@ return {
   {
     "sourcegraph/amp.nvim",
     event = "VeryLazy",
-    opts = {
-      split = "right",
-      width = 80,
-    },
+    -- auto_start: launches the WebSocket IDE bridge so amp CLI can connect on startup.
+    opts = { auto_start = true },
     keys = {
-      { "<leader>jaj", "<cmd>Amp<cr>", desc = "Amp: toggle" },
-      { "<leader>jaa", "<cmd>AmpSendSelection<cr>", mode = { "n", "v" }, desc = "Amp: send selection" },
+      {
+        "<leader>jaj",
+        function() Snacks.terminal.toggle("amp") end,
+        desc = "Amp: toggle terminal",
+      },
     },
   },
 }

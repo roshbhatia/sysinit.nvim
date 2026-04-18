@@ -2,13 +2,9 @@ return {
   {
     "carderne/pi-nvim",
     event = "VeryLazy",
-    opts = {
-      backend = "wezterm",
-      wezterm_direction = "Right",
-      wezterm_size = 0.35,
-    },
+    opts = {},
     keys = {
-      { "<leader>jpj", "<cmd>Pi<cr>", desc = "Pi: toggle" },
+      { "<leader>jpj", "<cmd>Pi<cr>", desc = "Pi: send prompt" },
       { "<leader>jpa", "<cmd>PiSendSelection<cr>", mode = { "n", "v" }, desc = "Pi: send selection" },
     },
   },
