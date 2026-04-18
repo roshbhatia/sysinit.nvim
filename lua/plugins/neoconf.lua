@@ -2,16 +2,14 @@ return {
   "folke/neoconf.nvim",
   priority = 1001,
   opts = {
-    local_settings = ".sysinit/neoconf.json",
+    local_settings = ".neoconf.json",
     global_settings = "neoconf.json",
   },
   config = function(_, opts)
     local neoconf = require("neoconf")
     neoconf.setup(opts)
 
-    -- Register custom schemas for autocompletion in .sysinit/neoconf.json
     require("neoconf.plugins").register({
-      name = "sysinit",
       on_schema = function(schema)
         -- Formatting toggle (read by none-ls BufWritePre)
         schema:set("autoformat", {
@@ -84,35 +82,30 @@ return {
         schema:import("rego_ls", {})
         schema:import("tflint", {})
         schema:import("marksman", {})
+        schema:import("copilot_ls", {})
+        schema:import("statix", {})
+        schema:import("up", {})
       end,
     })
 
     -- Scaffold .sysinit/neoconf.json for the current project
     vim.api.nvim_create_user_command("NeoconfInit", function()
       local root = vim.uv.cwd()
-      local dir = vim.fs.joinpath(root, ".sysinit")
-      local path = vim.fs.joinpath(dir, "neoconf.json")
+      local path = vim.fs.joinpath(root, ".neoconf.json")
 
       if vim.uv.fs_stat(path) then
         vim.notify("neoconf: " .. path .. " already exists", vim.log.levels.WARN)
         return
       end
 
-      vim.fn.mkdir(dir, "p")
-
-      local template = [[{
-  "autoformat": true,
-  "lua_ls": { "settings": { "Lua": { "workspace": { "checkThirdParty": false } } } },
-  "gopls": { "settings": { "gopls": { "gofumpt": false } } },
-  "pyright": { "settings": { "python": {} } },
-  "rust_analyzer": { "settings": { "rust-analyzer": {} } },
-  "nixd": {},
-  "terraformls": {},
-  "yamlls": { "settings": { "yaml": {} } },
-  "jsonls": { "settings": { "json": {} } },
-  "eslint": { "settings": {} }
-}
-]]
+      local template_path = vim.fs.joinpath(vim.fn.stdpath("config"), ".neoconf.json")
+      local src = io.open(template_path, "r")
+      if not src then
+        vim.notify("neoconf: template not found at " .. template_path, vim.log.levels.ERROR)
+        return
+      end
+      local content = src:read("*a")
+      src:close()
 
       local fd = io.open(path, "w")
       if not fd then
@@ -120,7 +113,7 @@ return {
         return
       end
       local ok, err = pcall(function()
-        fd:write(template)
+        fd:write(content)
         fd:close()
       end)
       if ok then
@@ -129,6 +122,6 @@ return {
       else
         vim.notify("neoconf: write error: " .. tostring(err), vim.log.levels.ERROR)
       end
-    end, { desc = "Scaffold .sysinit/neoconf.json for this project" })
+    end, { desc = "Scaffold .neoconf.json for this project" })
   end,
 }

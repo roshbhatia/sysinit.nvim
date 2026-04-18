@@ -290,7 +290,12 @@ return {
         generator = hex_color_generator(),
       })
 
-      -- Auto-format on save: prefer null-ls, fall back to attached LSP client
+      -- When multiple native LSP formatters cover the same filetype, pick the first attached
+      -- one from this table rather than prompting. null-ls always wins when it has a source.
+      local formatter_priority = {
+        nix = { "nixd", "nil_ls" },
+      }
+
       local augroup = vim.api.nvim_create_augroup("NullLsFormatting", { clear = true })
       vim.api.nvim_create_autocmd("BufWritePre", {
         group = augroup,
@@ -306,13 +311,48 @@ return {
           if ok and stats and stats.size and stats.size > 1024 * 1024 then
             return
           end
-          local has_null_ls = #vim.lsp.get_clients({ bufnr = bufnr, name = "null-ls" }) > 0
+
+          local ft = vim.bo[bufnr].filetype
+          -- null-ls is only preferred when it actually has a formatter for this filetype.
+          -- Without this check, filetypes like nix get silently swallowed: null-ls is
+          -- attached (for diagnostics/code-actions) but has no formatter, so native LSPs
+          -- (nixd, nil_ls) are incorrectly skipped.
+          local has_null_ls_formatter = #require("null-ls.sources").get_available(
+            ft,
+            null_ls.methods.FORMATTING
+          ) > 0
+          local use_null_ls = has_null_ls_formatter
+            and #vim.lsp.get_clients({ bufnr = bufnr, name = "null-ls" }) > 0
+
+          -- For filetypes with multiple native formatters, pick the highest-priority one
+          -- that is currently attached (silently falls through to the next if absent).
+          local chosen_lsp = nil
+          if not use_null_ls then
+            local priority = formatter_priority[ft]
+            if priority then
+              local attached = {}
+              for _, c in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+                if c.server_capabilities and c.server_capabilities.documentFormattingProvider then
+                  attached[c.name] = true
+                end
+              end
+              for _, name in ipairs(priority) do
+                if attached[name] then
+                  chosen_lsp = name
+                  break
+                end
+              end
+            end
+          end
+
           vim.lsp.buf.format({
             bufnr = bufnr,
             async = false,
             filter = function(client)
-              if client.name == "null-ls" then return true end
-              return not has_null_ls
+              if client.name == "null-ls" then return use_null_ls end
+              if use_null_ls then return false end
+              if chosen_lsp then return client.name == chosen_lsp end
+              return true
             end,
           })
         end,

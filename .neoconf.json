@@ -1,0 +1,32 @@
+{
+  "autoformat": true,
+  "lua_ls": {
+    "settings": { "Lua": { "workspace": { "checkThirdParty": false } } }
+  },
+  "gopls": {
+    "settings": { "gopls": { "gofumpt": true, "staticcheck": true } }
+  },
+  "pyright": {
+    "settings": { "python": { "analysis": { "typeCheckingMode": "basic" } } }
+  },
+  "ruff": {
+    "init_options": { "settings": { "fixAll": true, "organizeImports": true } }
+  },
+  "rust_analyzer": {
+    "settings": { "rust-analyzer": { "cargo": { "allFeatures": true } } }
+  },
+  "nixd": {
+    "settings": {
+      "nixd": {
+        "options": {}
+      }
+    }
+  },
+  "nil_ls": {
+    "settings": { "nil": { "nix": { "formatting": { "command": ["alejandra"] } } } }
+  },
+  "terraformls": {},
+  "yamlls": { "settings": { "yaml": {} } },
+  "jsonls": { "settings": { "json": {} } },
+  "eslint": { "settings": {} }
+}

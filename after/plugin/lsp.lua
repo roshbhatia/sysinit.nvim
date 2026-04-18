@@ -63,11 +63,20 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local bufnr = args.buf
     local client = vim.lsp.get_client_by_id(args.data.client_id)
 
-    -- Autofix on save
+    -- Autofix on save (code-action fixes, not formatting — run before the null-ls BufWritePre)
+    local function autoformat_enabled(buf)
+      if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then return false end
+      if require("neoconf").get("autoformat", nil, { bufnr = buf }) == false then return false end
+      return true
+    end
+
     if client and client.name == "eslint" then
       vim.api.nvim_create_autocmd("BufWritePre", {
         buffer = bufnr,
-        command = "EslintFixAll",
+        callback = function()
+          if not autoformat_enabled(bufnr) then return end
+          vim.cmd("EslintFixAll")
+        end,
       })
     end
 
@@ -75,6 +84,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.api.nvim_create_autocmd("BufWritePre", {
         buffer = bufnr,
         callback = function()
+          if not autoformat_enabled(bufnr) then return end
           vim.lsp.buf.code_action({
             context = { only = { "source.fixAll.ruff", "source.organizeImports.ruff" }, diagnostics = {} },
             apply = true,
