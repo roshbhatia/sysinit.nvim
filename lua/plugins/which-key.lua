@@ -25,7 +25,11 @@ return {
         { "<leader>e", group = "Explorer" },
         { "<leader>f", group = "Find" },
         { "<leader>g", group = "Git" },
-        { "<leader>j", group = "Agents" }, -- neph terminal agents
+        { "<leader>j", group = "AI Agents" },
+        { "<leader>jc", group = "Claude Code" },
+        { "<leader>jo", group = "OpenCode" },
+        { "<leader>jp", group = "Pi" },
+        { "<leader>ja", group = "Amp" },
         { "<leader>q", group = "Force Quit" },
         { "<leader>r", group = "Debug" }, -- DAP only
         { "<leader>t", group = "Terminal" },
@@ -52,7 +56,7 @@ return {
         { "v<leader>", group = "Extras" },
         { "v<leader>c", group = "Code" },
         { "v<leader>g", group = "Git" },
-        { "v<leader>j", group = "Agents" },
+        { "v<leader>j", group = "AI Agents" },
         { "vg", group = "Extras" },
         { "vgr", group = "Code" },
         { "vv", group = "AST" },

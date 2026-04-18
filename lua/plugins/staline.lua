@@ -36,25 +36,10 @@ return {
         return ""
       end
 
-      local function neph_gate_status()
-        local ok, gate = pcall(require, "neph.internal.gate")
-        if not ok then
-          return ""
-        end
-        local s = gate.get()
-        if s == "hold" then
-          return " "
-        end
-        if s == "bypass" then
-          return "󰠜 "
-        end
-        return ""
-      end
-
       require("staline").setup({
         sections = {
           left = { "mode", "branch", "file_name" },
-          mid = { neph_gate_status, copilot_status, get_format_status },
+          mid = { copilot_status, get_format_status },
           right = { "file_size", "line_column" },
         },
         defaults = {
