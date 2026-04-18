@@ -23,6 +23,7 @@ return {
           default = { policy_engine = "noop", review_provider = "noop", formatter = "noop" },
           hook = { policy_engine = "noop", review_provider = "vimdiff", formatter = "noop" },
           harness = { policy_engine = "cupcake", review_provider = "vimdiff", formatter = "noop" },
+          opencode_sse = { policy_engine = "noop", review_provider = "vimdiff", formatter = "noop" },
         },
         integration_default_group = "default",
 
