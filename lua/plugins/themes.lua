@@ -368,10 +368,15 @@ local function setup_catppuccin(palette, is_transparent)
         -- Cursor line background - lighter/whiter (overlay1 = #848483)
         CursorLine = { bg = colors.overlay1 },
 
-        -- Wilder: > prefix marks selection (WilderSelected is unstyled so the
-        -- prefix is the only indicator). Matched chars use ErrorMsg red;
-        -- on the selected item they also get an underline.
-        WilderSelected = { link = "Pmenu" },
+        -- Wilder highlights.
+        -- > prefix: hidden on non-selected (fg = popup bg), visible on selected.
+        WilderPrefixHidden = { fg = colors.surface0 },
+        WilderPrefixSelected = { fg = colors.lavender },
+        -- Selected row: underlined. Note: wilder's trailing-space padding chunk
+        -- is also a 1-element chunk so the underline reaches the popup edge —
+        -- that's a hard wilder rendering limit.
+        WilderSelected = { underline = true, sp = colors.lavender },
+        -- Fuzzy matched chars: ErrorMsg red. Selected matched chars also underlined.
         WilderAccent = { fg = colors.red },
         WilderSelectedAccent = { fg = colors.red, underline = true, sp = colors.red },
       }, neogit_highlights(colors))

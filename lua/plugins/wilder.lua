@@ -69,12 +69,10 @@ return {
           accent = "WilderAccent",
         },
         left = {
-          function(ctx, _)
-            if ctx.i == ctx.selected then
-              return { "> ", "WilderSelected" }
-            end
-            return "  "
-          end,
+          -- 3-element chunk: wilder uses [1] for non-selected, [2] for selected.
+          -- WilderPrefixHidden blends with the popup bg so > is invisible on
+          -- non-selected rows; WilderPrefixSelected makes it visible.
+          { "> ", "WilderPrefixHidden", "WilderPrefixSelected" },
         },
         right = {
           " ",
