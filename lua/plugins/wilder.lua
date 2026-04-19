@@ -40,7 +40,7 @@ return {
       })
 
       local popupmenu_renderer = wilder.popupmenu_renderer(wilder.popupmenu_palette_theme({
-        border = "rounded",
+        border = "none",
         max_height = "60%",
         min_height = 0,
         prompt_position = "top",
