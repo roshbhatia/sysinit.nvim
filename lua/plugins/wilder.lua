@@ -39,11 +39,20 @@ return {
         ),
       })
 
+      -- winborder="rounded" is set globally; clear it for the duration of cmdline
+      -- so wilder's own palette border="rounded" is the only border drawn.
+      local augroup_wb = vim.api.nvim_create_augroup("WilderWinborder", { clear = true })
+      vim.api.nvim_create_autocmd("CmdlineEnter", {
+        group = augroup_wb,
+        callback = function() vim.o.winborder = "" end,
+      })
+      vim.api.nvim_create_autocmd("CmdlineLeave", {
+        group = augroup_wb,
+        callback = function() vim.o.winborder = "rounded" end,
+      })
+
       local popupmenu_renderer = wilder.popupmenu_renderer(wilder.popupmenu_palette_theme({
-        -- Pass a list (not a string) so wilder's vimscript skips all string-branch
-        -- handling and draws no border characters. vim.o.winborder="rounded" owns
-        -- the single outer border at the Neovim float level.
-        border = { "", "", "", "", "", "", "", "" },
+        border = "rounded",
         max_height = "60%",
         min_height = 0,
         prompt_position = "top",
