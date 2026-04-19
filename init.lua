@@ -22,6 +22,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  dev = {
+    path = "~/github/personal/roshbhatia",
+    fallback = true,
+  },
   spec = {
     {
       import = "plugins",

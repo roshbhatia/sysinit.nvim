@@ -1,12 +1,13 @@
 return {
   {
     "roshbhatia/neph.nvim",
-    branch = "main",
+    dev = true,
     -- Compile TypeScript tools and install ~/.local/bin/neph after install/update.
     -- Requires node + npm on PATH. dist/ is committed so this is optional but recommended.
     build = "bash scripts/build.sh",
     dependencies = {
       "folke/snacks.nvim",
+      "folke/neoconf.nvim",
     },
     event = "VeryLazy",
     opts = function()
