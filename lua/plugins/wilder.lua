@@ -40,7 +40,10 @@ return {
       })
 
       local popupmenu_renderer = wilder.popupmenu_renderer(wilder.popupmenu_palette_theme({
-        border = "none",
+        -- Pass a list (not a string) so wilder's vimscript skips all string-branch
+        -- handling and draws no border characters. vim.o.winborder="rounded" owns
+        -- the single outer border at the Neovim float level.
+        border = { "", "", "", "", "", "", "", "" },
         max_height = "60%",
         min_height = 0,
         prompt_position = "top",
