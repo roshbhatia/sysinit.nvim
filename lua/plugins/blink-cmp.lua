@@ -171,16 +171,7 @@ return {
           },
         },
         cmdline = {
-          enabled = true,
-          keymap = {
-            preset = "cmdline",
-            ["<CR>"] = { "accept", "fallback" },
-          },
-          completion = {
-            menu = {
-              auto_show = true,
-            },
-          },
+          enabled = false,
         },
         fuzzy = {
           implementation = "prefer_rust",

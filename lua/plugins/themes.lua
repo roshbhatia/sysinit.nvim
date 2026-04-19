@@ -98,6 +98,10 @@ local TRANSPARENT_GROUPS = {
 }
 
 local HIGHLIGHT_OVERRIDES = {
+  WilderSelected = { link = "PmenuSel" },
+  WilderAccent = { link = "Search" },
+  WilderSeparator = { link = "Comment" },
+  WilderSpinner = { link = "DiagnosticInfo" },
   DiagnosticError = { link = "ErrorMsg" },
   DiagnosticHint = { link = "Comment" },
   DiagnosticInfo = { link = "Identifier" },
