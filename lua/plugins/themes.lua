@@ -368,10 +368,12 @@ local function setup_catppuccin(palette, is_transparent)
         -- Cursor line background - lighter/whiter (overlay1 = #848483)
         CursorLine = { bg = colors.overlay1 },
 
-        -- Wilder: selected item is underlined only (no bg fill); matched chars
-        -- get the mauve accent + a matching-colored underline.
-        WilderSelected = { underline = true, sp = colors.lavender },
-        WilderAccent = { fg = colors.mauve, underline = true, sp = colors.mauve },
+        -- Wilder: > prefix marks selection (WilderSelected is unstyled so the
+        -- prefix is the only indicator). Matched chars use ErrorMsg red;
+        -- on the selected item they also get an underline.
+        WilderSelected = { link = "Pmenu" },
+        WilderAccent = { fg = colors.red },
+        WilderSelectedAccent = { fg = colors.red, underline = true, sp = colors.red },
       }, neogit_highlights(colors))
     end,
     integrations = {

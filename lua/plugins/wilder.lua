@@ -64,15 +64,17 @@ return {
         highlights = {
           default = "Pmenu",
           selected = "WilderSelected",
+          selected_accent = "WilderSelectedAccent",
           border = "FloatBorder",
           accent = "WilderAccent",
         },
         left = {
-          " ",
-          {
-            " ",
-            "WilderSeparator",
-          },
+          function(ctx, _)
+            if ctx.i == ctx.selected then
+              return { "> ", "WilderSelected" }
+            end
+            return "  "
+          end,
         },
         right = {
           " ",
