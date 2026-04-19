@@ -98,8 +98,6 @@ local TRANSPARENT_GROUPS = {
 }
 
 local HIGHLIGHT_OVERRIDES = {
-  WilderSelected = { link = "PmenuSel" },
-  WilderAccent = { link = "Search" },
   WilderSeparator = { link = "Comment" },
   WilderSpinner = { link = "DiagnosticInfo" },
   DiagnosticError = { link = "ErrorMsg" },
@@ -369,6 +367,11 @@ local function setup_catppuccin(palette, is_transparent)
 
         -- Cursor line background - lighter/whiter (overlay1 = #848483)
         CursorLine = { bg = colors.overlay1 },
+
+        -- Wilder: selected item is underlined only (no bg fill); matched chars
+        -- get the mauve accent + a matching-colored underline.
+        WilderSelected = { underline = true, sp = colors.lavender },
+        WilderAccent = { fg = colors.mauve, underline = true, sp = colors.mauve },
       }, neogit_highlights(colors))
     end,
     integrations = {
