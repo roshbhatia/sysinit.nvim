@@ -228,12 +228,15 @@ add_to_path() {
 install_config() {
   local nvim_config="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 
-  log "Installing config to $nvim_config"
-
-  log "Cloning repository"
-  git clone "$REPO_URL" "$nvim_config"
-
-  log "Config installed"
+  if [[ -d "$nvim_config/.git" ]]; then
+    log "Updating config in $nvim_config"
+    git -C "$nvim_config" pull --ff-only --quiet
+    log "Config updated"
+  else
+    log "Installing config to $nvim_config"
+    git clone "$REPO_URL" "$nvim_config"
+    log "Config installed"
+  fi
 }
 
 main() {
