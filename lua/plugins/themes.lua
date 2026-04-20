@@ -139,8 +139,8 @@ local initial_palette = palette_builder.build({}, ls_palette)
 local function neogit_highlights(c)
   local U = require("catppuccin.utils.colors")
 
-  -- Shared section-header style — all status-buffer section labels link here
-  local section = { fg = c.mauve, bold = true }
+  -- Shared section-header style — Statement = mauve+bold via catppuccin+SYNTAX_STYLES.keywords
+  local section = { link = "Statement" }
 
   return {
     -- ── Window / float surfaces ──────────────────────────────────────────────
@@ -166,8 +166,9 @@ local function neogit_highlights(c)
     NeogitCommitViewDescription = { link = "Normal" },
 
     -- ── Diff stats overview ("+5 -3" inline in file list) ────────────────────
-    NeogitDiffAdditions = { fg = c.green },
-    NeogitDiffDeletions = { fg = c.red },
+    -- Added/Removed are Neovim 0.9+ semantic groups — always green/red.
+    NeogitDiffAdditions = { link = "Added" },
+    NeogitDiffDeletions = { link = "Removed" },
 
     -- ── Diff context ─────────────────────────────────────────────────────────
     -- MUST use `link` (not `bg = "NONE"`) because neogit's hl.lua calls
@@ -198,8 +199,9 @@ local function neogit_highlights(c)
     NeogitDiffDeleteInline = { bg = U.darken(c.red, 0.20, c.base), fg = c.red, bold = true },
 
     -- ── Diff file header ─────────────────────────────────────────────────────
-    -- No bg attr → would be empty → neogit default wins. Use link="Normal" as base.
-    NeogitDiffHeader = { fg = c.blue, bold = true },
+    -- Function = blue+bold via catppuccin+SYNTAX_STYLES.functions.
+    -- Highlight/Cursor variants need explicit bg so they stay explicit.
+    NeogitDiffHeader = { link = "Function" },
     NeogitDiffHeaderHighlight = { fg = c.blue, bg = c.surface0, bold = true },
     NeogitDiffHeaderCursor = { fg = c.blue, bg = c.surface1, bold = true },
 
@@ -221,12 +223,11 @@ local function neogit_highlights(c)
     -- ── Section headers ──────────────────────────────────────────────────────
     NeogitSectionHeader = section,
     NeogitSectionHeaderCount = { fg = c.subtext1, bold = true },
-    -- All status-buffer section labels link to the shared style
     NeogitUntrackedfiles = section,
     NeogitUnstagedchanges = section,
     NeogitUnmergedchanges = section,
     NeogitUnpulledchanges = section,
-    NeogitUnpushedchanges = section, -- the section variant (different from NeogitUnpushedTo)
+    NeogitUnpushedchanges = section,
     NeogitStagedchanges = section,
     NeogitRecentcommits = section,
     NeogitStashes = section,
@@ -235,7 +236,6 @@ local function neogit_highlights(c)
     NeogitPicking = section,
     NeogitMerging = section,
     NeogitBisecting = section,
-    -- These link to Function in neogit's own hl.lua (keep parity)
     NeogitUnmergedInto = { link = "Function" },
     NeogitUnpulledFrom = { link = "Function" },
     NeogitUnpushedTo = { fg = c.lavender, bold = true },
@@ -249,13 +249,15 @@ local function neogit_highlights(c)
     NeogitBranchHead = { fg = c.sapphire, bold = true, underline = true },
 
     -- ── Fold ─────────────────────────────────────────────────────────────────
-    NeogitFold = { fg = "NONE", bg = "NONE" }, -- never create a black bar
+    NeogitFold = { fg = "NONE", bg = "NONE" },
 
     -- ── Branch / remote / tag ────────────────────────────────────────────────
-    NeogitBranch = { fg = c.peach, bold = true },
+    -- Number = peach+bold via catppuccin+SYNTAX_STYLES.numbers.
+    -- DiagnosticWarn = yellow (warning/attention); Directory = blue (no bold).
+    NeogitBranch = { link = "Number" },
     NeogitRemote = { fg = c.green, bold = true },
-    NeogitTagName = { fg = c.yellow },
-    NeogitTagDistance = { fg = c.blue },
+    NeogitTagName = { link = "DiagnosticWarn" },
+    NeogitTagDistance = { link = "Directory" },
 
     -- ── Misc labels ──────────────────────────────────────────────────────────
     NeogitFilePath = { fg = c.blue, italic = true },
@@ -266,6 +268,8 @@ local function neogit_highlights(c)
 
     -- ── Change-type labels ───────────────────────────────────────────────────
     -- Base types: used directly in untracked files section and as link targets.
+    -- Kept as explicit palette refs: the specific bold+italic styling is intentional
+    -- and built-in Added/Removed/Changed don't carry the same presentation weight.
     NeogitChangeModified = { fg = c.blue, bold = true, italic = true },
     NeogitChangeAdded = { fg = c.green, bold = true, italic = true },
     NeogitChangeDeleted = { fg = c.red, bold = true, italic = true },
@@ -330,6 +334,7 @@ local function neogit_highlights(c)
     NeogitChangeUntrackedstaged = { fg = "NONE" },
 
     -- ── Commit graph ─────────────────────────────────────────────────────────
+    -- Intentional ANSI-color mapping: kept as palette refs (the color name IS the point).
     NeogitGraphAuthor = { fg = c.peach },
     NeogitGraphBlack = { fg = c.surface2 },
     NeogitGraphBoldBlack = { fg = c.surface2, bold = true },
@@ -353,41 +358,43 @@ local function neogit_highlights(c)
     NeogitGraphBoldOrange = { fg = c.peach, bold = true },
 
     -- ── GPG signatures ───────────────────────────────────────────────────────
-    NeogitSignatureGood = { fg = c.green },
+    NeogitSignatureGood = { link = "DiagnosticOk" },
     NeogitSignatureGoodUnknown = { fg = c.teal },
-    NeogitSignatureGoodExpired = { fg = c.yellow },
-    NeogitSignatureGoodExpiredKey = { fg = c.yellow },
+    NeogitSignatureGoodExpired = { link = "DiagnosticWarn" },
+    NeogitSignatureGoodExpiredKey = { link = "DiagnosticWarn" },
     NeogitSignatureGoodRevokedKey = { fg = c.peach },
-    NeogitSignatureBad = { fg = c.red, bold = true },
+    NeogitSignatureBad = { link = "DiagnosticError" },
     NeogitSignatureMissing = { fg = c.subtext1 },
-    NeogitSignatureNone = { fg = c.subtext0 },
+    NeogitSignatureNone = { link = "Comment" },
 
     -- ── Popup keys & states ──────────────────────────────────────────────────
-    NeogitPopupSectionTitle = { fg = c.mauve, bold = true },
-    NeogitPopupBranchName = { fg = c.peach, bold = true },
+    -- Statement = mauve+bold; Number = peach+bold; Identifier = lavender.
+    -- DiagnosticOk = green (enabled); Comment = muted subtext0 (disabled).
+    NeogitPopupSectionTitle = { link = "Statement" },
+    NeogitPopupBranchName = { link = "Number" },
     NeogitPopupBold = { bold = true },
-    NeogitPopupSwitchKey = { fg = c.lavender },
-    NeogitPopupSwitchEnabled = { fg = c.green },
-    NeogitPopupSwitchDisabled = { fg = c.subtext0 },
-    NeogitPopupOptionKey = { fg = c.lavender },
-    NeogitPopupOptionEnabled = { fg = c.green },
-    NeogitPopupOptionDisabled = { fg = c.subtext0 },
-    NeogitPopupConfigKey = { fg = c.lavender },
-    NeogitPopupConfigEnabled = { fg = c.green },
-    NeogitPopupConfigDisabled = { fg = c.subtext0 },
-    NeogitPopupActionKey = { fg = c.lavender },
-    NeogitPopupActionDisabled = { fg = c.subtext0 },
+    NeogitPopupSwitchKey = { link = "Identifier" },
+    NeogitPopupSwitchEnabled = { link = "DiagnosticOk" },
+    NeogitPopupSwitchDisabled = { link = "Comment" },
+    NeogitPopupOptionKey = { link = "Identifier" },
+    NeogitPopupOptionEnabled = { link = "DiagnosticOk" },
+    NeogitPopupOptionDisabled = { link = "Comment" },
+    NeogitPopupConfigKey = { link = "Identifier" },
+    NeogitPopupConfigEnabled = { link = "DiagnosticOk" },
+    NeogitPopupConfigDisabled = { link = "Comment" },
+    NeogitPopupActionKey = { link = "Identifier" },
+    NeogitPopupActionDisabled = { link = "Comment" },
 
     -- ── Command history console ───────────────────────────────────────────────
-    NeogitCommandText = { fg = c.text },
-    NeogitCommandTime = { fg = c.subtext1, italic = true },
-    NeogitCommandCodeNormal = { fg = c.green },
-    NeogitCommandCodeError = { fg = c.red, bold = true },
+    NeogitCommandText = { link = "Normal" },
+    NeogitCommandTime = { link = "Comment" },
+    NeogitCommandCodeNormal = { link = "DiagnosticOk" },
+    NeogitCommandCodeError = { link = "DiagnosticError" },
 
-    -- ── Notifications (internal snacks/nvim-notify bridge) ───────────────────
-    NeogitNotificationInfo = { fg = c.blue },
-    NeogitNotificationWarning = { fg = c.yellow },
-    NeogitNotificationError = { fg = c.red },
+    -- ── Notifications ────────────────────────────────────────────────────────
+    NeogitNotificationInfo = { link = "DiagnosticInfo" },
+    NeogitNotificationWarning = { link = "DiagnosticWarn" },
+    NeogitNotificationError = { link = "DiagnosticError" },
   }
 end
 
