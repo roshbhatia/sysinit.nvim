@@ -184,17 +184,18 @@ local function neogit_highlights(c)
     -- ── Diff additions ───────────────────────────────────────────────────────
     -- Link to Neovim's DiffAdd/DiffDelete so the colours scale with the
     -- terminal palette automatically (catppuccin already styles these).
-    -- Inline variants get an explicit, slightly more saturated bg.
+    -- Inline variants get semantically distinct green/red tinted backgrounds
+    -- so add and delete word-diffs are immediately distinguishable.
     NeogitDiffAdd = { link = "DiffAdd" },
     NeogitDiffAddHighlight = { link = "DiffAdd" },
     NeogitDiffAddCursor = { link = "DiffAdd" },
-    NeogitDiffAddInline = { bg = c.surface1, fg = c.green, bold = true },
+    NeogitDiffAddInline = { bg = U.darken(c.green, 0.20, c.base), fg = c.green, bold = true },
 
     -- ── Diff deletions ───────────────────────────────────────────────────────
     NeogitDiffDelete = { link = "DiffDelete" },
     NeogitDiffDeleteHighlight = { link = "DiffDelete" },
     NeogitDiffDeleteCursor = { link = "DiffDelete" },
-    NeogitDiffDeleteInline = { bg = c.surface1, fg = c.red, bold = true },
+    NeogitDiffDeleteInline = { bg = U.darken(c.red, 0.20, c.base), fg = c.red, bold = true },
 
     -- ── Diff file header ─────────────────────────────────────────────────────
     -- No bg attr → would be empty → neogit default wins. Use link="Normal" as base.
@@ -241,8 +242,11 @@ local function neogit_highlights(c)
 
     -- ── Status HEAD / active item ────────────────────────────────────────────
     NeogitStatusHEAD = { fg = c.text, bold = true },
-    NeogitActiveItem = { fg = c.peach, bold = true },
-    NeogitBranchHead = { fg = c.sapphire, bold = true },
+    -- High-contrast like neogit's default (bg_orange + dark fg) so the active
+    -- log entry is immediately visible; fg = crust gives dark-on-peach contrast.
+    NeogitActiveItem = { fg = c.crust, bg = c.peach, bold = true },
+    -- Underline matches neogit's semantic intent: HEAD branch is visually distinct.
+    NeogitBranchHead = { fg = c.sapphire, bold = true, underline = true },
 
     -- ── Fold ─────────────────────────────────────────────────────────────────
     NeogitFold = { fg = "NONE", bg = "NONE" }, -- never create a black bar
@@ -261,14 +265,69 @@ local function neogit_highlights(c)
     NeogitRebaseDone = { link = "Comment" },
 
     -- ── Change-type labels ───────────────────────────────────────────────────
-    NeogitChangeModified = { fg = c.blue, bold = true },
-    NeogitChangeAdded = { fg = c.green, bold = true },
-    NeogitChangeDeleted = { fg = c.red, bold = true },
-    NeogitChangeRenamed = { fg = c.mauve, bold = true },
-    NeogitChangeUpdated = { fg = c.peach, bold = true },
-    NeogitChangeCopied = { fg = c.pink, bold = true },
-    NeogitChangeNewFile = { fg = c.green, bold = true },
-    NeogitChangeUnmerged = { fg = c.yellow, bold = true },
+    -- Base types: used directly in untracked files section and as link targets.
+    NeogitChangeModified = { fg = c.blue, bold = true, italic = true },
+    NeogitChangeAdded = { fg = c.green, bold = true, italic = true },
+    NeogitChangeDeleted = { fg = c.red, bold = true, italic = true },
+    NeogitChangeRenamed = { fg = c.mauve, bold = true, italic = true },
+    NeogitChangeUpdated = { fg = c.peach, bold = true, italic = true },
+    NeogitChangeCopied = { fg = c.pink, bold = true, italic = true },
+    NeogitChangeNewFile = { fg = c.green, bold = true, italic = true },
+    NeogitChangeUnmerged = { fg = c.yellow, bold = true, italic = true },
+
+    -- Per-section variants — neogit emits these for each combination of
+    -- change-type × section (untracked / unstaged / staged). We own them
+    -- explicitly so we don't depend on neogit's internal default= links.
+    -- Untracked section
+    NeogitChangeMuntracked = { link = "NeogitChangeModified" },
+    NeogitChangeAuntracked = { link = "NeogitChangeAdded" },
+    NeogitChangeNuntracked = { link = "NeogitChangeNewFile" },
+    NeogitChangeDuntracked = { link = "NeogitChangeDeleted" },
+    NeogitChangeCuntracked = { link = "NeogitChangeCopied" },
+    NeogitChangeUuntracked = { link = "NeogitChangeUpdated" },
+    NeogitChangeRuntracked = { link = "NeogitChangeRenamed" },
+    NeogitChangeDDuntracked = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUUuntracked = { link = "NeogitChangeUnmerged" },
+    NeogitChangeAAuntracked = { link = "NeogitChangeUnmerged" },
+    NeogitChangeDUuntracked = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUDuntracked = { link = "NeogitChangeUnmerged" },
+    NeogitChangeAUuntracked = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUAuntracked = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUntrackeduntracked = { fg = "NONE" },
+    -- Unstaged section
+    NeogitChangeMunstaged = { link = "NeogitChangeModified" },
+    NeogitChangeAunstaged = { link = "NeogitChangeAdded" },
+    NeogitChangeNunstaged = { link = "NeogitChangeNewFile" },
+    NeogitChangeDunstaged = { link = "NeogitChangeDeleted" },
+    NeogitChangeCunstaged = { link = "NeogitChangeCopied" },
+    NeogitChangeUunstaged = { link = "NeogitChangeUpdated" },
+    NeogitChangeRunstaged = { link = "NeogitChangeRenamed" },
+    NeogitChangeTunstaged = { link = "NeogitChangeUpdated" },
+    NeogitChangeDDunstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUUunstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeAAunstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeDUunstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUDunstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeAUunstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUAunstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUntrackedunstaged = { fg = "NONE" },
+    -- Staged section
+    NeogitChangeMstaged = { link = "NeogitChangeModified" },
+    NeogitChangeAstaged = { link = "NeogitChangeAdded" },
+    NeogitChangeNstaged = { link = "NeogitChangeNewFile" },
+    NeogitChangeDstaged = { link = "NeogitChangeDeleted" },
+    NeogitChangeCstaged = { link = "NeogitChangeCopied" },
+    NeogitChangeUstaged = { link = "NeogitChangeUpdated" },
+    NeogitChangeRstaged = { link = "NeogitChangeRenamed" },
+    NeogitChangeTstaged = { link = "NeogitChangeUpdated" },
+    NeogitChangeDDstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUUstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeAAstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeDUstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUDstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeAUstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUAstaged = { link = "NeogitChangeUnmerged" },
+    NeogitChangeUntrackedstaged = { fg = "NONE" },
 
     -- ── Commit graph ─────────────────────────────────────────────────────────
     NeogitGraphAuthor = { fg = c.peach },
