@@ -7,7 +7,7 @@ return {
     },
     config = function()
       require("treesitter-context").setup({
-        separator = "",
+        separator = "",
       })
       vim.api.nvim_set_hl(0, "TreesitterContextBottom", {})
       vim.cmd("TSContext enable")
