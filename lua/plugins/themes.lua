@@ -438,13 +438,11 @@ local function setup_catppuccin(palette, is_transparent)
         -- > prefix: hidden on non-selected (fg = popup bg), visible on selected.
         WilderPrefixHidden = { fg = colors.surface0 },
         WilderPrefixSelected = { fg = colors.lavender },
-        -- Selected row: underlined. Note: wilder's trailing-space padding chunk
-        -- is also a 1-element chunk so the underline reaches the popup edge —
-        -- that's a hard wilder rendering limit.
-        WilderSelected = { underline = true, sp = colors.lavender },
-        -- Fuzzy matched chars: ErrorMsg red. Selected matched chars also underlined.
+        -- Selected row: bold.
+        WilderSelected = { bold = true, sp = colors.lavender },
+        -- Fuzzy matched chars: ErrorMsg red. Selected matched chars also bold.
         WilderAccent = { fg = colors.red },
-        WilderSelectedAccent = { fg = colors.red, underline = true, sp = colors.red },
+        WilderSelectedAccent = { fg = colors.red, bold = true, sp = colors.red },
       }, neogit_highlights(colors))
     end,
     integrations = {
