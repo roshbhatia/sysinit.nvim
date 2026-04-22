@@ -23,9 +23,9 @@ return {
       },
     },
     keys = {
-      { "<leader>gd", "<cmd>Glance definitions<cr>", desc = "Peek definition" },
-      { "<leader>gi", "<cmd>Glance implementations<cr>", desc = "Peek implementation" },
-      { "<leader>gu", "<cmd>Glance references<cr>", desc = "Peek references" },
+      { "<leader>cd", "<cmd>Glance definitions<cr>", desc = "Peek definition" },
+      { "<leader>ci", "<cmd>Glance implementations<cr>", desc = "Peek implementation" },
+      { "<leader>cu", "<cmd>Glance references<cr>", desc = "Peek references" },
     },
   },
 }
