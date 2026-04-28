@@ -15,27 +15,6 @@ return {
         return ""
       end
 
-      local function copilot_status()
-        local ok, status = pcall(function()
-          return require("sidekick").get_status()
-        end)
-
-        if not ok then
-          return ""
-        end
-
-        if status then
-          if status.kind == "Error" then
-            return " "
-          elseif status.busy then
-            return " "
-          else
-            return " "
-          end
-        end
-        return ""
-      end
-
       local function neph_gate_status()
         local ok, gate = pcall(require, "neph.internal.gate")
         if not ok then
@@ -54,7 +33,7 @@ return {
       require("staline").setup({
         sections = {
           left = { "mode", "branch", "file_name" },
-          mid = { neph_gate_status, copilot_status, get_format_status },
+          mid = { neph_gate_status, get_format_status },
           right = { "file_size", "line_column" },
         },
         defaults = {
