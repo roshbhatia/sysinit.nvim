@@ -61,6 +61,7 @@
   "staline.nvim": { "branch": "main", "commit": "d337bc9b343df3328921ef4c3f8ff604102d0201" },
   "tiny-devicons-auto-colors.nvim": { "branch": "main", "commit": "51f548421f8a74680eff27d283c9d5ea6e8d0074" },
   "tiny-glimmer.nvim": { "branch": "main", "commit": "cc285167914e947fc130523d02927fdaf24636a6" },
+  "tree-sitter-language-injection.nvim": { "branch": "main", "commit": "5f5b962232d189017d040a55eee623daf486b393" },
   "trouble.nvim": { "branch": "main", "commit": "bd67efe408d4816e25e8491cc5ad4088e708a69a" },
   "ts-comments.nvim": { "branch": "main", "commit": "123a9fb12e7229342f807ec9e6de478b1102b041" },
   "typescript-tools.nvim": { "branch": "master", "commit": "c2f5910074103705661e9651aa841e0d7eea9932" },

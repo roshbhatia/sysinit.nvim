@@ -10,6 +10,7 @@ return {
       "neovim/nvim-lspconfig",
       "fang2hou/blink-copilot",
       "copilotlsp-nvim/copilot-lsp",
+      "cursortab/cursortab.nvim",
     },
     opts = function()
       local providers = {
@@ -80,6 +81,20 @@ return {
             return items
           end,
         },
+        cursortab = {
+          name = "Cursortab",
+          module = "cursortab.blink",
+          score_offset = 50,
+          async = true,
+          ---@diagnostic disable-next-line: unused-local
+          transform_items = function(ctx, items)
+            for _, item in ipairs(items) do
+              item.kind_icon = "󰏌 CTab "
+              item.kind_name = "Cursortab"
+            end
+            return items
+          end,
+        },
       }
 
       local sources = {
@@ -89,6 +104,7 @@ return {
         "path",
         "snippets",
         "copilot",
+        "cursortab",
       }
 
       return {

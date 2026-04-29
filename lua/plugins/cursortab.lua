@@ -7,6 +7,10 @@ return {
       provider = {
         type = "copilot",
       },
+      blink = {
+        enabled = true,
+        ghost_text = false, -- blink.cmp handles ghost text; avoids duplicate overlay with blink-copilot
+      },
     })
   end,
 }
