@@ -9,7 +9,6 @@ return {
       require("treesitter-context").setup({
         separator = "",
       })
-      vim.api.nvim_set_hl(0, "TreesitterContextBottom", {})
       vim.cmd("TSContext enable")
     end,
     keys = {

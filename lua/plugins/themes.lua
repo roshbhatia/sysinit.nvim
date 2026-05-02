@@ -102,7 +102,7 @@ local HIGHLIGHT_OVERRIDES = {
   WilderSpinner = { link = "DiagnosticInfo" },
   DiagnosticError = { link = "ErrorMsg" },
   DiagnosticHint = { link = "Comment" },
-  DiagnosticInfo = { link = "Identifier" },
+  DiagnosticInfo = { link = "Directory" },
   DiagnosticOk = { link = "Question" },
   DiagnosticWarn = { link = "WarningMsg" },
   DiagnosticVirtualTextError = { link = "DiagnosticError" },
@@ -117,6 +117,7 @@ local HIGHLIGHT_OVERRIDES = {
   ["@markup.raw"] = { link = "String" },
   ["@module"] = { link = "Include" },
   ["@string.special.url"] = { link = "Underlined" },
+  TreesitterContextBottom = {},
   ["@variable"] = { link = "Identifier" },
   ["@variable.builtin"] = { link = "Special" },
   ["@variable.member"] = { link = "Identifier" },
@@ -176,11 +177,14 @@ local function neogit_highlights(c)
     -- group (bg="NONE", no fg) returns an empty table → is_set=false →
     -- neogit overwrites with palette.bg1 (#26292e) via default=true.
     -- link="Normal" guarantees is_set=true and adapts to float vs normal windows.
-    -- ContextHighlight covers ALL lines in the focused hunk, so it must be
-    -- very subtle — CursorLine is perfect: catppuccin already tunes it well.
+    -- ContextHighlight covers ALL lines in the focused hunk. Must NOT link to
+    -- CursorLine: our CursorLine is overlay1 (~#848483, L≈0.23) which
+    -- luminance-inverts the hierarchy — context would be brighter than add/delete
+    -- lines (~L=0.03), making context pop while additions recede. surface0/surface1
+    -- are genuinely subtle and keep the diff lines as the visual focus.
     NeogitDiffContext = { link = "Normal" },
-    NeogitDiffContextHighlight = { link = "CursorLine" },
-    NeogitDiffContextCursor = { link = "CursorLine" },
+    NeogitDiffContextHighlight = { bg = c.surface0 },
+    NeogitDiffContextCursor = { bg = c.surface1 },
 
     -- ── Diff additions ───────────────────────────────────────────────────────
     -- Link to Neovim's DiffAdd/DiffDelete so the colours scale with the
@@ -206,19 +210,23 @@ local function neogit_highlights(c)
     NeogitDiffHeaderCursor = { fg = c.blue, bg = c.surface1, bold = true },
 
     -- ── Hunk header ──────────────────────────────────────────────────────────
+    -- Hierarchy: unfocused=surface0 → active hunk=surface1 → cursor on header=surface2
+    -- Cursor must be ≥ Highlight prominence; sapphire (less saturated) was inverted.
     NeogitHunkHeader = { fg = c.blue, bg = c.surface0, bold = true },
     NeogitHunkHeaderHighlight = { fg = c.blue, bg = c.surface1, bold = true },
-    NeogitHunkHeaderCursor = { fg = c.sapphire, bg = c.surface1, bold = true },
+    NeogitHunkHeaderCursor = { fg = c.blue, bg = c.surface2, bold = true },
 
     -- ── Merge hunk header ────────────────────────────────────────────────────
     NeogitHunkMergeHeader = { fg = c.teal, bg = c.surface0, bold = true },
     NeogitHunkMergeHeaderHighlight = { fg = c.teal, bg = c.surface1, bold = true },
-    NeogitHunkMergeHeaderCursor = { fg = c.teal, bg = c.surface1, bold = true },
+    NeogitHunkMergeHeaderCursor = { fg = c.teal, bg = c.surface2, bold = true },
 
     -- ── Commit view header ───────────────────────────────────────────────────
+    -- Highlight and Cursor were identical (both sapphire+surface1); give Cursor
+    -- a distinct step so cursor-on-header is visually distinct from just "active".
     NeogitCommitViewHeader = { fg = c.blue, bg = c.surface0, bold = true },
     NeogitCommitViewHeaderHighlight = { fg = c.sapphire, bg = c.surface1, bold = true },
-    NeogitCommitViewHeaderCursor = { fg = c.sapphire, bg = c.surface1, bold = true },
+    NeogitCommitViewHeaderCursor = { fg = c.blue, bg = c.surface2, bold = true },
 
     -- ── Section headers ──────────────────────────────────────────────────────
     NeogitSectionHeader = section,
@@ -427,9 +435,11 @@ local function setup_catppuccin(palette, is_transparent)
         -- Cursor line number (always visible)
         CursorLineNr = { fg = colors.lavender, bold = true },
 
-        -- Visual selection - lighter, more white/neutral (overlay2 = #9f9f9e)
-        Visual = { bg = colors.overlay2, style = { "bold" } },
-        VisualNOS = { bg = colors.overlay2, style = { "bold" } },
+        -- Visual selection: overlay2 bg (~#9f9f9e) is intentionally bright;
+        -- fg=crust pins all text to a dark tone so muted tokens remain readable
+        -- (without it, comments at subtext1 contrast 1.19:1 against overlay2).
+        Visual = { bg = colors.overlay2, fg = colors.crust, bold = true },
+        VisualNOS = { bg = colors.overlay2, fg = colors.crust, bold = true },
 
         -- Cursor line background - lighter/whiter (overlay1 = #848483)
         CursorLine = { bg = colors.overlay1 },
