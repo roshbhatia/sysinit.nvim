@@ -12,11 +12,6 @@ return {
         desc = "Toggle explorer tree",
       },
       {
-        "<leader>ex",
-        "<cmd>Trouble diagnostics toggle<cr>",
-        desc = "Toggle diagnostics (Trouble)",
-      },
-      {
         "<leader>eg",
         function()
           require("grug-far").toggle_instance({
@@ -80,14 +75,6 @@ return {
             return vim.b[buf].neo_tree_source == "filesystem"
           end,
           size = { width = 0.2585 },
-        },
-        {
-          ft = "trouble",
-          size = { width = 0.2625 },
-          ---@diagnostic disable-next-line: unused-local
-          filter = function(buf, win)
-            return vim.w[win].trouble_type == nil or vim.w[win].trouble_type == ""
-          end,
         },
         {
           ft = "grug-far",

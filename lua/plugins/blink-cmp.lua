@@ -13,6 +13,20 @@ return {
       "cursortab/cursortab.nvim",
     },
     opts = function()
+      -- Render an AI completion's insertion text as the doc-window `detail`
+      -- (above the separator, highlighted with the buffer's filetype treesitter)
+      -- and clear `documentation` so sources like blink-copilot that populate
+      -- both fields don't duplicate the same text below the separator.
+      -- Runs in transform_items, before blink's empty-doc guard.
+      local function ai_doc_preview(item)
+        local text = (item.textEdit and item.textEdit.newText) or item.insertText or item.label
+        if type(text) ~= "string" or text == "" then return end
+        if not item.detail or item.detail == "" then
+          item.detail = text
+        end
+        item.documentation = nil
+      end
+
       local providers = {
         buffer = {
           score_offset = 3,
@@ -77,6 +91,7 @@ return {
             for _, item in ipairs(items) do
               item.kind_icon = " Copilot "
               item.kind_name = "Copilot"
+              ai_doc_preview(item)
             end
             return items
           end,
@@ -91,6 +106,7 @@ return {
             for _, item in ipairs(items) do
               item.kind_icon = "󰏌 CTab "
               item.kind_name = "Cursortab"
+              ai_doc_preview(item)
             end
             return items
           end,
@@ -121,44 +137,20 @@ return {
           documentation = {
             auto_show = true,
             auto_show_delay_ms = 0,
+            -- blink only invokes draw when the item has documentation OR detail
+            -- (otherwise the doc window is closed before draw runs). draw is the
+            -- ACTUAL renderer when set, so we must call default_implementation()
+            -- ourselves; mutating item.documentation alone renders nothing.
             draw = function(opts)
               local item = opts.item
-              local has_detail = item and item.detail and item.detail ~= ""
-              local has_doc = item and item.documentation
-
-              if type(has_doc) == "table" then
-                has_doc = has_doc.value and has_doc.value ~= ""
-              elseif type(has_doc) == "string" then
-                has_doc = has_doc ~= ""
-              else
-                has_doc = false
-              end
-
-              -- AI completions: show insertText as code preview; skip pretty_hover
-              local is_ai = item and (item.kind_name == "Copilot" or item.kind_name == "Cursortab")
-              if is_ai then
-                if not has_doc and not has_detail then
-                  local insert_text = item and (item.insertText or item.label)
-                  if insert_text and insert_text ~= "" then
-                    item.documentation = { kind = "plaintext", value = insert_text }
-                  else
-                    opts.window:close()
-                  end
-                end
-                return
-              end
-
-              if not has_detail and not has_doc then
-                opts.window:close()
-                return
-              end
-
-              -- documentation can be either a string or a MarkupContent object per LSP spec
-              -- only process when it's an object with a value field
               if item and item.documentation and type(item.documentation) == "table" and item.documentation.value then
-                local out = require("pretty_hover.parser").parse(item.documentation.value)
-                item.documentation.value = out:string()
+                local ok, parser = pcall(require, "pretty_hover.parser")
+                if ok then
+                  local out = parser.parse(item.documentation.value)
+                  item.documentation.value = out:string()
+                end
               end
+              opts.default_implementation()
             end,
           },
           ghost_text = {
