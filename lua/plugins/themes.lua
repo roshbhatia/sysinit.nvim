@@ -467,6 +467,7 @@ local function setup_catppuccin(palette, is_transparent)
       notify = true,
       nvimtree = true,
       markview = true,
+      render_markdown = true,
       semantic_tokens = true,
       treesitter = true,
       treesitter_context = true,
