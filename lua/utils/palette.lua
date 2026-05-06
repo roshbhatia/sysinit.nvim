@@ -10,51 +10,25 @@ local DEFAULT_ANSI = {
   [12] = "#729fcf", [13] = "#ad7fa8", [14] = "#34e2e2", [15] = "#eeeeec",
 }
 
--- Accent target hues (degrees) for semantic mapping
-local ACCENT_TARGETS = {
-  red = 0,
-  maroon = 350,
-  peach = 30,
+-- Primary accent slots: canonical ANSI semantic roles (base16/ANSI convention:
+-- ANSI 1=red, 3=yellow, 2=green, 6=teal/cyan, 4=blue, 5=purple).
+-- Processed first in this order so no secondary slot steals a primary hue.
+local PRIMARY_ORDER = { "red", "yellow", "green", "teal", "blue", "mauve" }
+local PRIMARY_TARGETS = {
+  red    = 0,
   yellow = 55,
-  green = 120,
-  teal = 170,
-  sky = 200,
-  sapphire = 220,
-  blue = 240,
-  mauve = 275,
-  pink = 320,
+  green  = 120,
+  teal   = 170,
+  blue   = 240,
+  mauve  = 275,
 }
 
-local ACCENT_ORDER = {
-  "red",
-  "maroon",
-  "peach",
-  "yellow",
-  "green",
-  "teal",
-  "sky",
-  "sapphire",
-  "blue",
-  "mauve",
-  "pink",
-}
-
+-- All accent slots — used only for LS_COLORS override filtering.
 local ACCENT_SLOTS = {
-  red = true,
-  maroon = true,
-  peach = true,
-  yellow = true,
-  green = true,
-  teal = true,
-  sky = true,
-  sapphire = true,
-  blue = true,
-  mauve = true,
+  red = true, maroon = true, peach = true, yellow = true, green = true,
+  teal = true, sky = true, sapphire = true, blue = true, mauve = true,
   pink = true,
 }
-
-local MIN_TEXT_CONTRAST_FLOOR = 3.0
-local MAX_TEXT_CONTRAST_TARGET = 4.5
 
 -- Position of each ramp colour between crust (0.0) and text (1.0).
 -- Ratios derived from Catppuccin Mocha's grayscale progression.
@@ -146,6 +120,8 @@ local function max_contrast(base, list)
 end
 
 local function target_text_contrast(base, candidates)
+  local MIN_TEXT_CONTRAST_FLOOR = 3.0
+  local MAX_TEXT_CONTRAST_TARGET = 4.5
   local target = math.min(MAX_TEXT_CONTRAST_TARGET, max_contrast(base, candidates))
   if target < MIN_TEXT_CONTRAST_FLOOR then
     target = MIN_TEXT_CONTRAST_FLOOR
@@ -210,6 +186,32 @@ local function rgb_to_hsl(hex)
   end
 
   return h, s, l
+end
+
+--- HSL → "#rrggbb". Used when generating derived accent variants.
+local function hsl_to_rgb(h, s, l)
+  local c = (1 - math.abs(2 * l - 1)) * s
+  local x = c * (1 - math.abs((h / 60) % 2 - 1))
+  local m = l - c / 2
+  local r, g, b
+  if     h < 60  then r, g, b = c, x, 0
+  elseif h < 120 then r, g, b = x, c, 0
+  elseif h < 180 then r, g, b = 0, c, x
+  elseif h < 240 then r, g, b = 0, x, c
+  elseif h < 300 then r, g, b = x, 0, c
+  else                r, g, b = c, 0, x
+  end
+  return string.format("#%02x%02x%02x",
+    clamp_channel((r + m) * 255),
+    clamp_channel((g + m) * 255),
+    clamp_channel((b + m) * 255))
+end
+
+--- Perceptual chroma: 0 for black/white, peaks at L=0.5.
+--- More reliable than raw HSL-S for filtering perceptually neutral colours.
+local function chroma(hex)
+  local _, s, l = rgb_to_hsl(hex)
+  return s * (1 - math.abs(2 * l - 1))
 end
 
 local function hue_distance(a, b)
@@ -285,24 +287,30 @@ local function pick_crust_color(base, text, is_dark)
   return M.interpolate(base, text, shift)
 end
 
+--- Filter to chromatic colours for accent matching.
+--- Uses perceptual chroma (not raw HSL-S) to exclude near-black/white
+--- colours that happen to have high HSL saturation (e.g. near-white tints).
 local function select_accent_candidates(candidates)
-  local saturated = {}
+  local chromatic = {}
   for _, cand in ipairs(candidates) do
-    if cand.sat >= 0.2 then
-      saturated[#saturated + 1] = cand
+    if chroma(cand.hex) >= 0.18 then
+      chromatic[#chromatic + 1] = cand
     end
   end
-  if #saturated >= 6 then
-    return saturated
+  if #chromatic >= 4 then
+    return chromatic
   end
   return candidates
 end
 
+--- Pick the best colour from candidates for a given target hue.
+--- Penalty weight 100 strongly prefers saturated colours over pale ones,
+--- preventing desaturated pastels from winning on hue proximity alone.
 local function pick_accent_color(candidates, target_hue, used)
   local best, best_score
   for _, cand in ipairs(candidates) do
     if not used[cand.hex] then
-      local score = hue_distance(cand.hue, target_hue) + (1 - cand.sat) * 40
+      local score = hue_distance(cand.hue, target_hue) + (1 - cand.sat) * 100
       if not best or score < best_score then
         best, best_score = cand, score
       end
@@ -311,7 +319,7 @@ local function pick_accent_color(candidates, target_hue, used)
 
   if not best then
     for _, cand in ipairs(candidates) do
-      local score = hue_distance(cand.hue, target_hue) + (1 - cand.sat) * 40
+      local score = hue_distance(cand.hue, target_hue) + (1 - cand.sat) * 100
       if not best or score < best_score then
         best, best_score = cand, score
       end
@@ -387,16 +395,30 @@ function M.build(terminal_colors, ls_palette, bg)
     end
   end
 
-  -- Semantic accent mapping from ANSI colors
+  -- ── Primary accent mapping ───────────────────────────────────────────────
+  -- Map the 6 canonical ANSI semantic roles first (base16 convention:
+  -- ANSI 1=red, 3=yellow, 2=green, 6=teal, 4=blue, 5=purple).
+  -- Processing primaries before secondaries prevents gold from being stolen
+  -- by maroon, or lavender from ending up as yellow.
   local accent_candidates = select_accent_candidates(candidates)
   local used = {}
-  for _, slot in ipairs(ACCENT_ORDER) do
-    local hex = pick_accent_color(accent_candidates, ACCENT_TARGETS[slot], used)
+  for _, slot in ipairs(PRIMARY_ORDER) do
+    local hex = pick_accent_color(accent_candidates, PRIMARY_TARGETS[slot], used)
     if hex then
       p[slot] = hex
       used[hex] = true
     end
   end
+
+  -- ── Secondary accent derivation ──────────────────────────────────────────
+  -- Secondary slots are interpolated from primaries rather than hue-matched
+  -- so they stay semantically consistent even when the terminal palette has
+  -- no dedicated colour for them (e.g. Rose Pine has no distinct orange).
+  p.maroon   = M.interpolate(p.red,    p.base,    0.25)  -- muted/dark red
+  p.peach    = M.interpolate(p.red,    p.yellow,  0.40)  -- orange
+  p.sky      = M.interpolate(p.teal,   p.blue,    0.50)  -- light cyan-blue
+  p.sapphire = M.interpolate(p.sky,    p.blue,    0.40)  -- deeper sky
+  p.pink     = M.interpolate(p.mauve,  p.red,     0.40)  -- red-purple
 
   -- LS_COLORS overrides only for accent slots
   for slot, hex in pairs(ls_palette or {}) do
@@ -405,7 +427,7 @@ function M.build(terminal_colors, ls_palette, bg)
     end
   end
 
-  -- Derived accents
+  -- ── Derived tertiary accents ──────────────────────────────────────────────
   local maroon = p.maroon or p.red
   if maroon and p.text then
     p.rosewater = M.interpolate(maroon, p.text, 0.6)

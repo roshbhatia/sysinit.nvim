@@ -122,7 +122,6 @@ return {
             auto_show = true,
             auto_show_delay_ms = 0,
             draw = function(opts)
-              -- Close window if there's no documentation or detail to show
               local item = opts.item
               local has_detail = item and item.detail and item.detail ~= ""
               local has_doc = item and item.documentation
@@ -133,6 +132,20 @@ return {
                 has_doc = has_doc ~= ""
               else
                 has_doc = false
+              end
+
+              -- AI completions: show insertText as code preview; skip pretty_hover
+              local is_ai = item and (item.kind_name == "Copilot" or item.kind_name == "Cursortab")
+              if is_ai then
+                if not has_doc and not has_detail then
+                  local insert_text = item and (item.insertText or item.label)
+                  if insert_text and insert_text ~= "" then
+                    item.documentation = { kind = "plaintext", value = insert_text }
+                  else
+                    opts.window:close()
+                  end
+                end
+                return
               end
 
               if not has_detail and not has_doc then
