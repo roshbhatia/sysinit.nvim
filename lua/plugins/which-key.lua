@@ -19,36 +19,25 @@ return {
       })
 
       wk.add({
-        -- ── Top-level groups ─────────────────────────────────────────────────
         { "<leader>c", group = "Code" },
+        { "<leader>cf", group = "Find" },
         { "<leader>d", group = "Diff" },
+        { "<leader>dr", group = "Review" },
         { "<leader>e", group = "Explorer" },
         { "<leader>f", group = "Find" },
         { "<leader>g", group = "Git" },
-        { "<leader>j", group = "Agents" }, -- neph terminal agents
-        { "<leader>q", group = "Force Quit" },
-        { "<leader>r", group = "Debug" }, -- DAP only
-        { "<leader>t", group = "Terminal" },
-
-        -- ── Code subgroups ───────────────────────────────────────────────────
-        { "<leader>cf", group = "Find" },
-
-        -- ── Diff subgroups ───────────────────────────────────────────────────
-        { "<leader>dr", group = "Review" },
-
-        -- ── Git subgroups ────────────────────────────────────────────────────
         { "<leader>gb", group = "Buffer" },
         { "<leader>gf", group = "Find" },
         { "<leader>gh", group = "Hunk" },
-
-        -- ── Navigation ───────────────────────────────────────────────────────
-        { "]", group = "Next" },
+        { "<leader>i", group = "Agents (Amp)" },
+        { "<leader>j", group = "Agents (Neph)" },
+        { "<leader>k", group = "Agents (Claude)" },
+        { "<leader>l", group = "Agents (Opencode)" },
+        { "<leader>q", group = "Force Quit" },
+        { "<leader>t", group = "Terminal" },
         { "[", group = "Prev" },
-
-        -- ── LSP (no leader) ──────────────────────────────────────────────────
+        { "]", group = "Next" },
         { "gr", group = "LSP" },
-
-        -- ── Visual mode ──────────────────────────────────────────────────────
         { "v<leader>", group = "Extras" },
         { "v<leader>c", group = "Code" },
         { "v<leader>g", group = "Git" },
