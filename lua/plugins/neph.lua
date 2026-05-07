@@ -5,8 +5,6 @@ return {
     dependencies = {
       "folke/snacks.nvim",
       "folke/neoconf.nvim",
-      "coder/claudecode.nvim",
-      "nickjvandyke/opencode.nvim",
     },
     event = "VeryLazy",
     opts = function()
