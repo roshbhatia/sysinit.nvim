@@ -1,11 +1,10 @@
 -- claudecode.nvim — Anthropic's Claude Code CLI integration.
 --
--- Terminal provider:
---   default: snacks (folke/snacks.nvim)
---   override: set vim.g.claudecode_provider = "wezterm" to use wezterm
---             cli split-pane (parent pane tracked via $WEZTERM_PANE).
---             Falls back to snacks automatically when WEZTERM_PANE is unset
---             or wezterm isn't on PATH.
+-- Terminal provider selection:
+--   auto-detect (default):
+--     - wezterm pane-split when $WEZTERM_PANE is set and `wezterm` is on PATH
+--     - snacks otherwise
+--   override: vim.g.claudecode_provider = "wezterm" | "snacks" | "auto"
 return {
   {
     "coder/claudecode.nvim",
@@ -21,13 +20,24 @@ return {
       "ClaudeCodeDiffDeny",
     },
     opts = function()
+      local choice = vim.g.claudecode_provider or "auto"
+      if choice == "auto" then
+        local in_wezterm = vim.env.WEZTERM_PANE ~= nil and vim.fn.executable("wezterm") == 1
+        choice = in_wezterm and "wezterm" or "snacks"
+      end
+
       local provider = "auto"
-      if vim.g.claudecode_provider == "wezterm" then
+      if choice == "wezterm" then
         local ok, wezterm = pcall(require, "utils.wezterm_terminal")
         if ok then
           local p = wezterm.build_provider({ name = "claudecode" })
           if p.is_available() then
             provider = p
+          else
+            vim.notify(
+              "claudecode: wezterm provider unavailable, falling back to snacks",
+              vim.log.levels.WARN
+            )
           end
         end
       end
