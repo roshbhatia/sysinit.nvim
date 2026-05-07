@@ -1,10 +1,12 @@
--- Wezterm terminal provider for plugins implementing claudecode.nvim's
--- ClaudeCode.TerminalProvider contract.
+-- Wezterm terminal helpers for AI agent integrations.
 --
--- Spawns the agent CLI in a wezterm pane split (mirroring the pattern used
--- by neph.nvim) and tracks the pane_id for toggle/focus state. The pane is
--- out-of-process, so get_active_bufnr() returns nil and lifecycle is owned
--- entirely by wezterm CLI calls.
+-- Two factories:
+--   M.build_provider(opts)         → claudecode.nvim TerminalProvider contract
+--   M.build_server_callbacks(cmd,opts) → opencode.nvim server.start/stop/toggle
+--
+-- Both spawn the CLI in a wezterm pane split (mirroring neph.nvim) and track
+-- the pane_id for toggle/focus state. Panes are out-of-process so lifecycle
+-- is owned entirely by `wezterm cli` calls.
 
 local M = {}
 
@@ -184,6 +186,113 @@ function M.build_provider(opts)
   })
 
   return Provider
+end
+
+--- Build start/stop/toggle callbacks for plugins like opencode.nvim that
+--- accept a server-management table (`vim.g.opencode_opts.server`).
+--- The plugin discovers the server out-of-band (e.g. opencode lsof-scans for
+--- a process listening on `--port`), so we only need to manage the pane.
+---
+--- toggle() implements focus-toggle semantics: focus the agent pane if not
+--- focused, otherwise focus the parent pane. Killing on toggle would terminate
+--- the server process and lose session state, which is rarely what you want.
+---
+--- @param cmd string  shell command to run in the pane (e.g. "opencode --port")
+--- @param opts? { name?: string, percent?: number, side?: "left"|"right", env?: table<string,string> }
+--- @return { start: fun(), stop: fun(), toggle: fun() }
+function M.build_server_callbacks(cmd, opts)
+  opts = opts or {}
+  local name = opts.name or "server"
+  local pane_id = nil
+  local parent_pane_id = tonumber(vim.env.WEZTERM_PANE)
+
+  local function do_spawn(focus)
+    if not parent_pane_id then
+      vim.notify(
+        ("%s/wezterm: WEZTERM_PANE not set; cannot split"):format(name),
+        vim.log.levels.ERROR
+      )
+      return
+    end
+
+    local env_str = build_env_prefix(opts.env)
+    local full_cmd = env_str ~= "" and (env_str .. " " .. cmd) or cmd
+    local pct = math.floor((opts.percent or 0.4) * 100)
+    local side_flag = (opts.side == "left") and "--left" or "--right"
+    local cwd = vim.fn.getcwd()
+
+    local spawn_cmd = string.format(
+      "wezterm cli split-pane --pane-id %d %s --percent %d --cwd %s -- sh -c %s 2>/dev/null",
+      parent_pane_id,
+      side_flag,
+      pct,
+      vim.fn.shellescape(cwd),
+      vim.fn.shellescape(full_cmd)
+    )
+
+    local result = vim.fn.system(spawn_cmd)
+    if vim.v.shell_error ~= 0 then
+      vim.notify(("%s/wezterm: spawn failed (exit %d)"):format(name, vim.v.shell_error), vim.log.levels.ERROR)
+      return
+    end
+
+    local id = tonumber(vim.trim(result))
+    if not id then
+      vim.notify(("%s/wezterm: could not parse pane id"):format(name), vim.log.levels.ERROR)
+      return
+    end
+    pane_id = id
+
+    if focus then
+      vim.defer_fn(function() activate_pane(pane_id) end, 80)
+    end
+  end
+
+  local function start()
+    if pane_id then
+      pane_alive(pane_id, function(alive)
+        if alive then
+          activate_pane(pane_id)
+        else
+          pane_id = nil
+          do_spawn(true)
+        end
+      end)
+    else
+      do_spawn(true)
+    end
+  end
+
+  local function stop()
+    if pane_id then
+      kill_pane(pane_id)
+      pane_id = nil
+    end
+  end
+
+  local function toggle()
+    if pane_id then
+      pane_alive(pane_id, function(alive)
+        if alive then
+          activate_pane(pane_id) -- focus toggle: focus pane (re-activating returns to parent if already focused in some wezterm setups)
+        else
+          pane_id = nil
+          do_spawn(true)
+        end
+      end)
+    else
+      do_spawn(true)
+    end
+  end
+
+  vim.api.nvim_create_autocmd("VimLeavePre", {
+    group = vim.api.nvim_create_augroup("wezterm_terminal_" .. name, { clear = true }),
+    callback = function()
+      if pane_id then kill_pane(pane_id) end
+    end,
+  })
+
+  return { start = start, stop = stop, toggle = toggle }
 end
 
 return M
