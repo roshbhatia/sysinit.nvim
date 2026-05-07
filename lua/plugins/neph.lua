@@ -20,22 +20,31 @@ return {
         -- Auto-create Neovim RPC socket so agents can call back via nvim --server
         socket = { enable = true },
 
-        -- Integration groups: agents in "hook" group get vimdiff review UI
-        -- review_provider is resolved per-agent via integration_groups (not a global config key)
+        -- Integration groups drive review_provider resolution per-agent.
+        -- "hook" + "harness" → vimdiff review UI; "default" → noop (auto-accept).
+        -- (The opencode_sse group was removed in peer-diff-integration; opencode
+        -- peer now intercepts permissions via opencode.nvim's User autocmds.)
         integration_groups = {
           default = { policy_engine = "noop", review_provider = "noop", formatter = "noop" },
           hook = { policy_engine = "noop", review_provider = "vimdiff", formatter = "noop" },
           harness = { policy_engine = "cupcake", review_provider = "vimdiff", formatter = "noop" },
-          opencode_sse = { policy_engine = "noop", review_provider = "vimdiff", formatter = "noop" },
         },
         integration_default_group = "default",
 
-        -- Filesystem watcher triggers review UI when an agent writes a file
+        -- Review pipeline. The popup style is the default for peer agents
+        -- (claude, opencode); set `style = "tab"` to force the vimdiff tab UI.
         review = {
           fs_watcher = { enable = true },
           queue = { enable = true },
           pending_notify = true,
+          -- style = "popup",  -- uncomment to force popup for ALL agents
         },
+
+        -- Slow-callback watchdog: logs WARN when any instrumented callback
+        -- exceeds the threshold. Cheap to leave on; gives a breadcrumb trail
+        -- if the plugin ever locks up. Set NEPH_DEBUG=1 in env to also flush
+        -- per-line debug logs to /tmp/neph-debug-<pid>.log.
+        watchdog = { enable = true, threshold_ms = 200 },
       }
     end,
     config = function(_, opts)
