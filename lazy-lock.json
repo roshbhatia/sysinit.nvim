@@ -11,7 +11,6 @@
   "codediff.nvim": { "branch": "main", "commit": "8afc229d38dc13ce71b2ffbb860084b2c726e061" },
   "colorful-menu.nvim": { "branch": "master", "commit": "13f9b7eaa9cd2901b4f8915cfb2483c3be4c8c20" },
   "copilot-lsp": { "branch": "main", "commit": "1b6d8273594643f51bb4c0c1d819bdb21b42159d" },
-  "cursortab.nvim": { "branch": "main", "commit": "5271f1869f0e5ce0d7c048a8d2b36879e8359424" },
   "dropbar.nvim": { "branch": "master", "commit": "f0a42bd92aa647e44221397723453403f5e20f16" },
   "edgy.nvim": { "branch": "main", "commit": "8bfd2808994a988c975694122f68624b8a219f5f" },
   "fastaction.nvim": { "branch": "main", "commit": "b147d91727cb35be4f722f17e7d4ed5b4a5801d8" },
