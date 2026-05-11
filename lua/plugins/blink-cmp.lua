@@ -10,7 +10,6 @@ return {
       "neovim/nvim-lspconfig",
       "fang2hou/blink-copilot",
       "copilotlsp-nvim/copilot-lsp",
-      "cursortab/cursortab.nvim",
     },
     opts = function()
       -- Render an AI completion's insertion text as the doc-window `detail`
@@ -20,7 +19,9 @@ return {
       -- Runs in transform_items, before blink's empty-doc guard.
       local function ai_doc_preview(item)
         local text = (item.textEdit and item.textEdit.newText) or item.insertText or item.label
-        if type(text) ~= "string" or text == "" then return end
+        if type(text) ~= "string" or text == "" then
+          return
+        end
         if not item.detail or item.detail == "" then
           item.detail = text
         end
@@ -96,21 +97,6 @@ return {
             return items
           end,
         },
-        cursortab = {
-          name = "Cursortab",
-          module = "cursortab.blink",
-          score_offset = 50,
-          async = true,
-          ---@diagnostic disable-next-line: unused-local
-          transform_items = function(ctx, items)
-            for _, item in ipairs(items) do
-              item.kind_icon = "󰏌 CTab "
-              item.kind_name = "Cursortab"
-              ai_doc_preview(item)
-            end
-            return items
-          end,
-        },
       }
 
       local sources = {
@@ -120,7 +106,6 @@ return {
         "path",
         "snippets",
         "copilot",
-        "cursortab",
       }
 
       return {
