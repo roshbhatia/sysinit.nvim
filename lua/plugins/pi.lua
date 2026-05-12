@@ -1,12 +1,13 @@
 -- pi.nvim — minimal AI coding agent integration (badlogic/pi-mono).
 --
 -- pi.nvim itself is fire-and-forget: :PiAsk sends buffer+prompt as context,
--- pi edits files on disk, plugin reloads buffers. No embedded terminal.
+-- pi edits files on disk, plugin reloads buffers. No embedded terminal of
+-- its own.
 --
--- For interactive REPL mode we keep a separate <leader>it toggle that opens
--- pi (without args) in a wezterm pane split, falling back to snacks.terminal
--- when not in wezterm — same pattern as claudecode/opencode.
-local function open_interactive_pi()
+-- For interactive REPL mode we wire <leader>kk to an out-of-process pi
+-- session in a wezterm pane split (snacks fallback when not in wezterm),
+-- mirroring the toggle pattern used by claudecode/opencode/amp.
+local function toggle_pi_repl()
   local choice = vim.g.pi_provider or "auto"
   if choice == "auto" then
     local in_wezterm = vim.env.WEZTERM_PANE ~= nil and vim.fn.executable("wezterm") == 1
@@ -16,9 +17,10 @@ local function open_interactive_pi()
   if choice == "wezterm" then
     local ok, wezterm = pcall(require, "utils.wezterm_terminal")
     if ok then
-      local server = wezterm.build_server_callbacks("pi", { name = "pi", percent = 0.4 })
-      vim.b._pi_server = server
-      server.toggle()
+      if not vim.g._pi_server then
+        vim.g._pi_server = wezterm.build_server_callbacks("pi", { name = "pi", percent = 0.4 })
+      end
+      vim.g._pi_server.toggle()
       return
     end
     vim.notify("pi: wezterm util missing, falling back to snacks", vim.log.levels.WARN)
@@ -40,11 +42,13 @@ return {
       thinking = "off",
     },
     keys = {
-      { "<leader>ii", "<cmd>PiAsk<cr>",          desc = "Pi: ask (buffer context)" },
-      { "<leader>ii", "<cmd>PiAskSelection<cr>", desc = "Pi: ask (selection)",       mode = "v" },
-      { "<leader>it", open_interactive_pi,       desc = "Pi: toggle interactive REPL" },
-      { "<leader>ix", "<cmd>PiCancel<cr>",       desc = "Pi: cancel request" },
-      { "<leader>iL", "<cmd>PiLog<cr>",          desc = "Pi: open session log" },
+      -- Match jj/hh/ll convention: <prefix><prefix> = toggle interactive session
+      { "<leader>kk", toggle_pi_repl,                desc = "Pi: toggle interactive REPL" },
+      -- Fire-and-forget one-shot (pi.nvim's native model)
+      { "<leader>ka", "<cmd>PiAsk<cr>",              desc = "Pi: ask (buffer context)" },
+      { "<leader>ks", "<cmd>PiAskSelection<cr>",     desc = "Pi: ask (selection)",         mode = "v" },
+      { "<leader>kx", "<cmd>PiCancel<cr>",           desc = "Pi: cancel request" },
+      { "<leader>kL", "<cmd>PiLog<cr>",              desc = "Pi: open session log" },
     },
   },
 }
