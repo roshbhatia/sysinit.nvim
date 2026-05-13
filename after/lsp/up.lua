@@ -13,11 +13,8 @@ local base_config = {
     "package/crossplane.yaml",
   },
   root_dir = function(bufnr, on_dir)
-    local fname = vim.api.nvim_buf_get_name(bufnr)
-    local util = require("lspconfig.util")
-
     -- Find git root first
-    local git_root = util.root_pattern(".git")(fname)
+    local git_root = vim.fs.root(bufnr, ".git")
     if not git_root then
       return nil
     end

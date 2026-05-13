@@ -7,7 +7,6 @@ return {
     dependencies = {
       "L3MON4D3/LuaSnip",
       "xzbdmw/colorful-menu.nvim",
-      "neovim/nvim-lspconfig",
       "fang2hou/blink-copilot",
       "copilotlsp-nvim/copilot-lsp",
     },
