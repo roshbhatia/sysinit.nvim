@@ -97,7 +97,7 @@ function M.resend()
     )
     return
   end
-  adapter.send(last, { submit = true })
+  adapter.send(last, { submit = false })
 end
 
 function M.kill()
@@ -119,7 +119,7 @@ function M.add_buffer()
     vim.notify("Harness: current buffer has no file", vim.log.levels.WARN)
     return
   end
-  adapter.send(text, { submit = true })
+  adapter.send(text, { submit = false })
 end
 
 function M.send_selection()
@@ -139,7 +139,7 @@ function M.send_selection()
   if not text or text == "" then
     return
   end
-  adapter.send(text, { submit = true })
+  adapter.send(text, { submit = false })
 end
 
 function M.setup()
