@@ -81,7 +81,7 @@ function M.pick_agent()
   snacks.picker.pick({
     source = "harness_agents",
     items = items,
-    title = "Harness — pick agent  (<c-o> options)",
+    title = "Harness — pick agent  (<c-o> options · <c-s> sessions)",
     format = function(item) return { { item.text, "Normal" } } end,
     layout = { preset = "select" },
     confirm = function(picker, item)
@@ -96,7 +96,14 @@ function M.pick_agent()
         local agent_name = item.adapter.name
         picker:close()
         require("harness.options").configure(agent_name, function()
-          -- Re-open the agent picker so the updated summary is visible.
+          vim.schedule(M.pick_agent)
+        end)
+      end,
+      pick_session = function(picker, item)
+        if not item then return end
+        local agent_name = item.adapter.name
+        picker:close()
+        require("harness.sessions").pick_for(agent_name, function()
           vim.schedule(M.pick_agent)
         end)
       end,
@@ -104,12 +111,14 @@ function M.pick_agent()
     win = {
       input = {
         keys = {
-          ["<c-o>"] = { "open_options", mode = { "i", "n" } },
+          ["<c-o>"] = { "open_options",  mode = { "i", "n" } },
+          ["<c-s>"] = { "pick_session",  mode = { "i", "n" } },
         },
       },
       list = {
         keys = {
           ["<c-o>"] = "open_options",
+          ["<c-s>"] = "pick_session",
         },
       },
     },

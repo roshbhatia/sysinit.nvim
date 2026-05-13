@@ -4,6 +4,7 @@ return require("harness.adapters._shared").raw_cli_adapter({
   cmd = "codex",
   options_schema = {
     { name = "dangerous", flag = "--dangerously-bypass-approvals-and-sandbox", kind = "toggle" },
+    { name = "search",    flag = "--search",                                    kind = "toggle" },
     { name = "model",     flag = "-m",                                          kind = "value", prompt = "Model" },
   },
 })
