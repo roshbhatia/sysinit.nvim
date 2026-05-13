@@ -63,15 +63,17 @@ function M.build_args(agent_name)
   local sel = M.get_selected(agent_name)
   local args = {}
   for _, opt in ipairs(schema) do
-    local v = sel[opt.name]
-    if opt.kind == "toggle" then
-      if v then
-        table.insert(args, opt.flag)
-      end
-    elseif opt.kind == "value" then
-      if v and v ~= "" then
-        table.insert(args, opt.flag)
-        table.insert(args, tostring(v))
+    if opt.cli ~= false then
+      local v = sel[opt.name]
+      if opt.kind == "toggle" then
+        if v then
+          table.insert(args, opt.flag)
+        end
+      elseif opt.kind == "value" then
+        if v and v ~= "" then
+          table.insert(args, opt.flag)
+          table.insert(args, tostring(v))
+        end
       end
     end
   end
@@ -81,11 +83,21 @@ end
 ---@param agent_name string
 ---@return string
 function M.summary(agent_name)
-  local args = M.build_args(agent_name)
-  if #args == 0 then
+  local schema = M.get_schema(agent_name)
+  if not schema then
     return ""
   end
-  return table.concat(args, " ")
+  local sel = M.get_selected(agent_name)
+  local parts = {}
+  for _, opt in ipairs(schema) do
+    local v = sel[opt.name]
+    if opt.kind == "toggle" and v then
+      table.insert(parts, opt.label or opt.flag)
+    elseif opt.kind == "value" and v and v ~= "" then
+      table.insert(parts, (opt.label or opt.flag) .. "=" .. tostring(v))
+    end
+  end
+  return table.concat(parts, " ")
 end
 
 ---@param agent_name string
@@ -108,7 +120,8 @@ function M.configure(agent_name, on_close)
     else
       right = cur and ("= " .. tostring(cur)) or "(unset)"
     end
-    return string.format("%-12s  %-40s  %s", right, opt.flag, opt.kind)
+    local display = opt.label or opt.flag
+    return string.format("%-12s  %-40s  %s", right, display, opt.kind)
   end
 
   local ok_snacks, snacks = pcall(require, "snacks")

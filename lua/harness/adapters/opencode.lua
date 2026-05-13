@@ -2,13 +2,48 @@ local function opencode_ok()
   return pcall(require, "opencode")
 end
 
+-- Rebuild vim.g.opencode_opts.server with the current option args appended
+-- to the spawn cmd. Takes effect on the NEXT fresh spawn — if a server
+-- pane is already up, kill it first (<leader>jx) to re-pick options.
+local function refresh_server_cmd()
+  local in_wezterm = vim.env.WEZTERM_PANE ~= nil and vim.fn.executable("wezterm") == 1
+  if not in_wezterm then
+    return
+  end
+
+  local args = require("harness.options").build_args("opencode")
+  local cmd = "opencode --port"
+  if #args > 0 then
+    cmd = cmd .. " " .. table.concat(args, " ")
+  end
+
+  local wt_ok, wt = pcall(require, "utils.wezterm_terminal")
+  if not wt_ok then
+    return
+  end
+  local server_opts = wt.build_server_callbacks(cmd, { name = "opencode", percent = 0.35 })
+
+  -- vim.g is a special table; reassign the whole value for changes to propagate.
+  local g = vim.g.opencode_opts or {}
+  g.server = server_opts
+  vim.g.opencode_opts = g
+end
+
 return {
   name = "opencode",
   label = "OpenCode",
+  options_schema = {
+    { name = "continue", flag = "--continue", kind = "toggle" },
+    { name = "fork",     flag = "--fork",     kind = "toggle" },
+    { name = "model",    flag = "--model",    kind = "value", prompt = "provider/model (e.g. anthropic/claude-sonnet-4-5)" },
+    { name = "agent",    flag = "--agent",    kind = "value", prompt = "Agent name" },
+    { name = "session",  flag = "--session",  kind = "value", prompt = "Session id (kill server first; <leader>jx)" },
+  },
   available = function()
     return opencode_ok() and vim.fn.executable("opencode") == 1
   end,
   toggle = function()
+    refresh_server_cmd()
     require("opencode").toggle()
   end,
   focus = function()
@@ -20,10 +55,6 @@ return {
   send = function(text, opts)
     opts = opts or {}
     require("opencode").prompt(text, { submit = opts.submit ~= false })
-    -- Focus the opencode pane so the user can review/edit before submitting.
-    -- opencode.toggle() shows the pane if hidden, but also hides if visible;
-    -- if it was already visible this is benign because the user just
-    -- triggered a prompt and would naturally look at it.
     pcall(function()
       require("opencode").toggle()
     end)
