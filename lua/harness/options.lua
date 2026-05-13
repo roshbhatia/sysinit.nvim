@@ -122,6 +122,9 @@ function M.configure(agent_name, on_close)
   for i, opt in ipairs(schema) do
     table.insert(items, { idx = i, opt = opt, text = format_item(opt) })
   end
+  -- Sentinel "submit" item so the user has an explicit way to close the
+  -- options picker via <CR>. Esc cancels with the same effect.
+  table.insert(items, { idx = -1, opt = nil, text = string.format("%-12s  %s", "", "→ Continue (submit options)") })
 
   local function reopen()
     M.configure(agent_name, on_close)
@@ -135,7 +138,7 @@ function M.configure(agent_name, on_close)
     layout = { preset = "select" },
     confirm = function(picker, item)
       picker:close()
-      if not item then
+      if not item or not item.opt then
         if on_close then on_close() end
         return
       end

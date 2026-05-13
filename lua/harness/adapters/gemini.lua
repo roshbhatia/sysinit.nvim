@@ -3,9 +3,9 @@ return require("harness.adapters._shared").raw_cli_adapter({
   label = "Gemini",
   cmd = "gemini",
   options_schema = {
-    { name = "yolo",    flag = "-y",      kind = "toggle" },
-    { name = "sandbox", flag = "-s",      kind = "toggle" },
-    { name = "resume",  flag = "-r",      kind = "value", prompt = "Resume: 'latest', index, or session name" },
-    { name = "model",   flag = "--model", kind = "value", prompt = "Model" },
+    { name = "yolo",    flag = "--yolo",    kind = "toggle" },
+    { name = "sandbox", flag = "--sandbox", kind = "toggle" },
+    { name = "resume",  flag = "--resume",  kind = "value", prompt = "Resume: 'latest', index, or session name" },
+    { name = "model",   flag = "--model",   kind = "value", prompt = "Model" },
   },
 })
