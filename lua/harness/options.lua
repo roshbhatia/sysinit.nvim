@@ -145,6 +145,15 @@ function M.configure(agent_name, on_close)
         vim.schedule(reopen)
         return
       end
+      if opt.picker_source then
+        require("harness.sessions").list(opt.picker_source, function(value)
+          if value ~= nil then
+            M.set(agent_name, opt.name, value)
+          end
+          vim.schedule(reopen)
+        end)
+        return
+      end
       vim.ui.input({
         prompt = (opt.prompt or opt.flag) .. ": ",
         default = sel[opt.name] and tostring(sel[opt.name]) or "",

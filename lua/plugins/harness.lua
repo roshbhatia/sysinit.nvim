@@ -19,7 +19,6 @@ return {
       { "<leader>jx", function() require("harness.api").kill() end,           desc = "Harness: kill active session" },
       { "<leader>jJ", function() require("harness.api").kill_and_pick() end,  desc = "Harness: kill and re-pick" },
       { "<leader>jo", function() require("harness.api").options() end,        desc = "Harness: configure options for active agent" },
-      { "<leader>jS", function() require("harness.api").sessions() end,       desc = "Harness: pick session for active agent" },
       { "<leader>j?", function() require("harness.api").status() end,         desc = "Harness: show active agent + options" },
       { "<leader>jb", function() require("harness.api").add_buffer() end,     desc = "Harness: add current buffer" },
       { "<leader>js", function() require("harness.api").send_selection() end, desc = "Harness: send selection",            mode = "v" },

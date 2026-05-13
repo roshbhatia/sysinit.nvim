@@ -110,15 +110,6 @@ function M.options()
   require("harness.options").configure(name)
 end
 
-function M.sessions()
-  local name = require("harness.session").get_active()
-  if not name then
-    vim.notify("Harness: no active agent — pick one with <leader>jj", vim.log.levels.WARN)
-    return
-  end
-  require("harness.sessions").pick_for(name)
-end
-
 function M.status()
   local name = require("harness.session").get_active()
   if not name then

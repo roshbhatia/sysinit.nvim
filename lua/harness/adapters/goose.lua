@@ -6,6 +6,6 @@ return require("harness.adapters._shared").raw_cli_adapter({
   options_schema = {
     { name = "resume", flag = "--resume", kind = "toggle" },
     { name = "fork",   flag = "--fork",   kind = "toggle" },
-    { name = "name",   flag = "--name",   kind = "value", prompt = "Session name" },
+    { name = "name",   flag = "--name",   kind = "value", prompt = "Session name", picker_source = "goose" },
   },
 })
