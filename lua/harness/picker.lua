@@ -1,10 +1,3 @@
----@mod harness.picker Agent picker UI
----@brief [[
---- Toggle-if-active semantics: if an agent is active and visible → hide;
---- active but not visible → focus; otherwise open vim.ui.select over the
---- list of available adapters and activate the chosen one.
----@brief ]]
-
 local M = {}
 
 local function active_adapter()

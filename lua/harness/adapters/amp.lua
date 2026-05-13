@@ -1,12 +1,3 @@
----@mod harness.adapters.amp Sourcegraph Amp adapter
----@brief [[
---- amp.nvim is an IDE bridge (LSP-ish), not a terminal manager. Send path
---- is require("amp.message").send_message(text) which broadcasts to amp's
---- userSentMessage event — that submits and triggers an agent response.
---- send_message returns false if the bridge server isn't connected (e.g.
---- auto_start = true hasn't completed yet); we surface that to the user.
----@brief ]]
-
 local function amp_message_ok()
   return pcall(require, "amp.message")
 end

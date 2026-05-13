@@ -1,6 +1,3 @@
--- harness — local AI-agent harness layer.
--- Lives at lua/harness/*; lazy spec just wires keymaps to harness.api and
--- registers the blink completion source on first FileType match.
 return {
   {
     name = "harness",

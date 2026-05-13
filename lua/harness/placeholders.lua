@@ -1,9 +1,3 @@
----@mod harness.placeholders Placeholder expansion
----@brief [[
---- Defines context-aware +token placeholders that are expanded inside
---- prompts before they are sent to an agent.
----@brief ]]
-
 local M = {}
 
 ---@type table<string, fun(ctx: harness.EditorState): string|nil>

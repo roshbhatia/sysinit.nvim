@@ -1,13 +1,3 @@
--- claudecode.nvim — Anthropic's Claude Code CLI integration.
---
--- Terminal provider selection:
---   auto-detect (default):
---     - wezterm pane-split when $WEZTERM_PANE is set and `wezterm` is on PATH
---     - snacks otherwise
---   override: vim.g.claudecode_provider = "wezterm" | "snacks" | "auto"
---
--- Keymaps live in lua/plugins/harness.lua under <leader>j*; this file only
--- handles plugin install + terminal-provider opts.
 return {
   {
     "coder/claudecode.nvim",

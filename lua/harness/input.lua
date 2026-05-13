@@ -1,10 +1,3 @@
----@mod harness.input Prompt-input popup with placeholder expansion
----@brief [[
---- Opens a snacks-backed input whose buffer filetype is ai_terminals_input
---- so the harness blink source fires +token completions. On submit, expands
---- placeholders against captured editor state and invokes on_confirm.
----@brief ]]
-
 local M = {}
 
 local placeholders = require("harness.placeholders")

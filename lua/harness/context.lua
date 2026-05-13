@@ -1,10 +1,3 @@
----@mod harness.context Editor-state capture
----@brief [[
---- Captures the current editor state (active window, buffer, cursor, cwd,
---- visual selection) while deliberately skipping UI/terminal buffers so that
---- context always reflects the last *real* source window the user was in.
----@brief ]]
-
 local M = {}
 
 ---@param buf? integer

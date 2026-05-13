@@ -1,12 +1,3 @@
--- opencode.nvim — opencode CLI integration.
---
--- Server (terminal) provider auto-detect:
---   - wezterm pane-split when $WEZTERM_PANE is set and `wezterm` is on PATH
---   - snacks otherwise
---   override: vim.g.opencode_provider = "wezterm" | "snacks" | "auto"
---
--- Keymaps live in lua/plugins/harness.lua under <leader>j*; this file only
--- handles plugin install + server-provider opts.
 return {
   {
     "nickjvandyke/opencode.nvim",

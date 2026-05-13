@@ -1,14 +1,3 @@
----@mod harness.adapters.pi pi.nvim adapter
----@brief [[
---- pi.nvim is fire-and-forget. The :PiAsk Ex-command takes no args and
---- opens its own vim.ui.input — calling it from the harness flow would
---- create a double-input. The right path is require("pi").run({message,
---- bufnr}) which skips the input prompt and runs with the buffer context.
----
---- Interactive REPL (toggle) delegates to the wezterm/snacks lifecycle
---- factory, same pattern the old lua/plugins/pi.lua used.
----@brief ]]
-
 local lifecycle = require("harness.lifecycle")
 
 local lc

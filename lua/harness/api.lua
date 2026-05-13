@@ -1,10 +1,3 @@
----@mod harness.api Public API
----@brief [[
---- User-facing actions for keymap binding. Routes everything through the
---- currently-active adapter (vim.g.harness_active). When no adapter is
---- active, action keys warn and bail; <leader>jj opens the picker.
----@brief ]]
-
 local M = {}
 
 local RESEND_MAX_BYTES = 8192

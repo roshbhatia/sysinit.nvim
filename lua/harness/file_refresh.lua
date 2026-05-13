@@ -1,10 +1,3 @@
----@mod harness.file_refresh External-write buffer refresh
----@brief [[
---- Polls :checktime every ~1s while a harness agent is active so buffers
---- reload when an agent writes their file outside Neovim. Polling stops
---- when vim.g.harness_active is cleared.
----@brief ]]
-
 local M = {}
 
 local INTERVAL_MS = 1000

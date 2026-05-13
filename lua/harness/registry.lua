@@ -1,11 +1,3 @@
----@mod harness.registry Adapter registry
----@brief [[
---- Stable-ordered list of all adapters. Includes plugin-backed adapters
---- (claudecode, opencode, amp, pi) and raw-CLI adapters (codex, copilot,
---- crush, cursor, gemini, goose). available() on each adapter is the sole
---- gate that controls inclusion in the picker.
----@brief ]]
-
 local M = {}
 
 local ORDER = {

@@ -1,18 +1,3 @@
----@mod harness.adapters._shared Adapter contract + raw-CLI factory
----@brief [[
---- Adapter shape:
----   {
----     name        : string  -- unique identifier (also used in vim.g.harness_active)
----     label       : string  -- display name
----     available() : boolean -- whether this adapter is usable right now
----     toggle()             -- show/hide the pane (no-op for bridge-only adapters)
----     focus()              -- focus the pane (no-op for bridge-only adapters)
----     send(text, {submit?: boolean})
----     is_visible() : boolean
----     kill()               -- optional; falls back to toggle if absent
----   }
----@brief ]]
-
 local M = {}
 
 local lifecycle = require("harness.lifecycle")

@@ -1,12 +1,3 @@
----@mod harness.lifecycle Wezterm-or-snacks pane lifecycle factory
----@brief [[
---- Generalizes the wezterm-or-snacks toggle pattern from lua/plugins/pi.lua.
---- Returns a uniform { toggle, focus, send, is_visible, kill } table for a
---- given shell command. The backend is chosen at first call:
----   • wezterm pane when $WEZTERM_PANE is set and wezterm is on PATH
----   • snacks.terminal otherwise
----@brief ]]
-
 local M = {}
 
 local function pick_backend()
@@ -27,10 +18,6 @@ function M.build(cmd, opts)
   end
   return M._snacks(cmd, opts, name)
 end
-
--- ---------------------------------------------------------------------------
--- Wezterm backend
--- ---------------------------------------------------------------------------
 
 local function wezterm_send_text(pane_id, text, submit)
   local payload = submit and (text .. "\r") or text
@@ -113,10 +100,6 @@ function M._wezterm(cmd, opts, name)
     end,
   }
 end
-
--- ---------------------------------------------------------------------------
--- Snacks backend
--- ---------------------------------------------------------------------------
 
 local function snacks_mod()
   local ok, snacks = pcall(require, "snacks")

@@ -1,10 +1,3 @@
----@mod harness.adapters.opencode opencode.nvim adapter
----@brief [[
---- Delegates to require("opencode"). The right send-path is .prompt(text)
---- (sends the prompt directly to the running opencode server) — NOT .ask()
---- which opens opencode's own input UI and would create a double-input.
----@brief ]]
-
 local function opencode_ok()
   return pcall(require, "opencode")
 end

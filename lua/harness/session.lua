@@ -1,9 +1,3 @@
----@mod harness.session Active-agent state
----@brief [[
---- Tracks the name of the active harness adapter via vim.g.harness_active.
---- No terminal/pane state lives here — that's the adapter's responsibility.
----@brief ]]
-
 local M = {}
 
 ---@return string|nil

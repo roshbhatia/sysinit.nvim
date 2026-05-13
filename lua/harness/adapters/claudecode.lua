@@ -1,18 +1,3 @@
----@mod harness.adapters.claudecode claudecode.nvim adapter
----@brief [[
---- claudecode.nvim spawns the claude CLI via a configured provider:
----   • snacks  → nvim terminal buffer  (chansend works)
----   • wezterm → out-of-process pane   (use `wezterm cli send-text`)
----
---- Strategy:
----   1. Ensure the pane is up via :ClaudeCode.
----   2. snacks: chansend into the discovered terminal buffer.
----   3. wezterm: read vim.g.harness_wezterm_pane_claudecode (published by
----      utils.wezterm_terminal.build_provider on spawn) and send via
----      `wezterm cli send-text --pane-id <id>`.
----   4. Last-resort: copy to clipboard so the user can paste manually.
----@brief ]]
-
 local function find_claude_terminal()
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == "terminal" then

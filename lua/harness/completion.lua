@@ -1,11 +1,3 @@
----@mod harness.completion blink.cmp source for +token placeholders
----@brief [[
---- Registers a blink.cmp source that completes +token placeholders inside
---- the ai_terminals_input filetype. Silently no-ops when blink is absent.
---- Registration is deferred until the filetype is first entered so blink
---- never loads eagerly at startup.
----@brief ]]
-
 local M = {}
 local registered = false
 
