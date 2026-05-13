@@ -44,73 +44,101 @@ return {
     keys = {
       {
         "<leader>ha",
-        function() require("opencode").ask("@this: ", { submit = true }) end,
+        function()
+          require("opencode").ask("@this: ", { submit = true })
+        end,
         desc = "Opencode: ask about this",
       },
       {
         "<leader>ha",
-        function() require("opencode").ask("@selection: ", { submit = true }) end,
+        function()
+          require("opencode").ask("@selection: ", { submit = true })
+        end,
         mode = "x",
         desc = "Opencode: ask about selection",
       },
       {
         "<leader>hh",
-        function() require("opencode").toggle() end,
+        function()
+          require("opencode").toggle()
+        end,
         desc = "Opencode: toggle",
       },
       {
         "<leader>hn",
-        function() require("opencode").command("session.new") end,
+        function()
+          require("opencode").command("session.new")
+        end,
         desc = "Opencode: new session",
       },
       {
         "<leader>hx",
-        function() require("opencode").command("session.interrupt") end,
+        function()
+          require("opencode").command("session.interrupt")
+        end,
         desc = "Opencode: interrupt session",
       },
       {
         "<leader>hs",
-        function() require("opencode").select_session() end,
+        function()
+          require("opencode").select_session()
+        end,
         desc = "Opencode: select session",
       },
       {
         "<leader>hp",
-        function() require("opencode").select() end,
+        function()
+          require("opencode").select()
+        end,
         desc = "Opencode: quick action",
       },
       {
         "<leader>he",
-        function() require("opencode").prompt("explain") end,
+        function()
+          require("opencode").prompt("explain")
+        end,
         desc = "Opencode: explain",
       },
       {
         "<leader>hr",
-        function() require("opencode").prompt("review") end,
+        function()
+          require("opencode").prompt("review")
+        end,
         desc = "Opencode: review",
       },
       {
         "<leader>hf",
-        function() require("opencode").prompt("fix") end,
+        function()
+          require("opencode").prompt("fix")
+        end,
         desc = "Opencode: fix diagnostics",
       },
       {
         "<leader>hi",
-        function() require("opencode").prompt("implement") end,
+        function()
+          require("opencode").prompt("implement")
+        end,
         desc = "Opencode: implement",
       },
       {
         "<leader>ht",
-        function() require("opencode").prompt("test") end,
+        function()
+          require("opencode").prompt("test")
+        end,
         desc = "Opencode: add tests",
       },
       {
         "<leader>hc",
-        function() require("opencode").command("session.compact") end,
+        function()
+          require("opencode").command("session.compact")
+        end,
         desc = "Opencode: compact session",
       },
       {
         "<leader>hA",
-        function() require("opencode").command("agent.cycle") end,
+        function()
+          require("opencode").command("agent.cycle")
+        end,
         desc = "Opencode: cycle agent",
       },
     },

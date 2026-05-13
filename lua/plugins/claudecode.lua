@@ -34,10 +34,7 @@ return {
           if p.is_available() then
             provider = p
           else
-            vim.notify(
-              "claudecode: wezterm provider unavailable, falling back to snacks",
-              vim.log.levels.WARN
-            )
+            vim.notify("claudecode: wezterm provider unavailable, falling back to snacks", vim.log.levels.WARN)
           end
         end
       end
@@ -48,16 +45,19 @@ return {
           split_side = "right",
           split_width_percentage = 0.4,
         },
+        diff_opts = {
+          open_in_new_tab = true,
+        },
       }
     end,
     keys = {
-      { "<leader>jj", "<cmd>ClaudeCode<cr>",            desc = "Claude: toggle" },
-      { "<leader>jf", "<cmd>ClaudeCodeFocus<cr>",       desc = "Claude: focus" },
-      { "<leader>jr", "<cmd>ClaudeCode --resume<cr>",   desc = "Claude: resume" },
+      { "<leader>jj", "<cmd>ClaudeCode<cr>", desc = "Claude: toggle" },
+      { "<leader>jf", "<cmd>ClaudeCodeFocus<cr>", desc = "Claude: focus" },
+      { "<leader>jr", "<cmd>ClaudeCode --resume<cr>", desc = "Claude: resume" },
       { "<leader>jC", "<cmd>ClaudeCode --continue<cr>", desc = "Claude: continue" },
       { "<leader>jm", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Claude: select model" },
-      { "<leader>jb", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Claude: add buffer" },
-      { "<leader>js", "<cmd>ClaudeCodeSend<cr>",        desc = "Claude: send selection", mode = "v" },
+      { "<leader>jb", "<cmd>ClaudeCodeAdd %<cr>", desc = "Claude: add buffer" },
+      { "<leader>js", "<cmd>ClaudeCodeSend<cr>", desc = "Claude: send selection", mode = "v" },
       {
         "<leader>js",
         "<cmd>ClaudeCodeTreeAdd<cr>",
@@ -65,7 +65,7 @@ return {
         ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
       },
       { "<leader>ja", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Claude: accept diff" },
-      { "<leader>jd", "<cmd>ClaudeCodeDiffDeny<cr>",   desc = "Claude: deny diff" },
+      { "<leader>jd", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Claude: deny diff" },
     },
   },
 }
