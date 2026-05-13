@@ -1,0 +1,46 @@
+---@mod harness.file_refresh External-write buffer refresh
+---@brief [[
+--- Polls :checktime every ~1s while a harness agent is active so buffers
+--- reload when an agent writes their file outside Neovim. Polling stops
+--- when vim.g.harness_active is cleared.
+---@brief ]]
+
+local M = {}
+
+local INTERVAL_MS = 1000
+
+---@type userdata|nil
+local timer = nil
+
+local function tick()
+  pcall(vim.cmd, "silent! checktime")
+end
+
+function M.is_active()
+  return timer ~= nil
+end
+
+function M.start()
+  if timer then
+    return
+  end
+  if not vim.uv then
+    return
+  end
+  timer = vim.uv.new_timer()
+  if not timer then
+    return
+  end
+  timer:start(INTERVAL_MS, INTERVAL_MS, vim.schedule_wrap(tick))
+end
+
+function M.stop()
+  if not timer then
+    return
+  end
+  pcall(timer.stop, timer)
+  pcall(timer.close, timer)
+  timer = nil
+end
+
+return M

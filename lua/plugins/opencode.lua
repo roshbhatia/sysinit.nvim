@@ -1,14 +1,12 @@
 -- opencode.nvim — opencode CLI integration.
 --
--- Server (terminal) provider:
---   auto-detect (default):
---     - wezterm pane-split when $WEZTERM_PANE is set and `wezterm` is on PATH
---     - snacks otherwise
+-- Server (terminal) provider auto-detect:
+--   - wezterm pane-split when $WEZTERM_PANE is set and `wezterm` is on PATH
+--   - snacks otherwise
 --   override: vim.g.opencode_provider = "wezterm" | "snacks" | "auto"
 --
--- The opencode plugin discovers the server out-of-band (lsof-scans for a
--- process running `opencode --port`), so any terminal that runs the command
--- works — we just have to manage the pane lifecycle.
+-- Keymaps live in lua/plugins/harness.lua under <leader>j*; this file only
+-- handles plugin install + server-provider opts.
 return {
   {
     "nickjvandyke/opencode.nvim",
@@ -41,106 +39,5 @@ return {
         events = { reload = true },
       }
     end,
-    keys = {
-      {
-        "<leader>ha",
-        function()
-          require("opencode").ask("@this: ", { submit = true })
-        end,
-        desc = "Opencode: ask about this",
-      },
-      {
-        "<leader>ha",
-        function()
-          require("opencode").ask("@selection: ", { submit = true })
-        end,
-        mode = "x",
-        desc = "Opencode: ask about selection",
-      },
-      {
-        "<leader>hh",
-        function()
-          require("opencode").toggle()
-        end,
-        desc = "Opencode: toggle",
-      },
-      {
-        "<leader>hn",
-        function()
-          require("opencode").command("session.new")
-        end,
-        desc = "Opencode: new session",
-      },
-      {
-        "<leader>hx",
-        function()
-          require("opencode").command("session.interrupt")
-        end,
-        desc = "Opencode: interrupt session",
-      },
-      {
-        "<leader>hs",
-        function()
-          require("opencode").select_session()
-        end,
-        desc = "Opencode: select session",
-      },
-      {
-        "<leader>hp",
-        function()
-          require("opencode").select()
-        end,
-        desc = "Opencode: quick action",
-      },
-      {
-        "<leader>he",
-        function()
-          require("opencode").prompt("explain")
-        end,
-        desc = "Opencode: explain",
-      },
-      {
-        "<leader>hr",
-        function()
-          require("opencode").prompt("review")
-        end,
-        desc = "Opencode: review",
-      },
-      {
-        "<leader>hf",
-        function()
-          require("opencode").prompt("fix")
-        end,
-        desc = "Opencode: fix diagnostics",
-      },
-      {
-        "<leader>hi",
-        function()
-          require("opencode").prompt("implement")
-        end,
-        desc = "Opencode: implement",
-      },
-      {
-        "<leader>ht",
-        function()
-          require("opencode").prompt("test")
-        end,
-        desc = "Opencode: add tests",
-      },
-      {
-        "<leader>hc",
-        function()
-          require("opencode").command("session.compact")
-        end,
-        desc = "Opencode: compact session",
-      },
-      {
-        "<leader>hA",
-        function()
-          require("opencode").command("agent.cycle")
-        end,
-        desc = "Opencode: cycle agent",
-      },
-    },
   },
 }

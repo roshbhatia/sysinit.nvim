@@ -105,6 +105,9 @@ function M.build_provider(opts)
       return
     end
     pane_id = id
+    -- Publish the spawned pane_id so harness adapters can route send() to
+    -- it via `wezterm cli send-text` (out-of-process pane = no nvim buf).
+    vim.g["harness_wezterm_pane_" .. name] = id
 
     if focus then
       vim.defer_fn(function() activate_pane(pane_id) end, 80)
@@ -137,6 +140,7 @@ function M.build_provider(opts)
   function Provider.close()
     if pane_id then
       kill_pane(pane_id)
+      vim.g["harness_wezterm_pane_" .. name] = nil
       pane_id = nil
     end
   end
@@ -242,6 +246,7 @@ function M.build_server_callbacks(cmd, opts)
       return
     end
     pane_id = id
+    vim.g["harness_wezterm_pane_" .. name] = id
 
     if focus then
       vim.defer_fn(function() activate_pane(pane_id) end, 80)
@@ -266,6 +271,7 @@ function M.build_server_callbacks(cmd, opts)
   local function stop()
     if pane_id then
       kill_pane(pane_id)
+      vim.g["harness_wezterm_pane_" .. name] = nil
       pane_id = nil
     end
   end

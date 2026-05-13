@@ -5,6 +5,9 @@
 --     - wezterm pane-split when $WEZTERM_PANE is set and `wezterm` is on PATH
 --     - snacks otherwise
 --   override: vim.g.claudecode_provider = "wezterm" | "snacks" | "auto"
+--
+-- Keymaps live in lua/plugins/harness.lua under <leader>j*; this file only
+-- handles plugin install + terminal-provider opts.
 return {
   {
     "coder/claudecode.nvim",
@@ -50,22 +53,5 @@ return {
         },
       }
     end,
-    keys = {
-      { "<leader>jj", "<cmd>ClaudeCode<cr>", desc = "Claude: toggle" },
-      { "<leader>jf", "<cmd>ClaudeCodeFocus<cr>", desc = "Claude: focus" },
-      { "<leader>jr", "<cmd>ClaudeCode --resume<cr>", desc = "Claude: resume" },
-      { "<leader>jC", "<cmd>ClaudeCode --continue<cr>", desc = "Claude: continue" },
-      { "<leader>jm", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Claude: select model" },
-      { "<leader>jb", "<cmd>ClaudeCodeAdd %<cr>", desc = "Claude: add buffer" },
-      { "<leader>js", "<cmd>ClaudeCodeSend<cr>", desc = "Claude: send selection", mode = "v" },
-      {
-        "<leader>js",
-        "<cmd>ClaudeCodeTreeAdd<cr>",
-        desc = "Claude: add tree entry",
-        ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
-      },
-      { "<leader>ja", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Claude: accept diff" },
-      { "<leader>jd", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Claude: deny diff" },
-    },
   },
 }
