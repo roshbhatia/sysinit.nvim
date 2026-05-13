@@ -7,7 +7,6 @@ return {
       local hl_utils = require("utils.highlight")
       local get_fg = hl_utils.get_fg
 
-      -- Helper to show format disabled icon only when relevant
       local function get_format_status()
         if vim.g.disable_autoformat or vim.b.disable_autoformat then
           return "󰉥 "
@@ -15,25 +14,26 @@ return {
         return ""
       end
 
-      local function neph_gate_status()
-        local ok, gate = pcall(require, "neph.internal.gate")
-        if not ok then
+      local function harness_active()
+        local name = vim.g.harness_active
+        if not name or name == "" then
           return ""
         end
-        local s = gate.get()
-        if s == "hold" then
-          return " "
+        local label = name
+        local ok, reg = pcall(require, "harness.registry")
+        if ok then
+          local adapter = reg.get_by_name(name)
+          if adapter and adapter.label then
+            label = adapter.label
+          end
         end
-        if s == "bypass" then
-          return "󰠜 "
-        end
-        return ""
+        return "  " .. label .. " "
       end
 
       require("staline").setup({
         sections = {
           left = { "mode", "branch", "file_name" },
-          mid = { neph_gate_status, get_format_status },
+          mid = { harness_active, get_format_status },
           right = { "file_size", "line_column" },
         },
         defaults = {
@@ -41,7 +41,7 @@ return {
           expand_null_ls = false,
           line_column = ":%c [%l/%L]",
           file_size_suffix = true,
-          branch_symbol = " ",
+          branch_symbol = " ",
         },
         mode_colors = {
           n = get_fg("Normal"),
@@ -77,8 +77,6 @@ return {
         },
       })
 
-      -- VeryLazy fires after the initial buffer's BufEnter/BufWinEnter events
-      -- have already run, so staline never gets its first draw. Force it.
       vim.defer_fn(function()
         vim.cmd("redrawstatus!")
       end, 0)

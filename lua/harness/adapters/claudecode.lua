@@ -115,11 +115,22 @@ end
 return {
   name = "claudecode",
   label = "Claude",
+  options_schema = {
+    { name = "dangerous", flag = "--dangerously-skip-permissions", kind = "toggle", default = true },
+    { name = "continue",  flag = "-c",                              kind = "toggle" },
+    { name = "resume",    flag = "-r",                              kind = "toggle" },
+    { name = "model",     flag = "--model",                         kind = "value", prompt = "Model alias or full name (e.g. opus, sonnet)" },
+  },
   available = function()
     return pcall(require, "claudecode") and vim.fn.executable("claude") == 1
   end,
   toggle = function()
-    vim.cmd("ClaudeCode")
+    local args = require("harness.options").build_args("claudecode")
+    if #args > 0 then
+      vim.cmd("ClaudeCode " .. table.concat(args, " "))
+    else
+      vim.cmd("ClaudeCode")
+    end
   end,
   focus = function()
     pcall(vim.cmd, "ClaudeCodeFocus")

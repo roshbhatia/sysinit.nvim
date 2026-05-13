@@ -2,27 +2,44 @@ local M = {}
 
 local lifecycle = require("harness.lifecycle")
 
----@param def { name: string, label: string, cmd: string, args?: string[], percent?: number, side?: "left"|"right" }
+---@param def { name: string, label: string, cmd: string, args?: string[], percent?: number, side?: "left"|"right", options_schema?: table }
 ---@return table adapter
 function M.raw_cli_adapter(def)
-  local cmd_string = def.cmd
-  if def.args and #def.args > 0 then
-    local escaped = {}
-    for i, a in ipairs(def.args) do
-      escaped[i] = vim.fn.shellescape(a)
+  local lc -- lazy-built per (cmd+options) combo
+  local lc_signature -- cached signature of options that produced lc
+
+  local function escape_args(args)
+    local out = {}
+    for i, a in ipairs(args) do
+      out[i] = vim.fn.shellescape(a)
     end
-    cmd_string = def.cmd .. " " .. table.concat(escaped, " ")
+    return out
   end
 
-  local lc -- lazy-built so we don't spawn anything at module load
+  local function build_cmd_string()
+    local args = vim.deepcopy(def.args or {})
+    local opt_args = require("harness.options").build_args(def.name)
+    for _, a in ipairs(opt_args) do
+      table.insert(args, a)
+    end
+    if #args == 0 then
+      return def.cmd
+    end
+    return def.cmd .. " " .. table.concat(escape_args(args), " ")
+  end
 
   local function ensure()
-    if not lc then
+    local cmd_string = build_cmd_string()
+    -- Rebuild the lifecycle whenever the args change so a freshly-spawned
+    -- pane reflects the user's latest option toggles.
+    if not lc or lc_signature ~= cmd_string then
+      if lc and lc.kill then pcall(lc.kill) end
       lc = lifecycle.build(cmd_string, {
         name = def.name,
         percent = def.percent,
         side = def.side,
       })
+      lc_signature = cmd_string
     end
     return lc
   end
@@ -30,6 +47,7 @@ function M.raw_cli_adapter(def)
   return {
     name = def.name,
     label = def.label,
+    options_schema = def.options_schema,
     available = function()
       return vim.fn.executable(def.cmd) == 1
     end,
@@ -51,6 +69,8 @@ function M.raw_cli_adapter(def)
     kill = function()
       if lc then
         lc.kill()
+        lc = nil
+        lc_signature = nil
       end
     end,
   }

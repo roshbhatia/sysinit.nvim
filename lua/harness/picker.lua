@@ -10,8 +10,43 @@ local function active_adapter()
   return registry.get_by_name(name)
 end
 
-function M.pick_agent()
+local function activate(adapter)
+  require("harness.session").set_active(adapter.name)
+  pcall(adapter.toggle)
+end
+
+local function format_label(adapter)
+  local options = require("harness.options")
   local session = require("harness.session")
+  local current = session.get_active()
+  local suffix = adapter.name == current and "  (active)" or ""
+  local summary = options.summary(adapter.name)
+  if summary ~= "" then
+    suffix = suffix .. "  [" .. summary .. "]"
+  end
+  return adapter.label .. suffix
+end
+
+local function snacks_picker()
+  local ok, snacks = pcall(require, "snacks")
+  if ok and snacks.picker then
+    return snacks
+  end
+  return nil
+end
+
+local function fallback_select(adapters)
+  vim.ui.select(adapters, {
+    prompt = "Select agent:",
+    format_item = format_label,
+  }, function(adapter)
+    if adapter then
+      activate(adapter)
+    end
+  end)
+end
+
+function M.pick_agent()
   local registry = require("harness.registry")
 
   local active = active_adapter()
@@ -21,9 +56,7 @@ function M.pick_agent()
       pcall(active.toggle)
       return
     end
-    -- Active but pane is gone; try to focus (re-open path inside adapter).
-    local fok = pcall(active.focus)
-    if fok then
+    if pcall(active.focus) then
       return
     end
   end
@@ -34,20 +67,53 @@ function M.pick_agent()
     return
   end
 
-  vim.ui.select(available, {
-    prompt = "Select agent:",
-    format_item = function(adapter)
-      local current = session.get_active()
-      local suffix = adapter.name == current and " (active)" or ""
-      return adapter.label .. suffix
+  local snacks = snacks_picker()
+  if not snacks then
+    fallback_select(available)
+    return
+  end
+
+  local items = {}
+  for _, adapter in ipairs(available) do
+    table.insert(items, { adapter = adapter, text = format_label(adapter) })
+  end
+
+  snacks.picker.pick({
+    source = "harness_agents",
+    items = items,
+    title = "Harness — pick agent  (<c-o> options)",
+    format = function(item) return { { item.text, "Normal" } } end,
+    layout = { preset = "select" },
+    confirm = function(picker, item)
+      picker:close()
+      if item then
+        activate(item.adapter)
+      end
     end,
-  }, function(adapter)
-    if not adapter then
-      return
-    end
-    session.set_active(adapter.name)
-    pcall(adapter.toggle)
-  end)
+    actions = {
+      open_options = function(picker, item)
+        if not item then return end
+        local agent_name = item.adapter.name
+        picker:close()
+        require("harness.options").configure(agent_name, function()
+          -- Re-open the agent picker so the updated summary is visible.
+          vim.schedule(M.pick_agent)
+        end)
+      end,
+    },
+    win = {
+      input = {
+        keys = {
+          ["<c-o>"] = { "open_options", mode = { "i", "n" } },
+        },
+      },
+      list = {
+        keys = {
+          ["<c-o>"] = "open_options",
+        },
+      },
+    },
+  })
 end
 
 function M.kill_active()
@@ -56,7 +122,7 @@ function M.kill_active()
   if adapter and adapter.kill then
     pcall(adapter.kill)
   elseif adapter then
-    pcall(adapter.toggle) -- best-effort hide
+    pcall(adapter.toggle)
   end
   session.clear_active()
 end

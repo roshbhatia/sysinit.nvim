@@ -101,6 +101,26 @@ function M.kill_and_pick()
   require("harness.picker").kill_and_pick()
 end
 
+function M.options()
+  local name = require("harness.session").get_active()
+  if not name then
+    vim.notify("Harness: no active agent — pick one with <leader>jj", vim.log.levels.WARN)
+    return
+  end
+  require("harness.options").configure(name)
+end
+
+function M.status()
+  local name = require("harness.session").get_active()
+  if not name then
+    vim.notify("Harness: no active agent", vim.log.levels.INFO)
+    return
+  end
+  local summary = require("harness.options").summary(name)
+  local msg = summary ~= "" and (name .. "  " .. summary) or name
+  vim.notify("Harness: " .. msg, vim.log.levels.INFO)
+end
+
 function M.add_buffer()
   local adapter = get_active_adapter()
   if not adapter then
