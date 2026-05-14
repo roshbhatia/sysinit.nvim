@@ -14,34 +14,18 @@ return {
         return ""
       end
 
-      local function harness_active()
-        local name = vim.g.harness_active
-        if not name or name == "" then
-          return ""
-        end
-        local label = name
-        local ok, reg = pcall(require, "harness.registry")
-        if ok then
-          local adapter = reg.get_by_name(name)
-          if adapter and adapter.label then
-            label = adapter.label
-          end
-        end
-        return "  " .. label .. " "
-      end
-
       require("staline").setup({
         sections = {
           left = { "mode", "branch", "file_name" },
-          mid = { harness_active, get_format_status },
-          right = { "file_size", "line_column" },
+          mid = {},
+          right = { get_format_status, "file_size", "line_column" },
         },
         defaults = {
           inactive_color = get_fg("Normal"),
           expand_null_ls = false,
           line_column = ":%c [%l/%L]",
           file_size_suffix = true,
-          branch_symbol = " ",
+          branch_symbol = " ",
         },
         mode_colors = {
           n = get_fg("Normal"),
