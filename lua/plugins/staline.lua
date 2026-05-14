@@ -63,7 +63,7 @@ return {
 
       vim.defer_fn(function()
         vim.cmd("redrawstatus!")
-      end, 0)
+      end, 10)
     end,
   },
 }
