@@ -55,18 +55,11 @@ local function wezterm_send(pane_id, text, submit)
   if not ok then
     return false
   end
-  vim.fn.system(string.format(
-    "wezterm cli send-text --no-paste --pane-id %d < %s",
-    pane_id,
-    vim.fn.shellescape(tmp)
-  ))
+  vim.fn.system(string.format("wezterm cli send-text --no-paste --pane-id %d < %s", pane_id, vim.fn.shellescape(tmp)))
   local shell_ok = vim.v.shell_error == 0
   pcall(vim.fn.delete, tmp)
   -- Focus the pane so the user can add more context before submitting.
-  vim.fn.jobstart(
-    { "wezterm", "cli", "activate-pane", "--pane-id", tostring(pane_id) },
-    { detach = true }
-  )
+  vim.fn.jobstart({ "wezterm", "cli", "activate-pane", "--pane-id", tostring(pane_id) }, { detach = true })
   return shell_ok
 end
 
@@ -90,10 +83,7 @@ end
 local function clipboard_fallback(text)
   pcall(vim.fn.setreg, "+", text)
   pcall(vim.fn.setreg, "*", text)
-  vim.notify(
-    "claudecode: send failed — prompt copied to clipboard, paste into the Claude pane",
-    vim.log.levels.WARN
-  )
+  vim.notify("claudecode: send failed — prompt copied to clipboard, paste into the Claude pane", vim.log.levels.WARN)
 end
 
 local function try_send(text, submit)
@@ -116,10 +106,15 @@ return {
   name = "claudecode",
   label = "Claude",
   options_schema = {
-    { name = "dangerous", flag = "--dangerously-skip-permissions", kind = "toggle", default = true },
-    { name = "continue",  flag = "--continue",                     kind = "toggle" },
-    { name = "resume",    flag = "--resume",                       kind = "toggle" },
-    { name = "model",     flag = "--model",                        kind = "value", prompt = "Model alias or full name (e.g. opus, sonnet)" },
+    { name = "dangerous", flag = "--dangerously-skip-permissions", kind = "toggle" },
+    { name = "continue", flag = "--continue", kind = "toggle" },
+    { name = "resume", flag = "--resume", kind = "toggle" },
+    {
+      name = "model",
+      flag = "--model",
+      kind = "value",
+      prompt = "Model alias or full name (e.g. opus, sonnet)",
+    },
   },
   available = function()
     return pcall(require, "claudecode") and vim.fn.executable("claude") == 1
