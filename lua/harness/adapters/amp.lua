@@ -71,7 +71,7 @@ end
 
 return {
   name = "amp",
-  label = "󰫤 Amp",
+  label = "󰫤  Amp",
   options_schema = {
     { name = "dangerous", flag = "--dangerously-allow-all", kind = "toggle" },
     {

@@ -31,7 +31,7 @@ end
 
 return {
   name = "opencode",
-  label = " OpenCode",
+  label = "  OpenCode",
   options_schema = {
     { name = "continue", flag = "--continue", kind = "toggle" },
     { name = "fork", flag = "--fork", kind = "toggle" },

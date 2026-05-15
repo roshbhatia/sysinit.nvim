@@ -30,7 +30,7 @@ end
 
 return {
   name = "pi",
-  label = "󰏿 Pi",
+  label = "󰏿  Pi",
   options_schema = {
     { name = "no_tools", flag = "--no-tools", kind = "toggle" },
     { name = "thinking", flag = "--thinking", kind = "value", prompt = "off|minimal|low|medium|high|xhigh" },
