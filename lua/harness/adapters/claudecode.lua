@@ -104,7 +104,7 @@ end
 
 return {
   name = "claudecode",
-  label = "Claude",
+  label = " Claude",
   options_schema = {
     { name = "dangerous", flag = "--dangerously-skip-permissions", kind = "toggle" },
     { name = "continue", flag = "--continue", kind = "toggle" },

@@ -31,13 +31,18 @@ end
 
 return {
   name = "opencode",
-  label = "OpenCode",
+  label = " OpenCode",
   options_schema = {
     { name = "continue", flag = "--continue", kind = "toggle" },
-    { name = "fork",     flag = "--fork",     kind = "toggle" },
-    { name = "model",    flag = "--model",    kind = "value", prompt = "provider/model (e.g. anthropic/claude-sonnet-4-5)" },
-    { name = "agent",    flag = "--agent",    kind = "value", prompt = "Agent name" },
-    { name = "session",  flag = "--session",  kind = "value", prompt = "Session id (kill server first; <leader>jx)" },
+    { name = "fork", flag = "--fork", kind = "toggle" },
+    {
+      name = "model",
+      flag = "--model",
+      kind = "value",
+      prompt = "provider/model (e.g. anthropic/claude-sonnet-4-5)",
+    },
+    { name = "agent", flag = "--agent", kind = "value", prompt = "Agent name" },
+    { name = "session", flag = "--session", kind = "value", prompt = "Session id (kill server first; <leader>jx)" },
   },
   available = function()
     return opencode_ok() and vim.fn.executable("opencode") == 1

@@ -30,11 +30,11 @@ end
 
 return {
   name = "pi",
-  label = "Pi",
+  label = "󰏿 Pi",
   options_schema = {
     { name = "no_tools", flag = "--no-tools", kind = "toggle" },
     { name = "thinking", flag = "--thinking", kind = "value", prompt = "off|minimal|low|medium|high|xhigh" },
-    { name = "model",    flag = "--model",    kind = "value", prompt = "Model pattern (e.g. anthropic/sonnet)" },
+    { name = "model", flag = "--model", kind = "value", prompt = "Model pattern (e.g. anthropic/sonnet)" },
   },
   available = function()
     return vim.fn.executable("pi") == 1

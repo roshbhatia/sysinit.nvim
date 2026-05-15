@@ -71,17 +71,35 @@ end
 
 return {
   name = "amp",
-  label = "Amp",
+  label = "󰫤 Amp",
   options_schema = {
-    { name = "dangerous",  flag = "--dangerously-allow-all", kind = "toggle" },
-    { name = "mode",       flag = "--mode",                  kind = "value",
-      prompt = "deep|free|large|rush|smart" },
-    { name = "visibility", flag = "--visibility",            kind = "value",
-      prompt = "private|public|workspace|group" },
-    { name = "thread",     flag = "threads continue", label = "resume via amp picker",
-      kind = "toggle", cli = false },
-    { name = "submit",     flag = "submit",           label = "auto-submit on send",
-      kind = "toggle", cli = false },
+    { name = "dangerous", flag = "--dangerously-allow-all", kind = "toggle" },
+    {
+      name = "mode",
+      flag = "--mode",
+      kind = "value",
+      prompt = "deep|free|large|rush|smart",
+    },
+    {
+      name = "visibility",
+      flag = "--visibility",
+      kind = "value",
+      prompt = "private|public|workspace|group",
+    },
+    {
+      name = "thread",
+      flag = "threads continue",
+      label = "resume via amp picker",
+      kind = "toggle",
+      cli = false,
+    },
+    {
+      name = "submit",
+      flag = "submit",
+      label = "auto-submit on send",
+      kind = "toggle",
+      cli = false,
+    },
   },
   available = function()
     return amp_message_ok() and vim.fn.executable("amp") == 1
@@ -119,16 +137,10 @@ return {
       return
     end
     if sent == false then
-      vim.notify(
-        "amp: bridge has no connected client — toggle amp first (<leader>jj → amp)",
-        vim.log.levels.WARN
-      )
+      vim.notify("amp: bridge has no connected client — toggle amp first (<leader>jj → amp)", vim.log.levels.WARN)
       return
     end
-    vim.notify(
-      string.format("amp: %s %d chars", submit and "submitted" or "appended", #text),
-      vim.log.levels.INFO
-    )
+    vim.notify(string.format("amp: %s %d chars", submit and "submitted" or "appended", #text), vim.log.levels.INFO)
   end,
   kill = function()
     if lc then
