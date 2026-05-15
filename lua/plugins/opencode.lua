@@ -26,7 +26,7 @@ return {
       ---@type opencode.Opts
       vim.g.opencode_opts = {
         server = server_opts, -- nil → use default (snacks)
-        lsp = { enabled = false },
+        lsp = { enabled = true },
         events = { reload = true },
       }
     end,
