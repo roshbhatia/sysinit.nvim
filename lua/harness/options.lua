@@ -8,8 +8,38 @@ local M = {}
 ---@field prompt?   string   -- prompt label for kind="value"
 ---@field label?    string   -- display label in picker (defaults to flag)
 
+local STATE_DIR = vim.fn.stdpath("state") .. "/harness"
+local STATE_FILE = STATE_DIR .. "/options.json"
+
 ---@type table<string, table<string, any>>  agent_name → { opt_name = value }
 local state = {}
+local loaded = false
+
+local function load()
+  if loaded then return end
+  loaded = true
+  local fd = io.open(STATE_FILE, "r")
+  if not fd then return end
+  local raw = fd:read("*a")
+  fd:close()
+  if not raw or raw == "" then return end
+  local ok, data = pcall(vim.json.decode, raw)
+  if ok and type(data) == "table" then
+    state = data
+  end
+end
+
+local function save()
+  vim.fn.mkdir(STATE_DIR, "p")
+  local ok, encoded = pcall(vim.json.encode, state)
+  if not ok then return end
+  local tmp = STATE_FILE .. ".tmp"
+  local fd = io.open(tmp, "w")
+  if not fd then return end
+  fd:write(encoded)
+  fd:close()
+  pcall(vim.uv.fs_rename, tmp, STATE_FILE)
+end
 
 ---@param agent_name string
 ---@return harness.OptionDef[]|nil
@@ -24,6 +54,7 @@ end
 ---@param agent_name string
 ---@return table<string, any>
 function M.get_selected(agent_name)
+  load()
   if not state[agent_name] then
     state[agent_name] = {}
     local schema = M.get_schema(agent_name)
@@ -34,6 +65,7 @@ function M.get_selected(agent_name)
         end
       end
     end
+    save()
   end
   return state[agent_name]
 end
@@ -44,6 +76,7 @@ end
 function M.set(agent_name, opt_name, value)
   local sel = M.get_selected(agent_name)
   sel[opt_name] = value
+  save()
 end
 
 ---@param agent_name string
@@ -51,6 +84,14 @@ end
 function M.toggle(agent_name, opt_name)
   local sel = M.get_selected(agent_name)
   sel[opt_name] = not sel[opt_name]
+  save()
+end
+
+---@param agent_name string
+function M.reset(agent_name)
+  load()
+  state[agent_name] = nil
+  save()
 end
 
 ---@param agent_name string
@@ -183,7 +224,7 @@ function M.configure(agent_name, on_close)
     actions = {
       reset_all = function(picker)
         picker:close()
-        state[agent_name] = nil
+        M.reset(agent_name)
         vim.schedule(reopen)
       end,
     },
