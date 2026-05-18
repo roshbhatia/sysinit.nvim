@@ -1,19 +1,5 @@
--- lsp-ai: multi-provider AI coding assistant
---
--- Only activates when a config exists (global or local neoconf).
--- Global config:  ~/.config/nvim/neoconf.json      (:LspAiConfig global)
--- Local override: .sysinit/neoconf.json             (:LspAiConfig local)
---
--- Supported providers: anthropic, openai, openai_compatible, ollama, gemini, mistral
---
--- Minimal global config example:
---   { "lsp_ai": { "active_model": "openrouter", "models": { "openrouter": {
---       "type": "openai_compatible", "model": "deepseek/deepseek-v3.2",
---       "api_key_env_var": "OPENROUTER_API_KEY",
---       "base_url": "https://openrouter.ai/api/v1/chat/completions" } } } }
 local neoconf = require("neoconf")
 
--- No config → disabled (filetypes={} means the server process never starts)
 if not neoconf.get("lsp_ai") then
   return { filetypes = {} }
 end
@@ -36,7 +22,6 @@ local function list_ollama_models()
   return names
 end
 
--- Build models from the current environment (baseline; neoconf merges over this)
 local function detect_models()
   local models = {}
 
@@ -172,10 +157,30 @@ local function build_config()
   return {
     cmd = { "lsp-ai", "--stdio" },
     filetypes = {
-      "c", "cpp", "cs", "clojure", "cmake", "dart", "go", "haskell",
-      "html", "java", "javascript", "lua", "markdown", "nix", "php",
-      "python", "ruby", "rust", "sh", "swift", "toml", "typescript",
-      "typescriptreact", "typst",
+      "c",
+      "cpp",
+      "cs",
+      "clojure",
+      "cmake",
+      "dart",
+      "go",
+      "haskell",
+      "html",
+      "java",
+      "javascript",
+      "lua",
+      "markdown",
+      "nix",
+      "php",
+      "python",
+      "ruby",
+      "rust",
+      "sh",
+      "swift",
+      "toml",
+      "typescript",
+      "typescriptreact",
+      "typst",
     },
     root_markers = { ".git" },
     init_options = build_init_options(),
