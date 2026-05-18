@@ -1,0 +1,4 @@
+# treesitter queries here are hand-authored, but we don't want them
+# cluttering diffs or language stats.
+queries/**/*.scm        linguist-generated=true -diff
+after/queries/**/*.scm  linguist-generated=true -diff
