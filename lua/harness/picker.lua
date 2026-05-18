@@ -12,6 +12,7 @@ end
 
 local function activate(adapter)
   require("harness.session").set_active(adapter.name)
+  require("harness.frecency").record(adapter.name)
   pcall(adapter.toggle)
 end
 
@@ -66,6 +67,8 @@ function M.pick_agent()
     vim.notify("Harness: no agents available on PATH", vim.log.levels.WARN)
     return
   end
+
+  require("harness.frecency").sort(available)
 
   local snacks = snacks_picker()
   if not snacks then
