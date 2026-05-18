@@ -11,6 +11,7 @@ local ORDER = {
   "cursor",
   "gemini",
   "goose",
+  "hermes",
 }
 
 ---@return table[]
