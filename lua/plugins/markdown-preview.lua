@@ -11,7 +11,7 @@ return {
     },
     keys = {
       {
-        "<localleader>p",
+        "<localleader>xP",
         "<cmd>MarkdownPreviewToggle<cr>",
         desc = "Toggle preview",
         ft = "markdown",

@@ -6,7 +6,7 @@ end
 
 Snacks.keymap.set("n", "<localleader>xp", function()
   local file = vim.fn.expand("%:p")
-  Snacks.terminal.open({ "glow", "-p", file }, {
+  Snacks.terminal.toggle({ "glow", "-p", file }, {
     win = { position = "right", width = 0.4 },
   })
 end, { ft = "markdown", desc = "Preview with glow" })
