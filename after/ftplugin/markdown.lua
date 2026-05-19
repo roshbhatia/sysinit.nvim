@@ -4,6 +4,13 @@ if vim.treesitter.highlighter.active[vim.api.nvim_get_current_buf()] then
   vim.treesitter.stop(vim.api.nvim_get_current_buf())
 end
 
+Snacks.keymap.set("n", "<localleader>xp", function()
+  local file = vim.fn.expand("%:p")
+  Snacks.terminal.open({ "glow", "-p", file }, {
+    win = { position = "right", width = 0.4 },
+  })
+end, { ft = "markdown", desc = "Preview with glow" })
+
 -- Enable LSP semantic tokens for markdown
 vim.b.semantic_tokens = true
 
