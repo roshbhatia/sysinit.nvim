@@ -35,6 +35,13 @@ return {
   options_schema = {
     { name = "continue", flag = "--continue", kind = "toggle" },
     { name = "fork", flag = "--fork", kind = "toggle" },
+    { name = "pure", flag = "--pure", kind = "toggle" },
+    {
+      name = "log_level",
+      flag = "--log-level",
+      kind = "value",
+      prompt = "Log level (DEBUG, INFO, WARN, ERROR)",
+    },
     {
       name = "model",
       flag = "--model",

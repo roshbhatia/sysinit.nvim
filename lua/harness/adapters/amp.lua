@@ -38,6 +38,10 @@ local function build_amp_parts()
     table.insert(parts, "--visibility")
     table.insert(parts, sel.visibility)
   end
+  if sel.effort and sel.effort ~= "" then
+    table.insert(parts, "--effort")
+    table.insert(parts, sel.effort)
+  end
   return parts
 end
 
@@ -85,6 +89,12 @@ return {
       flag = "--visibility",
       kind = "value",
       prompt = "private|public|workspace|group",
+    },
+    {
+      name = "effort",
+      flag = "--effort",
+      kind = "value",
+      prompt = "Effort (mode-dependent: e.g. minimal|low|medium|high|xhigh)",
     },
     {
       name = "thread",

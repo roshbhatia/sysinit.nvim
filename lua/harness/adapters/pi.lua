@@ -17,9 +17,28 @@ local function build_pi_cmd()
   if sel.no_tools then
     table.insert(cmd, "--no-tools")
   end
+  if sel.fast then
+    table.insert(cmd, "--fast")
+  end
+  if sel.plan then
+    table.insert(cmd, "--plan")
+  end
+  if sel.verbose then
+    table.insert(cmd, "--verbose")
+  end
+  if sel["continue"] then
+    table.insert(cmd, "--continue")
+  end
+  if sel.resume then
+    table.insert(cmd, "--resume")
+  end
   if sel.thinking and sel.thinking ~= "" then
     table.insert(cmd, "--thinking")
     table.insert(cmd, sel.thinking)
+  end
+  if sel.provider and sel.provider ~= "" then
+    table.insert(cmd, "--provider")
+    table.insert(cmd, sel.provider)
   end
   if sel.model and sel.model ~= "" then
     table.insert(cmd, "--model")
@@ -33,7 +52,13 @@ return {
   label = "󰏿  Pi",
   options_schema = {
     { name = "no_tools", flag = "--no-tools", kind = "toggle" },
+    { name = "fast", flag = "--fast", kind = "toggle" },
+    { name = "plan", flag = "--plan", kind = "toggle" },
+    { name = "verbose", flag = "--verbose", kind = "toggle" },
+    { name = "continue", flag = "--continue", kind = "toggle" },
+    { name = "resume", flag = "--resume", kind = "toggle" },
     { name = "thinking", flag = "--thinking", kind = "value", prompt = "off|minimal|low|medium|high|xhigh" },
+    { name = "provider", flag = "--provider", kind = "value", prompt = "Provider (e.g. anthropic, openai, google)" },
     { name = "model", flag = "--model", kind = "value", prompt = "Model pattern (e.g. anthropic/sonnet)" },
   },
   available = function()

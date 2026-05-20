@@ -117,6 +117,15 @@ return {
     },
     { name = "continue", flag = "--continue", kind = "toggle" },
     { name = "resume", flag = "--resume", kind = "toggle" },
+    { name = "fork_session", flag = "--fork-session", kind = "toggle" },
+    { name = "worktree", flag = "--worktree", kind = "toggle" },
+    {
+      name = "effort",
+      flag = "--effort",
+      kind = "value",
+      prompt = "Effort (low, medium, high, xhigh, max)",
+    },
+    { name = "agent", flag = "--agent", kind = "value", prompt = "Agent name" },
     {
       name = "model",
       flag = "--model",
