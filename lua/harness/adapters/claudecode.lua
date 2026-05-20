@@ -107,6 +107,14 @@ return {
   label = "  Claude",
   options_schema = {
     { name = "dangerous", flag = "--dangerously-skip-permissions", kind = "toggle" },
+    { name = "ide", flag = "--ide", kind = "toggle", default = true },
+    {
+      name = "permission_mode",
+      flag = "--permission-mode",
+      kind = "value",
+      default = "auto",
+      prompt = [[Permission mode (acceptEdits, auto, bypassPermissions, default, dontAsk, plan)]],
+    },
     { name = "continue", flag = "--continue", kind = "toggle" },
     { name = "resume", flag = "--resume", kind = "toggle" },
     {
