@@ -48,37 +48,7 @@ local function chansend_to_buf(buf, text, submit)
   return ok
 end
 
-local function wezterm_send(pane_id, text, submit)
-  local payload = submit and (text .. "\r") or text
-  local tmp = vim.fn.tempname()
-  local ok = pcall(vim.fn.writefile, vim.split(payload, "\n", { plain = true }), tmp, "b")
-  if not ok then
-    return false
-  end
-  vim.fn.system(string.format("wezterm cli send-text --no-paste --pane-id %d < %s", pane_id, vim.fn.shellescape(tmp)))
-  local shell_ok = vim.v.shell_error == 0
-  pcall(vim.fn.delete, tmp)
-  -- Focus the pane so the user can add more context before submitting.
-  vim.fn.jobstart({ "wezterm", "cli", "activate-pane", "--pane-id", tostring(pane_id) }, { detach = true })
-  return shell_ok
-end
-
-local function wezterm_pane_alive(pane_id)
-  local res = vim.fn.system({ "wezterm", "cli", "list", "--format", "json" })
-  if vim.v.shell_error ~= 0 then
-    return false
-  end
-  local ok, panes = pcall(vim.json.decode, res)
-  if not ok or type(panes) ~= "table" then
-    return false
-  end
-  for _, p in ipairs(panes) do
-    if p.pane_id == pane_id then
-      return true
-    end
-  end
-  return false
-end
+local wt = require("utils.wezterm_terminal")
 
 local function clipboard_fallback(text)
   pcall(vim.fn.setreg, "+", text)
@@ -89,8 +59,8 @@ end
 local function try_send(text, submit)
   -- 1. wezterm pane (out-of-process)
   local pane_id = vim.g.harness_wezterm_pane_claudecode
-  if pane_id and wezterm_pane_alive(pane_id) then
-    if wezterm_send(pane_id, text, submit) then
+  if pane_id and wt.pane_alive_sync(pane_id) then
+    if wt.send_text(pane_id, text, submit) then
       return true
     end
   end
@@ -149,7 +119,7 @@ return {
   end,
   is_visible = function()
     local pane_id = vim.g.harness_wezterm_pane_claudecode
-    if pane_id and wezterm_pane_alive(pane_id) then
+    if pane_id and wt.pane_alive_sync(pane_id) then
       return true
     end
     local buf = find_claude_terminal()
@@ -175,7 +145,7 @@ return {
   kill = function()
     local pane_id = vim.g.harness_wezterm_pane_claudecode
     if pane_id then
-      vim.fn.system({ "wezterm", "cli", "kill-pane", "--pane-id", tostring(pane_id) })
+      vim.fn.jobstart({ "wezterm", "cli", "kill-pane", "--pane-id", tostring(pane_id) }, { detach = true })
       vim.g.harness_wezterm_pane_claudecode = nil
       return
     end

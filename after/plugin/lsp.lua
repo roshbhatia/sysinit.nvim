@@ -58,17 +58,16 @@ vim.diagnostic.handlers.signs = {
   end,
 }
 
+local function autoformat_enabled(buf)
+  if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then return false end
+  if require("neoconf").get("autoformat", nil, { bufnr = buf }) == false then return false end
+  return true
+end
+
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local bufnr = args.buf
     local client = vim.lsp.get_client_by_id(args.data.client_id)
-
-    -- Autofix on save (code-action fixes, not formatting — run before the null-ls BufWritePre)
-    local function autoformat_enabled(buf)
-      if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then return false end
-      if require("neoconf").get("autoformat", nil, { bufnr = buf }) == false then return false end
-      return true
-    end
 
     if client and client.name == "eslint" then
       vim.api.nvim_create_autocmd("BufWritePre", {
@@ -116,9 +115,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
     end, { buffer = bufnr, desc = "Previous error" })
 
-    Snacks.keymap.set("n", "<leader>cj", function()
-      vim.lsp.buf.signature_help({})
-    end, { buffer = bufnr, desc = "Signature help" })
+    Snacks.keymap.set("n", "<leader>cj", vim.lsp.buf.signature_help, { buffer = bufnr, desc = "Signature help" })
   end,
 })
 

@@ -19,43 +19,10 @@ function M.build(cmd, opts)
   return M._snacks(cmd, opts, name)
 end
 
-local function wezterm_send_text(pane_id, text, submit)
-  local payload = submit and (text .. "\r") or text
-  local tmp = vim.fn.tempname()
-  vim.fn.writefile(vim.split(payload, "\n", { plain = true }), tmp, "b")
-  vim.fn.system(string.format(
-    "wezterm cli send-text --no-paste --pane-id %d < %s",
-    pane_id,
-    vim.fn.shellescape(tmp)
-  ))
-  pcall(vim.fn.delete, tmp)
-  -- Focus the pane after sending so the user lands in the agent's input.
-  vim.fn.jobstart(
-    { "wezterm", "cli", "activate-pane", "--pane-id", tostring(pane_id) },
-    { detach = true }
-  )
-end
-
-local function pane_alive(pane_id)
-  local res = vim.fn.system({ "wezterm", "cli", "list", "--format", "json" })
-  if vim.v.shell_error ~= 0 then
-    return false
-  end
-  local ok, panes = pcall(vim.json.decode, res)
-  if not ok or type(panes) ~= "table" then
-    return false
-  end
-  for _, p in ipairs(panes) do
-    if p.pane_id == pane_id then
-      return true
-    end
-  end
-  return false
-end
+local wt = require("utils.wezterm_terminal")
 
 ---@private
 function M._wezterm(cmd, opts, name)
-  local wt = require("utils.wezterm_terminal")
   local server = wt.build_server_callbacks(cmd, {
     name = name,
     percent = opts.percent or 0.4,
@@ -65,7 +32,7 @@ function M._wezterm(cmd, opts, name)
 
   local function get_pane()
     local pid = vim.g["harness_wezterm_pane_" .. name]
-    if pid and pane_alive(pid) then
+    if pid and wt.pane_alive_sync(pid) then
       return pid
     end
     return nil
@@ -85,14 +52,14 @@ function M._wezterm(cmd, opts, name)
       local submit = send_opts.submit ~= false
       local pid = get_pane()
       if pid then
-        wezterm_send_text(pid, text, submit)
+        wt.send_text(pid, text, submit)
         return
       end
       server.start()
       vim.defer_fn(function()
         local p = get_pane()
         if p then
-          wezterm_send_text(p, text, submit)
+          wt.send_text(p, text, submit)
         else
           vim.notify(name .. ": wezterm pane not found after start", vim.log.levels.WARN)
         end
@@ -159,7 +126,7 @@ function M._snacks(cmd, opts, name)
       local ok, valid = pcall(function()
         return term:buf_valid() and term.win and vim.api.nvim_win_is_valid(term.win)
       end)
-      return ok and valid == true
+      return ok and valid
     end,
     send = function(text, send_opts)
       send_opts = send_opts or {}

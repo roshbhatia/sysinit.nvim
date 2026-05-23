@@ -50,6 +50,91 @@ local function build_env_prefix(env_table)
   return table.concat(parts, " ")
 end
 
+--- Shared low-level pane spawner.
+---@param parent_pane_id integer
+---@param name string  used in error messages and vim.g tracking key
+---@param cmd_string string
+---@param opts { env?: table, percent?: number, side?: "left"|"right" }
+---@param focus boolean
+---@return integer|nil  spawned pane_id, or nil on failure
+local function _spawn(parent_pane_id, name, cmd_string, opts, focus)
+  local env_str = build_env_prefix(opts.env)
+  local full_cmd = env_str ~= "" and (env_str .. " " .. cmd_string) or cmd_string
+  local pct = math.floor((opts.percent or 0.4) * 100)
+  local side_flag = (opts.side == "left") and "--left" or "--right"
+  local cwd = vim.fn.getcwd()
+
+  -- Redirect stderr; wezterm prints config-reload notices to stderr that
+  -- corrupt the pane-id integer on stdout.
+  local spawn_cmd = string.format(
+    "wezterm cli split-pane --pane-id %d %s --percent %d --cwd %s -- sh -c %s 2>/dev/null",
+    parent_pane_id,
+    side_flag,
+    pct,
+    vim.fn.shellescape(cwd),
+    vim.fn.shellescape(full_cmd)
+  )
+
+  local result = vim.fn.system(spawn_cmd)
+  if vim.v.shell_error ~= 0 then
+    vim.notify(("%s/wezterm: spawn failed (exit %d)"):format(name, vim.v.shell_error), vim.log.levels.ERROR)
+    return nil
+  end
+
+  local id = tonumber(vim.trim(result))
+  if not id then
+    vim.notify(("%s/wezterm: could not parse pane id"):format(name), vim.log.levels.ERROR)
+    return nil
+  end
+
+  -- Publish so harness adapters can route send() via `wezterm cli send-text`.
+  vim.g["harness_wezterm_pane_" .. name] = id
+
+  if focus then
+    vim.defer_fn(function() activate_pane(id) end, 80)
+  end
+
+  return id
+end
+
+--- Synchronous pane liveness check (blocks on wezterm cli list).
+---@param pane_id integer
+---@return boolean
+function M.pane_alive_sync(pane_id)
+  local res = vim.fn.system({ "wezterm", "cli", "list", "--format", "json" })
+  if vim.v.shell_error ~= 0 then return false end
+  local ok, panes = pcall(vim.json.decode, res)
+  if not ok or type(panes) ~= "table" then return false end
+  for _, p in ipairs(panes) do
+    if p.pane_id == pane_id then return true end
+  end
+  return false
+end
+
+--- Send text to a wezterm pane via a temp file (preserves newlines/special chars).
+--- Returns true on success.
+---@param pane_id integer
+---@param text string
+---@param submit boolean  append \r to submit
+---@return boolean
+function M.send_text(pane_id, text, submit)
+  local payload = submit and (text .. "\r") or text
+  local tmp = vim.fn.tempname()
+  local ok = pcall(vim.fn.writefile, vim.split(payload, "\n", { plain = true }), tmp, "b")
+  if not ok then return false end
+  vim.fn.system(string.format(
+    "wezterm cli send-text --no-paste --pane-id %d < %s",
+    pane_id,
+    vim.fn.shellescape(tmp)
+  ))
+  local sent = vim.v.shell_error == 0
+  pcall(vim.fn.delete, tmp)
+  if sent then
+    vim.fn.jobstart({ "wezterm", "cli", "activate-pane", "--pane-id", tostring(pane_id) }, { detach = true })
+  end
+  return sent
+end
+
 --- Build a claudecode-compatible provider that uses wezterm panes.
 --- @param opts? { name?: string, percent?: number, side?: "left"|"right" }
 --- @return table provider
@@ -64,54 +149,16 @@ function M.build_provider(opts)
 
   local function spawn(cmd_string, env_table, effective_config, focus)
     if not parent_pane_id then
-      vim.notify(
-        ("%s/wezterm: WEZTERM_PANE not set; cannot split"):format(name),
-        vim.log.levels.ERROR
-      )
+      vim.notify(("%s/wezterm: WEZTERM_PANE not set; cannot split"):format(name), vim.log.levels.ERROR)
       return
     end
-
-    local env_str = build_env_prefix(env_table)
-    local full_cmd = env_str ~= "" and (env_str .. " " .. cmd_string) or cmd_string
-
     local merged = vim.tbl_extend("force", cfg, effective_config or {})
-    local pct = math.floor((opts.percent or merged.split_width_percentage or 0.4) * 100)
-    local side_flag = ((opts.side or merged.split_side) == "left") and "--left" or "--right"
-    local cwd = vim.fn.getcwd()
-
-    -- Redirect stderr; wezterm prints config-reload notices to stderr that
-    -- corrupt the pane-id integer on stdout.
-    local spawn_cmd = string.format(
-      "wezterm cli split-pane --pane-id %d %s --percent %d --cwd %s -- sh -c %s 2>/dev/null",
-      parent_pane_id,
-      side_flag,
-      pct,
-      vim.fn.shellescape(cwd),
-      vim.fn.shellescape(full_cmd)
-    )
-
-    local result = vim.fn.system(spawn_cmd)
-    if vim.v.shell_error ~= 0 then
-      vim.notify(
-        ("%s/wezterm: spawn failed (exit %d)"):format(name, vim.v.shell_error),
-        vim.log.levels.ERROR
-      )
-      return
-    end
-
-    local id = tonumber(vim.trim(result))
-    if not id then
-      vim.notify(("%s/wezterm: could not parse pane id"):format(name), vim.log.levels.ERROR)
-      return
-    end
-    pane_id = id
-    -- Publish the spawned pane_id so harness adapters can route send() to
-    -- it via `wezterm cli send-text` (out-of-process pane = no nvim buf).
-    vim.g["harness_wezterm_pane_" .. name] = id
-
-    if focus then
-      vim.defer_fn(function() activate_pane(pane_id) end, 80)
-    end
+    local id = _spawn(parent_pane_id, name, cmd_string, {
+      env = env_table,
+      percent = opts.percent or merged.split_width_percentage,
+      side = opts.side or merged.split_side,
+    }, focus)
+    if id then pane_id = id end
   end
 
   function Provider.setup(term_config)
@@ -181,7 +228,6 @@ function M.build_provider(opts)
     return nil
   end
 
-  -- Kill orphan pane when nvim exits (matches existing claudecode wezterm hygiene)
   vim.api.nvim_create_autocmd("VimLeavePre", {
     group = vim.api.nvim_create_augroup("wezterm_terminal_" .. name, { clear = true }),
     callback = function()
@@ -212,45 +258,11 @@ function M.build_server_callbacks(cmd, opts)
 
   local function do_spawn(focus)
     if not parent_pane_id then
-      vim.notify(
-        ("%s/wezterm: WEZTERM_PANE not set; cannot split"):format(name),
-        vim.log.levels.ERROR
-      )
+      vim.notify(("%s/wezterm: WEZTERM_PANE not set; cannot split"):format(name), vim.log.levels.ERROR)
       return
     end
-
-    local env_str = build_env_prefix(opts.env)
-    local full_cmd = env_str ~= "" and (env_str .. " " .. cmd) or cmd
-    local pct = math.floor((opts.percent or 0.4) * 100)
-    local side_flag = (opts.side == "left") and "--left" or "--right"
-    local cwd = vim.fn.getcwd()
-
-    local spawn_cmd = string.format(
-      "wezterm cli split-pane --pane-id %d %s --percent %d --cwd %s -- sh -c %s 2>/dev/null",
-      parent_pane_id,
-      side_flag,
-      pct,
-      vim.fn.shellescape(cwd),
-      vim.fn.shellescape(full_cmd)
-    )
-
-    local result = vim.fn.system(spawn_cmd)
-    if vim.v.shell_error ~= 0 then
-      vim.notify(("%s/wezterm: spawn failed (exit %d)"):format(name, vim.v.shell_error), vim.log.levels.ERROR)
-      return
-    end
-
-    local id = tonumber(vim.trim(result))
-    if not id then
-      vim.notify(("%s/wezterm: could not parse pane id"):format(name), vim.log.levels.ERROR)
-      return
-    end
-    pane_id = id
-    vim.g["harness_wezterm_pane_" .. name] = id
-
-    if focus then
-      vim.defer_fn(function() activate_pane(pane_id) end, 80)
-    end
+    local id = _spawn(parent_pane_id, name, cmd, opts, focus)
+    if id then pane_id = id end
   end
 
   local function start()
@@ -280,7 +292,7 @@ function M.build_server_callbacks(cmd, opts)
     if pane_id then
       pane_alive(pane_id, function(alive)
         if alive then
-          activate_pane(pane_id) -- focus toggle: focus pane (re-activating returns to parent if already focused in some wezterm setups)
+          activate_pane(pane_id)
         else
           pane_id = nil
           do_spawn(true)

@@ -1,7 +1,7 @@
 local M = {}
 
-local STATE_DIR = vim.fn.stdpath("state") .. "/harness"
-local STATE_FILE = STATE_DIR .. "/frecency.json"
+local persist = require("harness.persist")
+local STATE_FILE = persist.path("frecency")
 local HALF_LIFE_S = 7 * 24 * 3600
 
 ---@type table<string, { count: integer, last_ts: integer }>
@@ -11,27 +11,11 @@ local loaded = false
 local function load()
   if loaded then return end
   loaded = true
-  local fd = io.open(STATE_FILE, "r")
-  if not fd then return end
-  local raw = fd:read("*a")
-  fd:close()
-  if not raw or raw == "" then return end
-  local ok, data = pcall(vim.json.decode, raw)
-  if ok and type(data) == "table" then
-    state = data
-  end
+  state = persist.load(STATE_FILE) or {}
 end
 
 local function save()
-  vim.fn.mkdir(STATE_DIR, "p")
-  local ok, encoded = pcall(vim.json.encode, state)
-  if not ok then return end
-  local tmp = STATE_FILE .. ".tmp"
-  local fd = io.open(tmp, "w")
-  if not fd then return end
-  fd:write(encoded)
-  fd:close()
-  pcall(vim.uv.fs_rename, tmp, STATE_FILE)
+  persist.save(STATE_FILE, state)
 end
 
 ---@param name string

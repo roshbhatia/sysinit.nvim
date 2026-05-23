@@ -30,8 +30,7 @@ return {
       local providers = {
         buffer = {
           score_offset = 3,
-          ---@diagnostic disable-next-line: unused-local
-          transform_items = function(ctx, items)
+          transform_items = function(_ctx, items)
             for _, item in ipairs(items) do
               item.kind_icon = " Buffer "
               item.kind_name = "Buffer"
@@ -47,8 +46,7 @@ return {
         },
         lsp = {
           score_offset = 0,
-          ---@diagnostic disable-next-line: unused-local
-          transform_items = function(ctx, items)
+          transform_items = function(_ctx, items)
             for _, item in ipairs(items) do
               item.kind_icon = "󰘧 LSP "
               item.kind_name = "LSP"
@@ -58,8 +56,7 @@ return {
         },
         path = {
           score_offset = 1,
-          ---@diagnostic disable-next-line: unused-local
-          transform_items = function(ctx, items)
+          transform_items = function(_ctx, items)
             for _, item in ipairs(items) do
               item.kind_icon = " Path "
               item.kind_name = "Path"
@@ -72,8 +69,7 @@ return {
         },
         snippets = {
           score_offset = 2,
-          ---@diagnostic disable-next-line: unused-local
-          transform_items = function(ctx, items)
+          transform_items = function(_ctx, items)
             for _, item in ipairs(items) do
               item.kind_icon = "󰩫 Snippets "
               item.kind_name = "Snippets"
@@ -86,8 +82,7 @@ return {
           module = "blink-copilot",
           score_offset = 100,
           async = true,
-          ---@diagnostic disable-next-line: unused-local
-          transform_items = function(ctx, items)
+          transform_items = function(_ctx, items)
             for _, item in ipairs(items) do
               item.kind_icon = " Copilot "
               item.kind_name = "Copilot"
