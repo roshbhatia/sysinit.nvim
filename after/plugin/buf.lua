@@ -37,6 +37,7 @@ end, {
 
 Snacks.keymap.set("n", "<leader>w", function()
   vim.cmd("silent! write!")
+  vim.cmd("silent! xit!")
 end, {
-  desc = "Write buffer",
+  desc = "Write and close buffer",
 })
