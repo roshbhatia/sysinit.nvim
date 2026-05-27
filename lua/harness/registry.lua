@@ -9,6 +9,7 @@ local ORDER = {
   "copilot",
   "crush",
   "cursor",
+  "devin",
   "gemini",
   "goose",
   "hermes",
