@@ -8,6 +8,9 @@ return {
         position = "bottom",
         view_mode = "tree",
       },
+      history = {
+        position = "left",
+      },
       keymaps = {
         view = {
           toggle_explorer = "<leader>dt",
@@ -18,6 +21,9 @@ return {
           accept_both = "<leader>db",
           discard = "<leader>dx",
         },
+      },
+      diff = {
+        compute_moves = true,
       },
     },
     keys = {
