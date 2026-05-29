@@ -12,6 +12,8 @@ return {
       enable_builtin = true,
       default_merge_method = "squash",
       default_delete_branch = true,
+      reviews = { auto_show_threads = true },
+      pull_requests = { use_branch_name_as_title = true },
       mappings = {
         issue = {
           reload = { lhs = "<localleader>R", desc = "reload issue" },
@@ -55,6 +57,17 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      require("octo").setup(opts)
+      vim.treesitter.language.register("markdown", "octo")
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "octo",
+        callback = function(ev)
+          vim.keymap.set("i", "@", "@<C-x><C-o>", { silent = true, buffer = ev.buf })
+          vim.keymap.set("i", "#", "#<C-x><C-o>", { silent = true, buffer = ev.buf })
+        end,
+      })
+    end,
     keys = {
       { "<leader>gr", "<Cmd>Octo<CR>", desc = "GitHub" },
     },

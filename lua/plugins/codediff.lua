@@ -41,8 +41,9 @@ return {
           for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
             vim.wo[win].foldcolumn = "0"
             vim.wo[win].signcolumn = "no"
-            vim.wo[win].number = false
+            vim.wo[win].number = true
             vim.wo[win].relativenumber = false
+            vim.wo[win].foldenable = false
             clear_foldsign(vim.api.nvim_win_get_buf(win))
           end
           vim.g.codediff_saved_showtabline = vim.o.showtabline
