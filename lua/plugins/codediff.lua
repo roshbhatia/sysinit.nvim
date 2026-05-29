@@ -5,6 +5,7 @@ return {
     cmd = "CodeDiff",
     opts = {
       explorer = {
+        position = "bottom",
         view_mode = "tree",
       },
       keymaps = {
