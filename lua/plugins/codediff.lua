@@ -35,21 +35,53 @@ return {
         end
       end
 
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "CodeDiffOpen",
-        callback = function()
-          for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-            vim.wo[win].foldcolumn = "0"
-            vim.wo[win].signcolumn = "no"
+      -- Apply number/fold opts to just the two diff windows.
+      -- Must run via vim.schedule so it lands after welcome_window.sync restores
+      -- its saved profiles (which would otherwise override these settings).
+      local function apply_diff_winopts(tabpage)
+        local ok, lifecycle = pcall(require, "codediff.ui.lifecycle")
+        if not ok then return end
+        local orig_win, mod_win = lifecycle.get_windows(tabpage)
+        for _, win in ipairs({ orig_win, mod_win }) do
+          if win and vim.api.nvim_win_is_valid(win) then
             vim.wo[win].number = true
             vim.wo[win].relativenumber = false
             vim.wo[win].foldenable = false
+            vim.wo[win].foldcolumn = "0"
+            vim.wo[win].signcolumn = "no"
+            clear_foldsign(vim.api.nvim_win_get_buf(win))
+          end
+        end
+      end
+
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "CodeDiffOpen",
+        callback = function(ev)
+          for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+            vim.wo[win].foldcolumn = "0"
+            vim.wo[win].signcolumn = "no"
             clear_foldsign(vim.api.nvim_win_get_buf(win))
           end
           vim.g.codediff_saved_showtabline = vim.o.showtabline
           vim.o.showtabline = 0
-          -- prevent foldsign from re-drawing while diff is open
           require("nvim-foldsign").setup({ enabled = false })
+          local tabpage = (ev.data or {}).tabpage or vim.api.nvim_get_current_tabpage()
+          vim.schedule(function()
+            apply_diff_winopts(tabpage)
+          end)
+        end,
+      })
+
+      -- Re-apply on every file selection: welcome_window.sync restores saved
+      -- profiles synchronously, so we schedule to run after it.
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "CodeDiffFileSelect",
+        callback = function(ev)
+          local tabpage = (ev.data or {}).tabpage
+          if not tabpage then return end
+          vim.schedule(function()
+            apply_diff_winopts(tabpage)
+          end)
         end,
       })
 
