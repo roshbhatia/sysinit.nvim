@@ -1,26 +1,33 @@
 vim.opt.mouse = "a"
 vim.o.mousemoveevent = true
-vim.opt.clipboard = "unnamedplus"
 
--- https://github.com/tjdevries/config.nvim/blob/master/plugin/clipboard.lua
-if vim.env.SSH_CONNECTION then
-  local function vim_paste()
-    local content = vim.fn.getreg('"')
-    return vim.split(content, "\n")
+-- Setting clipboard="unnamedplus" synchronously probes for the system clipboard
+-- provider (pbcopy/pbpaste on macOS), which blocks startup for ~13ms. Deferring
+-- via schedule() pushes the probe to the first main-loop tick — clipboard is
+-- never needed before the first user-initiated copy/paste anyway.
+vim.schedule(function()
+  vim.opt.clipboard = "unnamedplus"
+
+  -- https://github.com/tjdevries/config.nvim/blob/master/plugin/clipboard.lua
+  if vim.env.SSH_CONNECTION then
+    local function vim_paste()
+      local content = vim.fn.getreg('"')
+      return vim.split(content, "\n")
+    end
+
+    vim.g.clipboard = {
+      name = "OSC 52",
+      copy = {
+        ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+        ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+      },
+      paste = {
+        ["+"] = vim_paste,
+        ["*"] = vim_paste,
+      },
+    }
   end
-
-  vim.g.clipboard = {
-    name = "OSC 52",
-    copy = {
-      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
-      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
-    },
-    paste = {
-      ["+"] = vim_paste,
-      ["*"] = vim_paste,
-    },
-  }
-end
+end)
 
 vim.opt.number = true
 vim.opt.signcolumn = "yes:3"

@@ -2,7 +2,7 @@ return {
   {
     "Bekaboo/dropbar.nvim",
     branch = "master",
-    lazy = false,
+    event = "VimEnter",
     opts = {
       icons = {
         ui = {
