@@ -195,7 +195,7 @@ return {
           providers = providers,
         },
         snippets = {
-          preset = "none",
+          preset = "default",
         },
       }
     end,
