@@ -9,9 +9,6 @@ return {
           position = "bottom",
           view_mode = "tree",
         },
-        history = {
-          position = "left",
-        },
         keymaps = {
           view = {
             toggle_explorer = "<leader>dt",
@@ -40,7 +37,9 @@ return {
       -- its saved profiles (which would otherwise override these settings).
       local function apply_diff_winopts(tabpage)
         local ok, lifecycle = pcall(require, "codediff.ui.lifecycle")
-        if not ok then return end
+        if not ok then
+          return
+        end
         local orig_win, mod_win = lifecycle.get_windows(tabpage)
         for _, win in ipairs({ orig_win, mod_win }) do
           if win and vim.api.nvim_win_is_valid(win) then
@@ -78,7 +77,9 @@ return {
         pattern = "CodeDiffFileSelect",
         callback = function(ev)
           local tabpage = (ev.data or {}).tabpage
-          if not tabpage then return end
+          if not tabpage then
+            return
+          end
           vim.schedule(function()
             apply_diff_winopts(tabpage)
           end)
