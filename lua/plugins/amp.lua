@@ -4,7 +4,7 @@ return {
     branch = "main",
     lazy = false,
     opts = {
-      auto_start = true,
+      auto_start = false,
       log_level = "info",
     },
   },
