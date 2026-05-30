@@ -3,9 +3,13 @@ return {
     "mrjones2014/smart-splits.nvim",
     event = "VeryLazy",
     config = function()
+      local ft = require("utils.filetypes")
       require("smart-splits").setup({
         cursor_follows_swapped_bufs = true,
         at_edge = "stop",
+        default_amount = 3,
+        ignored_filetypes = ft.sidebar_filetypes,
+        ignored_buftypes = ft.utility_buftypes,
       })
     end,
     keys = function()

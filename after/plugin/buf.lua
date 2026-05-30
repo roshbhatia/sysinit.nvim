@@ -1,5 +1,5 @@
 -- Disable fold/sign column decorations on floating windows and special filetypes
-local special_filetypes = { "oil", "oil_preview", "quickfix", "help" }
+local special_filetypes = require("utils.filetypes").utility_filetypes
 
 local function disable_decorations(win)
   local config = vim.api.nvim_win_get_config(win)

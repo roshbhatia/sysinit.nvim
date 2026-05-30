@@ -4,6 +4,8 @@ return {
     version = "2.*",
     lazy = true,
     config = function()
+      local ft = require("utils.filetypes")
+      local picker_filetypes = vim.list_extend(vim.list_extend({}, ft.sidebar_filetypes), { "neo-tree-popup", "notify" })
       require("window-picker").setup({
         hint = "floating-big-letter",
         show_prompt = false,
@@ -14,7 +16,7 @@ return {
           include_current_win = false,
           autoselect_one = true,
           bo = {
-            filetype = { "neo-tree", "neo-tree-popup", "notify" },
+            filetype = picker_filetypes,
             buftype = { "terminal", "quickfix" },
           },
         },
