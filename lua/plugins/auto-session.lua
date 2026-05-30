@@ -15,6 +15,7 @@ return {
     git_use_branch_name = true,
     bypass_save_filetypes = { "snacks_dashboard" },
     args_allow_single_directory = true,
+    cwd_change_handling = true,
     continue_restore_on_error = true,
     log_level = "info",
     post_restore_cmds = {

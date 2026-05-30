@@ -11,6 +11,7 @@ return {
           col = 1,
         },
         numhl = false,
+        current_line_blame = false,
       })
     end,
     keys = {
@@ -108,6 +109,14 @@ return {
             require("gitsigns").setqflist("all")
           end,
           desc = "Quickfix hunks",
+          mode = "n",
+        },
+        {
+          "<leader>gl",
+          function()
+            require("gitsigns").toggle_current_line_blame()
+          end,
+          desc = "Toggle line blame",
           mode = "n",
         },
     },
