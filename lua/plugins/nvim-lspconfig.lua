@@ -1,7 +1,7 @@
 return {
   {
     "neovim/nvim-lspconfig",
-    lazy = false,
+    event = "BufReadPost",
     dependencies = {
       "b0o/SchemaStore.nvim",
       "saghen/blink.cmp",

@@ -2,10 +2,8 @@ return {
   {
     "saghen/blink.cmp",
     version = "1.*",
-    event = { "UIEnter" },
-    priority = 1000,
+    event = { "BufReadPost", "InsertEnter" },
     dependencies = {
-      "L3MON4D3/LuaSnip",
       "xzbdmw/colorful-menu.nvim",
       "fang2hou/blink-copilot",
       "copilotlsp-nvim/copilot-lsp",
@@ -67,16 +65,6 @@ return {
             show_hidden_files_by_default = true,
           },
         },
-        snippets = {
-          score_offset = 2,
-          transform_items = function(_ctx, items)
-            for _, item in ipairs(items) do
-              item.kind_icon = "󰩫 Snippets "
-              item.kind_name = "Snippets"
-            end
-            return items
-          end,
-        },
         copilot = {
           name = "copilot",
           module = "blink-copilot",
@@ -98,7 +86,6 @@ return {
         "lazydev",
         "lsp",
         "path",
-        "snippets",
         "copilot",
       }
 
@@ -193,12 +180,10 @@ return {
               end
             end,
             "select_next",
-            "snippet_forward",
             "fallback",
           },
           ["<S-Tab>"] = {
             "select_prev",
-            "snippet_backward",
             "fallback",
           },
         },
@@ -210,7 +195,7 @@ return {
           providers = providers,
         },
         snippets = {
-          preset = "luasnip",
+          preset = "none",
         },
       }
     end,
