@@ -61,7 +61,7 @@ local function _spawn(parent_pane_id, name, cmd_string, opts, focus)
   local env_str = build_env_prefix(opts.env)
   local full_cmd = env_str ~= "" and (env_str .. " " .. cmd_string) or cmd_string
   local pct = math.floor((opts.percent or 0.4) * 100)
-  local side_flag = (opts.side == "right") and "--right" or "--left"
+  local side_flag = (opts.side == "left") and "--left" or "--right"
   local cwd = vim.fn.getcwd()
 
   -- Redirect stderr; wezterm prints config-reload notices to stderr that
