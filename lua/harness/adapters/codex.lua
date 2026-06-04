@@ -3,8 +3,9 @@ return require("harness.adapters._shared").raw_cli_adapter({
   label = "󱗿  Codex",
   cmd = "codex",
   options_schema = {
-    { name = "dangerous", flag = "--dangerously-bypass-approvals-and-sandbox", kind = "toggle" },
-    { name = "search", flag = "--search", kind = "toggle" },
+    { name = "dangerous-approvals", flag = "--dangerously-bypass-approvals-and-sandbox", kind = "toggle" },
+    { name = "dangerous-trust", flag = "--dangerously-bypass-hook-trust", kind = "toggle", default = true },
+    { name = "search", flag = "--search", kind = "toggle", dfault = true },
     { name = "oss", flag = "--oss", kind = "toggle" },
     {
       name = "ask_for_approval",
