@@ -10,7 +10,7 @@ return {
     close_filetypes_on_save = {
       "snacks_dashboard",
       "checkhealth",
-      "neo-tree",
+      "fyler_finder",
     },
     git_use_branch_name = true,
     bypass_save_filetypes = { "snacks_dashboard" },
