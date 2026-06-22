@@ -8,6 +8,7 @@ local servers = {
   "ast_grep",
   "awk_ls",
   "bashls",
+  "contextive",
   "copilot_ls",
   "cue",
   "dockerls",
