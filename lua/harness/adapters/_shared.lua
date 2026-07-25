@@ -49,7 +49,9 @@ function M.raw_cli_adapter(def)
     label = def.label,
     options_schema = def.options_schema,
     available = function()
-      return vim.fn.executable(def.cmd) == 1
+      -- def.cmd may carry a subcommand ("hermes chat"), which is fine for the
+      -- shell but not for executable(). Test the binary, not the whole string.
+      return vim.fn.executable(def.cmd:match("^%S+")) == 1
     end,
     toggle = function()
       ensure().toggle()
