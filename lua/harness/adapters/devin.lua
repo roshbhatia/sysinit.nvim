@@ -9,7 +9,9 @@ return require("harness.adapters._shared").raw_cli_adapter({
       name = "permission_mode",
       flag = "--permission-mode",
       kind = "value",
-      prompt = "Permission mode (auto, dangerous)",
+      -- Enum read from the CLI's own rejection message, which is broader than
+      -- `devin --help` documents: autonomous additionally requires --sandbox.
+      prompt = "normal|auto, accept-edits, smart, dangerous|yolo|bypass, autonomous (needs --sandbox)",
     },
     {
       name = "resume",
