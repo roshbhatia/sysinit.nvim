@@ -27,9 +27,6 @@ local function build_amp_parts()
     table.insert(parts, "threads")
     table.insert(parts, "continue")
   end
-  if sel.dangerous then
-    table.insert(parts, "--dangerously-allow-all")
-  end
   if sel.mode and sel.mode ~= "" then
     table.insert(parts, "--mode")
     table.insert(parts, sel.mode)
@@ -37,10 +34,6 @@ local function build_amp_parts()
   if sel.visibility and sel.visibility ~= "" then
     table.insert(parts, "--visibility")
     table.insert(parts, sel.visibility)
-  end
-  if sel.effort and sel.effort ~= "" then
-    table.insert(parts, "--effort")
-    table.insert(parts, sel.effort)
   end
   return parts
 end
@@ -77,24 +70,20 @@ return {
   name = "amp",
   label = "󰫤  Amp",
   options_schema = {
-    { name = "dangerous", flag = "--dangerously-allow-all", kind = "toggle" },
+    -- amp dropped --dangerously-allow-all and --effort as CLI flags. Permissions
+    -- are now the `amp.dangerouslyAllowAll` setting plus `amp permissions`
+    -- subcommands, and --mode absorbed what --effort used to select.
     {
       name = "mode",
       flag = "--mode",
       kind = "value",
-      prompt = "deep|free|large|rush|smart",
+      prompt = "low|medium|high|ultra",
     },
     {
       name = "visibility",
       flag = "--visibility",
       kind = "value",
-      prompt = "private|public|workspace|group",
-    },
-    {
-      name = "effort",
-      flag = "--effort",
-      kind = "value",
-      prompt = "Effort (mode-dependent: e.g. minimal|low|medium|high|xhigh)",
+      prompt = "private|unlisted|workspace|group",
     },
     {
       name = "thread",

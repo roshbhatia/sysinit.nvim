@@ -10,7 +10,7 @@ local ORDER = {
   "crush",
   "cursor",
   "devin",
-  "gemini",
+  "antigravity",
   "goose",
   "hermes",
 }
