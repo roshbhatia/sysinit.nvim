@@ -3,10 +3,20 @@ local M = {}
 ---@class harness.OptionDef
 ---@field name      string   -- key used in state table (e.g. "dangerous")
 ---@field flag      string   -- CLI flag emitted (e.g. "--dangerously-skip-permissions")
----@field kind      string   -- "toggle" | "value"
+---@field kind      string   -- "toggle" | "value" | "enum" | "opt_value" | "list"
 ---@field default?  any
----@field prompt?   string   -- prompt label for kind="value"
+---@field choices?  string[] -- allowed values for kind="enum"
+---@field prompt?   string   -- prompt label for kind="value"/"list"
 ---@field label?    string   -- display label in picker (defaults to flag)
+
+-- Kinds beyond toggle/value exist because CLI surfaces drifted past a plain
+-- on/off or key=value shape:
+--   enum      -- fixed choice set; picked from a list so a stale choice can't
+--               be typed and only fail at spawn time.
+--   opt_value -- flag that is valid bare OR with a value (--resume [id]).
+--               State is `true` for bare, a string for the value form.
+--   list      -- repeatable flag (--add-dir A --add-dir B). Stored as one
+--               comma-separated string, emitted as one flag pair per item.
 
 local persist = require("harness.persist")
 local STATE_FILE = persist.path("options")
@@ -94,10 +104,27 @@ function M.build_args(agent_name)
         if v then
           table.insert(args, opt.flag)
         end
-      elseif opt.kind == "value" then
+      elseif opt.kind == "value" or opt.kind == "enum" then
         if v and v ~= "" then
           table.insert(args, opt.flag)
           table.insert(args, tostring(v))
+        end
+      elseif opt.kind == "opt_value" then
+        if v == true then
+          table.insert(args, opt.flag)
+        elseif type(v) == "string" and v ~= "" then
+          table.insert(args, opt.flag)
+          table.insert(args, v)
+        end
+      elseif opt.kind == "list" then
+        if type(v) == "string" and v ~= "" then
+          for _, item in ipairs(vim.split(v, ",", { plain = true, trimempty = true })) do
+            item = vim.trim(item)
+            if item ~= "" then
+              table.insert(args, opt.flag)
+              table.insert(args, item)
+            end
+          end
         end
       end
     end
@@ -116,10 +143,19 @@ function M.summary(agent_name)
   local parts = {}
   for _, opt in ipairs(schema) do
     local v = sel[opt.name]
-    if opt.kind == "toggle" and v then
-      table.insert(parts, opt.label or opt.flag)
-    elseif opt.kind == "value" and v and v ~= "" then
-      table.insert(parts, (opt.label or opt.flag) .. "=" .. tostring(v))
+    local display = opt.label or opt.flag
+    if opt.kind == "toggle" then
+      if v then
+        table.insert(parts, display)
+      end
+    elseif opt.kind == "opt_value" then
+      if v == true then
+        table.insert(parts, display)
+      elseif type(v) == "string" and v ~= "" then
+        table.insert(parts, display .. "=" .. v)
+      end
+    elseif v and v ~= "" then
+      table.insert(parts, display .. "=" .. tostring(v))
     end
   end
   return table.concat(parts, " ")
@@ -142,8 +178,16 @@ function M.configure(agent_name, on_close)
     local right
     if opt.kind == "toggle" then
       right = cur and "[x]" or "[ ]"
+    elseif opt.kind == "opt_value" then
+      if cur == true then
+        right = "[bare]"
+      elseif type(cur) == "string" and cur ~= "" then
+        right = "= " .. cur
+      else
+        right = "[ ]"
+      end
     else
-      right = cur and ("= " .. tostring(cur)) or "(unset)"
+      right = (cur and cur ~= "") and ("= " .. tostring(cur)) or "(unset)"
     end
     local display = opt.label or opt.flag
     return string.format("%-12s  %-40s  %s", right, display, opt.kind)
@@ -184,6 +228,43 @@ function M.configure(agent_name, on_close)
       if opt.kind == "toggle" then
         M.toggle(agent_name, opt.name)
         vim.schedule(reopen)
+        return
+      end
+      if opt.kind == "enum" and opt.choices then
+        local choices = { "(unset)" }
+        vim.list_extend(choices, opt.choices)
+        vim.ui.select(choices, { prompt = (opt.label or opt.flag) .. ": " }, function(choice)
+          if choice then
+            M.set(agent_name, opt.name, choice ~= "(unset)" and choice or nil)
+          end
+          vim.schedule(reopen)
+        end)
+        return
+      end
+      if opt.kind == "opt_value" then
+        -- Bare and valued forms are both legal, so offer them explicitly
+        -- rather than making the user guess from a free-text prompt.
+        local modes = { "off", "bare flag", "set value…" }
+        vim.ui.select(modes, { prompt = (opt.label or opt.flag) .. ": " }, function(mode)
+          if mode == "off" then
+            M.set(agent_name, opt.name, nil)
+          elseif mode == "bare flag" then
+            M.set(agent_name, opt.name, true)
+          elseif mode == "set value…" then
+            local cur = sel[opt.name]
+            vim.ui.input({
+              prompt = (opt.prompt or opt.flag) .. ": ",
+              default = type(cur) == "string" and cur or "",
+            }, function(value)
+              if value ~= nil then
+                M.set(agent_name, opt.name, value ~= "" and value or nil)
+              end
+              vim.schedule(reopen)
+            end)
+            return
+          end
+          vim.schedule(reopen)
+        end)
         return
       end
       if opt.picker_source then
