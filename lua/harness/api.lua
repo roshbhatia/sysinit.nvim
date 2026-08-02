@@ -155,8 +155,29 @@ function M.send_selection()
   adapter.send(text, { submit = false })
 end
 
+function M.walkthrough_clear()
+  require("harness.control").clear()
+end
+
+function M.preview_spec()
+  local path = vim.api.nvim_buf_get_name(0)
+  if path == "" then
+    vim.notify("Harness: current buffer has no file", vim.log.levels.WARN)
+    return
+  end
+  local res = require("harness.preview").open(path, { focus = false })
+  if not res.ok then
+    vim.notify("Harness: " .. tostring(res.error), vim.log.levels.WARN)
+  end
+end
+
 function M.setup()
   require("harness.completion").setup()
+  -- Registering the instance is what lets an agent started outside nvim find
+  -- and adopt this editor later. See doc/agent-ide-integration.md.
+  require("harness.instance").setup()
+  require("harness.control").setup()
+  require("harness.spec_watch").setup()
 end
 
 return M
