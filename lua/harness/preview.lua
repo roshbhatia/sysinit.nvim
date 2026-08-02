@@ -23,6 +23,9 @@ local function open_window()
     vim.api.nvim_set_current_win(state.win)
     return
   end
+  -- Required lazily: control.lua reaches back into this module for its
+  -- preview op, and a top-level require either way would be a cycle.
+  require("harness.control").dismiss_start_screen()
   vim.cmd("botright vsplit")
   state.win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_width(state.win, math.max(60, math.floor(vim.o.columns * 0.42)))

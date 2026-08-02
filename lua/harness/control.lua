@@ -34,6 +34,53 @@ local function ensure_buf(path)
   return buf, nil
 end
 
+local START_SCREENS = {
+  snacks_dashboard = true,
+  dashboard = true,
+  alpha = true,
+  starter = true,
+  ministarter = true,
+}
+
+--- Close any start screen still floating over the editor.
+---
+--- snacks.dashboard is a full-editor float at zindex 10. Opening a buffer in a
+--- real window underneath succeeds but stays invisible, so an agent's
+--- walkthrough looks like it did nothing. Interactive use never hits this
+--- because the user opens a file, which dismisses the dashboard first.
+function M.dismiss_start_screen()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_config(win).relative ~= "" then
+      local buf = vim.api.nvim_win_get_buf(win)
+      if START_SCREENS[vim.bo[buf].filetype] then
+        pcall(vim.api.nvim_win_close, win, true)
+      end
+    end
+  end
+end
+
+--- Close leftover scratch windows.
+---
+--- Dismissing snacks.dashboard leaves an empty no-name window behind, so a
+--- two-file walkthrough would otherwise show three splits. Only windows whose
+--- buffer is unnamed, unmodified, and empty are closed, and never the last one.
+local function prune_empty_windows()
+  local wins = vim.api.nvim_tabpage_list_wins(0)
+  for _, win in ipairs(wins) do
+    if #vim.api.nvim_tabpage_list_wins(0) <= 1 then
+      return
+    end
+    if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
+      local buf = vim.api.nvim_win_get_buf(win)
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+      local blank = #lines == 0 or (#lines == 1 and lines[1] == "")
+      if vim.api.nvim_buf_get_name(buf) == "" and not vim.bo[buf].modified and blank then
+        pcall(vim.api.nvim_win_close, win, true)
+      end
+    end
+  end
+end
+
 --- Pick a window suitable for content, skipping terminals, sidebars, and floats.
 ---@return integer|nil
 local function main_win()
@@ -54,6 +101,7 @@ end
 ---@param buf integer
 ---@param split string|nil  "none" | "vsplit" | "split" | "tab"
 local function show(buf, split)
+  M.dismiss_start_screen()
   if split == "tab" then
     vim.cmd("tabnew")
     vim.api.nvim_win_set_buf(0, buf)
@@ -69,7 +117,9 @@ local function show(buf, split)
     vim.cmd("split")
   end
   vim.api.nvim_win_set_buf(0, buf)
-  return vim.api.nvim_get_current_win()
+  local win = vim.api.nvim_get_current_win()
+  prune_empty_windows()
+  return win
 end
 
 ---@param win integer
