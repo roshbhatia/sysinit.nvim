@@ -1,3 +1,6 @@
+-- Flags verified against `devin --help`. The permission-mode enum below is the
+-- one the CLI documents; the binary also accepts an undocumented `autonomous`
+-- value that additionally requires --sandbox, so it is listed last.
 return require("harness.adapters._shared").raw_cli_adapter({
   name = "devin",
   label = "󰚩  Devin",
@@ -8,23 +11,17 @@ return require("harness.adapters._shared").raw_cli_adapter({
     {
       name = "permission_mode",
       flag = "--permission-mode",
-      kind = "value",
-      -- Enum read from the CLI's own rejection message, which is broader than
-      -- `devin --help` documents: autonomous additionally requires --sandbox.
-      prompt = "normal|auto, accept-edits, smart, dangerous|yolo|bypass, autonomous (needs --sandbox)",
-    },
-    {
-      name = "resume",
-      flag = "--resume",
-      kind = "value",
-      prompt = "Resume: session ID (leave blank for interactive picker via -r alone)",
+      kind = "enum",
+      choices = { "auto", "accept-edits", "smart", "dangerous", "autonomous" },
     },
     {
       name = "respect_workspace_trust",
       flag = "--respect-workspace-trust",
-      kind = "value",
-      prompt = "Respect workspace trust (true, false)",
+      kind = "enum",
+      choices = { "true", "false" },
     },
+    { name = "resume", flag = "--resume", kind = "opt_value", prompt = "Session ID (blank opens the picker)" },
+    { name = "export", flag = "--export", kind = "opt_value", prompt = "Export path (blank uses the default)" },
     {
       name = "model",
       flag = "--model",

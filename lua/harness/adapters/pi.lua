@@ -9,40 +9,17 @@ local function ensure_lifecycle()
   return lc
 end
 
--- pi.run reads pi.config at runtime to assemble the cmd. We bypass that
--- by passing an explicit cmd built from the harness options.
+-- pi.run reads pi.config at runtime to assemble the cmd. We bypass that by
+-- passing an explicit cmd built from the harness options.
+--
+-- `--mode rpc --no-session` is fixed: pi.nvim speaks pi's RPC protocol and
+-- expects an ephemeral session. That is why the session flags (--session,
+-- --session-id, --fork, --name) are absent from the schema; they would
+-- contradict --no-session.
 local function build_pi_cmd()
-  local sel = require("harness.options").get_selected("pi")
   local cmd = { "pi", "--mode", "rpc", "--no-session" }
-  if sel.no_tools then
-    table.insert(cmd, "--no-tools")
-  end
-  if sel.fast then
-    table.insert(cmd, "--fast")
-  end
-  if sel.plan then
-    table.insert(cmd, "--plan")
-  end
-  if sel.verbose then
-    table.insert(cmd, "--verbose")
-  end
-  if sel["continue"] then
-    table.insert(cmd, "--continue")
-  end
-  if sel.resume then
-    table.insert(cmd, "--resume")
-  end
-  if sel.thinking and sel.thinking ~= "" then
-    table.insert(cmd, "--thinking")
-    table.insert(cmd, sel.thinking)
-  end
-  if sel.provider and sel.provider ~= "" then
-    table.insert(cmd, "--provider")
-    table.insert(cmd, sel.provider)
-  end
-  if sel.model and sel.model ~= "" then
-    table.insert(cmd, "--model")
-    table.insert(cmd, sel.model)
+  for _, arg in ipairs(require("harness.options").build_args("pi")) do
+    table.insert(cmd, arg)
   end
   return cmd
 end
@@ -50,16 +27,38 @@ end
 return {
   name = "pi",
   label = "󰏿  Pi",
+  -- Flags verified against `pi --help`. --thinking gained `max`. --fast,
+  -- --plan, --preset, --mcp-config, and --retry-stall-timeout-ms come from
+  -- pi extensions, not the core parser, so they need those extensions loaded.
   options_schema = {
     { name = "no_tools", flag = "--no-tools", kind = "toggle" },
+    { name = "no_builtin_tools", flag = "--no-builtin-tools", kind = "toggle" },
     { name = "fast", flag = "--fast", kind = "toggle" },
     { name = "plan", flag = "--plan", kind = "toggle" },
     { name = "verbose", flag = "--verbose", kind = "toggle" },
     { name = "continue", flag = "--continue", kind = "toggle" },
     { name = "resume", flag = "--resume", kind = "toggle" },
-    { name = "thinking", flag = "--thinking", kind = "value", prompt = "off|minimal|low|medium|high|xhigh" },
+    { name = "no_skills", flag = "--no-skills", kind = "toggle" },
+    { name = "no_extensions", flag = "--no-extensions", kind = "toggle" },
+    { name = "no_context_files", flag = "--no-context-files", kind = "toggle" },
+    { name = "approve", flag = "--approve", kind = "toggle" },
+    { name = "offline", flag = "--offline", kind = "toggle" },
+    {
+      name = "thinking",
+      flag = "--thinking",
+      kind = "enum",
+      choices = { "off", "minimal", "low", "medium", "high", "xhigh", "max" },
+    },
     { name = "provider", flag = "--provider", kind = "value", prompt = "Provider (e.g. anthropic, openai, google)" },
     { name = "model", flag = "--model", kind = "value", prompt = "Model pattern (e.g. anthropic/sonnet)" },
+    { name = "models", flag = "--models", kind = "value", prompt = "Ctrl+P cycle patterns, comma-separated" },
+    { name = "tools", flag = "--tools", kind = "value", prompt = "Tool allowlist, comma-separated" },
+    { name = "exclude_tools", flag = "--exclude-tools", kind = "value", prompt = "Tool denylist, comma-separated" },
+    { name = "append_system_prompt", flag = "--append-system-prompt", kind = "value", prompt = "Text or file path" },
+    { name = "preset", flag = "--preset", kind = "value", prompt = "Preset configuration name" },
+    { name = "mcp_config", flag = "--mcp-config", kind = "value", prompt = "Path to MCP config file" },
+    { name = "skill", flag = "--skill", kind = "list", prompt = "Skill files or dirs (comma-separated)" },
+    { name = "extension", flag = "--extension", kind = "list", prompt = "Extension files (comma-separated)" },
   },
   available = function()
     return vim.fn.executable("pi") == 1

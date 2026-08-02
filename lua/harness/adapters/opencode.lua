@@ -32,15 +32,21 @@ end
 return {
   name = "opencode",
   label = "  OpenCode",
+  -- Flags verified against `opencode --help`. --port is fixed by the server
+  -- callback below, so it is deliberately absent here.
   options_schema = {
     { name = "continue", flag = "--continue", kind = "toggle" },
     { name = "fork", flag = "--fork", kind = "toggle" },
     { name = "pure", flag = "--pure", kind = "toggle" },
+    { name = "auto", flag = "--auto", kind = "toggle" },
+    { name = "mini", flag = "--mini", kind = "toggle" },
+    { name = "no_replay", flag = "--no-replay", kind = "toggle" },
+    { name = "print_logs", flag = "--print-logs", kind = "toggle" },
     {
       name = "log_level",
       flag = "--log-level",
-      kind = "value",
-      prompt = "Log level (DEBUG, INFO, WARN, ERROR)",
+      kind = "enum",
+      choices = { "DEBUG", "INFO", "WARN", "ERROR" },
     },
     {
       name = "model",
@@ -50,6 +56,8 @@ return {
     },
     { name = "agent", flag = "--agent", kind = "value", prompt = "Agent name" },
     { name = "session", flag = "--session", kind = "value", prompt = "Session id (kill server first; <leader>jx)" },
+    { name = "hostname", flag = "--hostname", kind = "value", prompt = "Hostname to listen on" },
+    { name = "replay_limit", flag = "--replay-limit", kind = "value", prompt = "Cap mini replay to newest N" },
   },
   available = function()
     return opencode_ok() and vim.fn.executable("opencode") == 1

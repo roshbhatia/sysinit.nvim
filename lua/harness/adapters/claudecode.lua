@@ -75,25 +75,34 @@ end
 return {
   name = "claudecode",
   label = "  Claude",
+  -- Flags verified against `claude --help`. --permission-mode renamed its
+  -- `default` choice to `manual`; passing `default` is now rejected.
+  -- --add-dir is variadic (one flag, many values), so it stays a single value
+  -- rather than a repeatable list.
   options_schema = {
     { name = "dangerous", flag = "--dangerously-skip-permissions", kind = "toggle" },
     { name = "ide", flag = "--ide", kind = "toggle", default = true },
     {
       name = "permission_mode",
       flag = "--permission-mode",
-      kind = "value",
+      kind = "enum",
       default = "auto",
-      prompt = [[Permission mode (acceptEdits, auto, bypassPermissions, default, dontAsk, plan)]],
+      choices = { "acceptEdits", "auto", "bypassPermissions", "manual", "dontAsk", "plan" },
     },
     { name = "continue", flag = "--continue", kind = "toggle" },
-    { name = "resume", flag = "--resume", kind = "toggle" },
     { name = "fork_session", flag = "--fork-session", kind = "toggle" },
-    { name = "worktree", flag = "--worktree", kind = "toggle" },
+    { name = "safe_mode", flag = "--safe-mode", kind = "toggle" },
+    { name = "bare", flag = "--bare", kind = "toggle" },
+    { name = "chrome", flag = "--chrome", kind = "toggle" },
+    { name = "verbose", flag = "--verbose", kind = "toggle" },
+    { name = "resume", flag = "--resume", kind = "opt_value", prompt = "Session ID or search term" },
+    { name = "worktree", flag = "--worktree", kind = "opt_value", prompt = "Worktree name (blank generates one)" },
+    { name = "from_pr", flag = "--from-pr", kind = "opt_value", prompt = "PR number or URL" },
     {
       name = "effort",
       flag = "--effort",
-      kind = "value",
-      prompt = "Effort (low, medium, high, xhigh, max)",
+      kind = "enum",
+      choices = { "low", "medium", "high", "xhigh", "max" },
     },
     { name = "agent", flag = "--agent", kind = "value", prompt = "Agent name" },
     {
@@ -102,6 +111,26 @@ return {
       kind = "value",
       prompt = "Model alias or full name (e.g. opus, sonnet)",
     },
+    {
+      name = "fallback_model",
+      flag = "--fallback-model",
+      kind = "value",
+      prompt = "Fallback model(s), comma-separated",
+    },
+    { name = "name", flag = "--name", kind = "value", prompt = "Display name for this session" },
+    { name = "session_id", flag = "--session-id", kind = "value", prompt = "Session UUID" },
+    { name = "add_dir", flag = "--add-dir", kind = "value", prompt = "Extra directory to allow" },
+    { name = "settings", flag = "--settings", kind = "value", prompt = "Settings file path or JSON" },
+    { name = "setting_sources", flag = "--setting-sources", kind = "value", prompt = "user,project,local" },
+    { name = "tools", flag = "--tools", kind = "value", prompt = [[Tools (e.g. "Bash,Edit,Read", "" to disable)]] },
+    {
+      name = "allowed_tools",
+      flag = "--allowed-tools",
+      kind = "value",
+      prompt = [[Allowed tools (e.g. "Bash(git *)")]],
+    },
+    { name = "disallowed_tools", flag = "--disallowed-tools", kind = "value", prompt = "Denied tools" },
+    { name = "append_system_prompt", flag = "--append-system-prompt", kind = "value", prompt = "Text to append" },
   },
   available = function()
     return pcall(require, "claudecode") and vim.fn.executable("claude") == 1

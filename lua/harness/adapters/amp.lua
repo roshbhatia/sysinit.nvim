@@ -21,19 +21,19 @@ local lc
 local lc_signature
 
 local function build_amp_parts()
-  local sel = require("harness.options").get_selected("amp")
+  local options = require("harness.options")
+  local sel = options.get_selected("amp")
   local parts = { "amp" }
   if sel.thread then
     table.insert(parts, "threads")
     table.insert(parts, "continue")
+    -- --last belongs to the subcommand, so it must land before the globals.
+    if sel.thread_last then
+      table.insert(parts, "--last")
+    end
   end
-  if sel.mode and sel.mode ~= "" then
-    table.insert(parts, "--mode")
-    table.insert(parts, sel.mode)
-  end
-  if sel.visibility and sel.visibility ~= "" then
-    table.insert(parts, "--visibility")
-    table.insert(parts, sel.visibility)
+  for _, arg in ipairs(options.build_args("amp")) do
+    table.insert(parts, arg)
   end
   return parts
 end
@@ -76,19 +76,34 @@ return {
     {
       name = "mode",
       flag = "--mode",
-      kind = "value",
-      prompt = "low|medium|high|ultra",
+      kind = "enum",
+      choices = { "low", "medium", "high", "ultra" },
     },
     {
       name = "visibility",
       flag = "--visibility",
-      kind = "value",
-      prompt = "private|unlisted|workspace|group",
+      kind = "enum",
+      choices = { "private", "unlisted", "workspace", "group" },
     },
+    -- --ide is on by default and is what connects the CLI to the amp.nvim
+    -- bridge, so the useful knob is the opt-out.
+    { name = "no_ide", flag = "--no-ide", kind = "toggle" },
+    { name = "no_notifications", flag = "--no-notifications", kind = "toggle" },
+    { name = "label", flag = "--label", kind = "list", prompt = "Thread labels (comma-separated)" },
+    { name = "mcp_config", flag = "--mcp-config", kind = "value", prompt = "MCP JSON or config file path" },
+    { name = "settings_file", flag = "--settings-file", kind = "value", prompt = "Custom settings file path" },
+    { name = "log_level", flag = "--log-level", kind = "value", prompt = "Log level" },
     {
       name = "thread",
       flag = "threads continue",
       label = "resume via amp picker",
+      kind = "toggle",
+      cli = false,
+    },
+    {
+      name = "thread_last",
+      flag = "--last",
+      label = "resume last thread (needs resume above)",
       kind = "toggle",
       cli = false,
     },

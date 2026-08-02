@@ -1,3 +1,5 @@
+-- Flags verified against `codex --help`. `--ask-for-approval` no longer accepts
+-- on-failure; the live enum is untrusted/on-request/never.
 return require("harness.adapters._shared").raw_cli_adapter({
   name = "codex",
   label = "󱗿  Codex",
@@ -5,20 +7,34 @@ return require("harness.adapters._shared").raw_cli_adapter({
   options_schema = {
     { name = "dangerous-approvals", flag = "--dangerously-bypass-approvals-and-sandbox", kind = "toggle" },
     { name = "dangerous-trust", flag = "--dangerously-bypass-hook-trust", kind = "toggle", default = true },
-    { name = "search", flag = "--search", kind = "toggle", dfault = true },
+    { name = "search", flag = "--search", kind = "toggle", default = true },
     { name = "oss", flag = "--oss", kind = "toggle" },
+    { name = "no_alt_screen", flag = "--no-alt-screen", kind = "toggle" },
+    { name = "strict_config", flag = "--strict-config", kind = "toggle" },
     {
       name = "ask_for_approval",
       flag = "--ask-for-approval",
-      kind = "value",
-      prompt = "Approval (untrusted, on-failure, on-request, never)",
+      kind = "enum",
+      choices = { "untrusted", "on-request", "never" },
     },
     {
       name = "sandbox",
       flag = "--sandbox",
-      kind = "value",
-      prompt = "Sandbox (read-only, workspace-write, danger-full-access)",
+      kind = "enum",
+      choices = { "read-only", "workspace-write", "danger-full-access" },
+    },
+    {
+      name = "local_provider",
+      flag = "--local-provider",
+      kind = "enum",
+      choices = { "lmstudio", "ollama" },
     },
     { name = "model", flag = "--model", kind = "value", prompt = "Model" },
+    { name = "profile", flag = "--profile", kind = "value", prompt = "Config profile name" },
+    { name = "cd", flag = "--cd", kind = "value", prompt = "Working root directory" },
+    { name = "add_dir", flag = "--add-dir", kind = "list", prompt = "Extra writable dirs (comma-separated)" },
+    { name = "config", flag = "--config", kind = "list", prompt = "key=value overrides (comma-separated)" },
+    { name = "enable", flag = "--enable", kind = "list", prompt = "Features to enable (comma-separated)" },
+    { name = "disable", flag = "--disable", kind = "list", prompt = "Features to disable (comma-separated)" },
   },
 })
