@@ -155,6 +155,30 @@ function M.send_selection()
   adapter.send(text, { submit = false })
 end
 
+--- Send every review.nvim comment to the active agent as one message.
+--- Sent unsubmitted so you can add framing before you hit enter.
+function M.send_review()
+  local adapter = get_active_adapter()
+  if not adapter then
+    return
+  end
+  local ok_store, store = pcall(require, "review.store")
+  local ok_export, export = pcall(require, "review.export")
+  if not (ok_store and ok_export) then
+    vim.notify("Harness: review.nvim not loaded — open a review with <leader>dr", vim.log.levels.WARN)
+    return
+  end
+  local count = store.count()
+  if count == 0 then
+    vim.notify("Harness: no review comments to send", vim.log.levels.WARN)
+    return
+  end
+  local markdown = export.generate_markdown()
+  last_prompts[adapter.name] = markdown
+  adapter.send(markdown, { submit = false })
+  vim.notify(string.format("Harness: sent %d review comment(s) to %s", count, adapter.name), vim.log.levels.INFO)
+end
+
 function M.walkthrough_clear()
   require("harness.control").clear()
 end
