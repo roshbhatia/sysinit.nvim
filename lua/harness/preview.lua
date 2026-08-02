@@ -40,17 +40,28 @@ local function render_with_glow(full)
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_win_set_buf(state.win, buf)
   vim.bo[buf].bufhidden = "wipe"
+  pcall(vim.api.nvim_buf_set_name, buf, "glow://" .. vim.fn.fnamemodify(full, ":t"))
+  vim.keymap.set("n", "q", "<Cmd>close<CR>", { buffer = buf, nowait = true })
+
+  -- nvim_open_term interprets glow's ANSI without running the job *in* the
+  -- buffer. Spawning it with jobstart({term=true}) would leave a
+  -- "[Process exited 0]" line and a term:// buffer name in the winbar.
+  local chan = vim.api.nvim_open_term(buf, {})
   local width = math.max(40, vim.api.nvim_win_get_width(state.win) - 2)
-  vim.fn.jobstart({ "glow", "--style", "auto", "--width", tostring(width), full }, {
-    term = true,
-    on_exit = function()
-      -- Terminal buffers stay in terminal-mode keymaps otherwise, which makes
-      -- a read-only preview feel like a shell you can type into.
-      if vim.api.nvim_buf_is_valid(buf) then
-        vim.keymap.set("n", "q", "<Cmd>close<CR>", { buffer = buf, nowait = true })
+  vim.system(
+    { "glow", "--style", "auto", "--width", tostring(width), full },
+    -- glow strips color when stdout is a pipe, which is exactly what we want
+    -- to override: the escapes are the point.
+    { env = { CLICOLOR_FORCE = "1" } },
+    vim.schedule_wrap(function(res)
+      if not vim.api.nvim_buf_is_valid(buf) then
+        return
       end
-    end,
-  })
+      local out = (res.stdout or ""):gsub("\n", "\r\n")
+      pcall(vim.api.nvim_chan_send, chan, out)
+    end)
+  )
+
   state.buf = buf
   if old and old ~= buf and vim.api.nvim_buf_is_valid(old) then
     pcall(vim.api.nvim_buf_delete, old, { force = true })
