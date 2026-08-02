@@ -79,7 +79,7 @@ end
 local function snacks_opts(opts)
   return {
     win = {
-      position = opts.side == "left" and "left" or "right",
+      position = opts.side == "right" and "right" or "left",
       width = opts.percent or 0.4,
     },
     env = opts.env,
