@@ -1,7 +1,7 @@
 -- Flags verified against `goose session --help`. --fork requires --resume.
 return require("harness.adapters._shared").raw_cli_adapter({
   name = "goose",
-  label = "  Goose",
+  label = "  Goose",
   cmd = "goose",
   args = { "session" },
   options_schema = {

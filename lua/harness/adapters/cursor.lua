@@ -2,7 +2,7 @@
 -- take an optional value, so they use opt_value rather than a plain toggle.
 return require("harness.adapters._shared").raw_cli_adapter({
   name = "cursor",
-  label = "  Cursor Agent",
+  label = "  Cursor Agent",
   cmd = "cursor-agent",
   options_schema = {
     { name = "yolo", flag = "--yolo", kind = "toggle" },
