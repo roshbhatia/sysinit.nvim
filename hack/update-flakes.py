@@ -26,8 +26,11 @@ def update():
                 cache[key] = api(f"repos/{owner}/{repo}/commits/{branch}")["sha"]
             else:
                 releases = api(f"repos/{owner}/{repo}/releases?per_page=100")
-                stable = [release for release in releases if not release["draft"] and not release["prerelease"]]
-                cache[key] = stable[0]["tag_name"] if stable else ref
+                stable = [release["tag_name"] for release in releases if not release["draft"] and not release["prerelease"]]
+                stable = [tag for tag in stable if re.fullmatch(r"v?\d+\.\d+\.\d+", tag)]
+                if not stable:
+                    stable = [tag["name"] for tag in api(f"repos/{owner}/{repo}/tags?per_page=100") if re.fullmatch(r"v?\d+\.\d+\.\d+", tag["name"])]
+                cache[key] = max([ref, *stable], key=lambda tag: tuple(map(int, tag.lstrip("v").split("."))))
         return f'github:{owner}/{repo}/{cache[key]}{query or ""}'
 
     for relative in sorted(tracked, key=lambda path: (path.count("/"), path)):

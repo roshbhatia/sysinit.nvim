@@ -27,6 +27,7 @@ class UpdateFlakesTest(unittest.TestCase):
                 if endpoint.endswith('/releases?per_page=100'):
                     return json.dumps([
                         {'tag_name': 'v3.0.0-rc1', 'draft': False, 'prerelease': True},
+                        {'tag_name': 'v1.5.0', 'draft': False, 'prerelease': False},
                         {'tag_name': 'v2.0.0', 'draft': False, 'prerelease': False},
                     ])
                 if endpoint.endswith('/commits/main'):
@@ -39,6 +40,21 @@ class UpdateFlakesTest(unittest.TestCase):
             self.assertIn('b' * 40, (root / 'extras/flake.nix').read_text())
             self.assertEqual([entry[1]['cwd'] for entry in calls], [root, root / 'extras'])
             self.assertTrue(all(entry[0] == ['nix', 'flake', 'update'] and entry[1]['check'] for entry in calls))
+
+    def test_tag_only_repositories_exclude_prereleases_and_do_not_downgrade(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            path = root / 'flake.nix'
+            path.write_text('"github:owner/tool/v2.0.0"')
+            def output(argv, **kwargs):
+                if argv[0] == 'git':
+                    return 'flake.nix\n'
+                if '/releases?' in argv[-1]:
+                    return '[]'
+                return json.dumps([{'name': 'v1.9.0'}, {'name': 'v3.0.0-rc1'}, {'name': 'v2.1.0'}])
+            with patch.object(updater, 'ROOT', root), patch.object(updater.subprocess, 'check_output', side_effect=output), patch.object(updater.subprocess, 'run'):
+                updater.update()
+            self.assertEqual(path.read_text(), '"github:owner/tool/v2.1.0"')
 
 
 if __name__ == '__main__':
