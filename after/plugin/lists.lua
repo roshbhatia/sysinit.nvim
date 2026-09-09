@@ -30,21 +30,40 @@ local function is_loc_win()
   return wininfo and wininfo.loclist == 1
 end
 
+local function has_qf_entries()
+  return vim.fn.getqflist({ size = 0 }).size > 0
+end
+
+local function stepped_scope(delta)
+  local ok, scopes = pcall(require, "harness.scopes")
+  return ok and scopes.step(delta)
+end
+
 local function next_item()
+  if stepped_scope(1) then
+    return
+  end
   if is_qf_win() or (get_qf_winid() and not get_loc_winid()) then
     vim.cmd.cnext()
   elseif is_loc_win() or get_loc_winid() then
     vim.cmd.lnext()
+  elseif has_qf_entries() then
+    vim.cmd.cnext()
   else
     vim.notify("No quickfix or location list open", vim.log.levels.INFO)
   end
 end
 
 local function prev_item()
+  if stepped_scope(-1) then
+    return
+  end
   if is_qf_win() or (get_qf_winid() and not get_loc_winid()) then
     vim.cmd.cprev()
   elseif is_loc_win() or get_loc_winid() then
     vim.cmd.lprev()
+  elseif has_qf_entries() then
+    vim.cmd.cprev()
   else
     vim.notify("No quickfix or location list open", vim.log.levels.INFO)
   end
@@ -55,6 +74,8 @@ local function first_item()
     vim.cmd.cfirst()
   elseif is_loc_win() or get_loc_winid() then
     vim.cmd.lfirst()
+  elseif has_qf_entries() then
+    vim.cmd.cfirst()
   else
     vim.notify("No quickfix or location list open", vim.log.levels.INFO)
   end
@@ -65,12 +86,13 @@ local function last_item()
     vim.cmd.clast()
   elseif is_loc_win() or get_loc_winid() then
     vim.cmd.llast()
+  elseif has_qf_entries() then
+    vim.cmd.clast()
   else
     vim.notify("No quickfix or location list open", vim.log.levels.INFO)
   end
 end
 
--- Smart toggle: closed → open+focus; open unfocused → focus; focused → close
 local function toggle_qf()
   local winid = get_qf_winid()
   if not winid then
@@ -93,9 +115,9 @@ local function toggle_loc()
   end
 end
 
-Snacks.keymap.set("n", "]q", next_item,  { desc = "Next qf/loc item" })
-Snacks.keymap.set("n", "[q", prev_item,  { desc = "Prev qf/loc item" })
-Snacks.keymap.set("n", "]Q", last_item,  { desc = "Last qf/loc item" })
+Snacks.keymap.set("n", "]q", next_item, { desc = "Next qf/loc item" })
+Snacks.keymap.set("n", "[q", prev_item, { desc = "Prev qf/loc item" })
+Snacks.keymap.set("n", "]Q", last_item, { desc = "Last qf/loc item" })
 Snacks.keymap.set("n", "[Q", first_item, { desc = "First qf/loc item" })
-Snacks.keymap.set("n", "<leader>eq", toggle_qf,  { desc = "Toggle quickfix" })
+Snacks.keymap.set("n", "<leader>eq", toggle_qf, { desc = "Toggle quickfix" })
 Snacks.keymap.set("n", "<leader>el", toggle_loc, { desc = "Toggle loclist" })

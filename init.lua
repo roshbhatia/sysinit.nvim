@@ -21,7 +21,17 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
+local lockfile = vim.fn.stdpath("state") .. "/lazy-lock.json"
+if vim.fn.filereadable(lockfile) == 0 then
+  vim.fn.mkdir(vim.fn.stdpath("state"), "p")
+  local seed = vim.fn.stdpath("config") .. "/lazy-lock.json"
+  if vim.fn.filereadable(seed) == 1 then
+    assert(vim.uv.fs_copyfile(seed, lockfile))
+  end
+end
+
 require("lazy").setup({
+  lockfile = lockfile,
   dev = {
     path = "~/github/personal/roshbhatia",
     fallback = true,
@@ -37,6 +47,7 @@ require("lazy").setup({
     },
   },
   performance = {
+    reset_packpath = false,
     rtp = {
       disabled_plugins = {
         "gzip",

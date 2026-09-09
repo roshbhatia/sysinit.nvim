@@ -14,11 +14,23 @@ return {
         return ""
       end
 
+      local function get_notes_status()
+        local ok, notes = pcall(require, "harness.notes")
+        if not ok then
+          return ""
+        end
+        local state = notes.status()
+        if state.count == 0 then
+          return ""
+        end
+        return string.format("%s %d ", state.shown and "󰦢" or "󰦣", state.count)
+      end
+
       require("staline").setup({
         sections = {
           left = { "mode", "branch", "file_name" },
           mid = {},
-          right = { get_format_status, "file_size", "line_column" },
+          right = { get_notes_status, get_format_status, "file_size", "line_column" },
         },
         defaults = {
           inactive_color = get_fg("Normal"),

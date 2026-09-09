@@ -10,7 +10,7 @@ return {
     close_filetypes_on_save = {
       "snacks_dashboard",
       "checkhealth",
-      "fyler_finder",
+      "neo-tree",
     },
     git_use_branch_name = true,
     bypass_save_filetypes = { "snacks_dashboard" },
@@ -18,9 +18,15 @@ return {
     cwd_change_handling = true,
     continue_restore_on_error = true,
     log_level = "info",
+    pre_save_cmds = {
+      function()
+        pcall(function()
+          require("harness.api").review_close()
+        end)
+      end,
+    },
     post_restore_cmds = {
       function()
-        -- Open dashboard if no files were restored
         if vim.fn.argc(-1) == 0 and #vim.fn.getbufinfo({ buflisted = 1 }) == 0 then
           Snacks.dashboard.open({
             wo = {
@@ -32,7 +38,6 @@ return {
     },
     no_restore_cmds = {
       function()
-        -- Open dashboard when starting without arguments and no session to restore
         if vim.fn.argc(-1) == 0 then
           Snacks.dashboard.open({
             wo = {

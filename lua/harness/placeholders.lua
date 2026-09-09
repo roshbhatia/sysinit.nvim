@@ -42,6 +42,14 @@ local function safe_buf_get_lines(buf, start, end_)
   return lines
 end
 
+local function git_root(ctx)
+  local name = safe_buf_name(ctx.buf)
+  if name then
+    return context.get_git_root(vim.fn.fnamemodify(name, ":h"))
+  end
+  return context.get_git_root(ctx.cwd)
+end
+
 M.providers.position = function(ctx)
   if not safe_is_file(ctx.buf) then
     return nil
@@ -178,8 +186,6 @@ M.providers.diagnostics = function(ctx)
 end
 
 ---@param ctx harness.EditorState
----@param type_patterns string[]
----@return string|nil
 local function ts_ancestor(ctx, type_patterns)
   local ok, ts_utils = pcall(require, "nvim-treesitter.ts_utils")
   if not ok then
@@ -225,8 +231,12 @@ end
 
 local DIFF_MAX_BYTES = 32768
 
-M.providers.git = function(_ctx)
-  local result = vim.fn.system("git status --short --branch 2>/dev/null")
+M.providers.git = function(ctx)
+  local root = git_root(ctx)
+  if not root then
+    return nil
+  end
+  local result = vim.fn.system({ "git", "-C", root, "status", "--short", "--branch" })
   if vim.v.shell_error ~= 0 or result == "" then
     return nil
   end
@@ -241,13 +251,12 @@ M.providers.diff = function(ctx)
   if not path then
     return nil
   end
-  local root = context.get_git_root()
+  local root = git_root(ctx)
   if not root then
     return nil
   end
-  local rel = context.strip_git_root(path)
-  local result =
-    vim.fn.system(string.format("git -C %s diff %s 2>/dev/null", vim.fn.shellescape(root), vim.fn.shellescape(rel)))
+  local rel = context.strip_git_root(path, root)
+  local result = vim.fn.system({ "git", "-C", root, "diff", "--", rel })
   if vim.v.shell_error ~= 0 or result == "" then
     return nil
   end
@@ -361,10 +370,6 @@ M.descriptions = {
 }
 
 ---@param parts  string[]
----@param pos    integer
----@param input  string
----@param len    integer
----@return integer
 local function strip_token_whitespace(parts, pos, input, len)
   while pos <= len and input:sub(pos, pos) == " " do
     pos = pos + 1
@@ -384,8 +389,6 @@ local function strip_token_whitespace(parts, pos, input, len)
 end
 
 ---@param input  string
----@param state? harness.Context|table
----@return string
 function M.apply(input, state)
   if not input or input == "" then
     return input

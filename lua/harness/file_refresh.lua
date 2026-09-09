@@ -2,15 +2,11 @@ local M = {}
 
 local INTERVAL_MS = 1000
 
----@type userdata|nil
+---@type uv.uv_timer_t|nil
 local timer = nil
 
 local function tick()
   pcall(vim.cmd, "silent! checktime")
-end
-
-function M.is_active()
-  return timer ~= nil
 end
 
 function M.start()
@@ -25,6 +21,11 @@ function M.start()
     return
   end
   timer:start(INTERVAL_MS, INTERVAL_MS, vim.schedule_wrap(tick))
+end
+
+---@return boolean
+function M.is_active()
+  return timer ~= nil
 end
 
 function M.stop()

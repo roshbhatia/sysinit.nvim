@@ -11,20 +11,142 @@ return {
       require("harness.api").setup()
     end,
     keys = {
-      { "<leader>jj", function() require("harness.api").toggle() end,         desc = "Harness: pick / toggle active agent" },
-      { "<leader>ja", function() require("harness.api").ask() end,            desc = "Harness: ask",                       mode = { "n", "v" } },
-      { "<leader>jc", function() require("harness.api").comment() end,        desc = "Harness: comment",                   mode = { "n", "v" } },
-      { "<leader>jf", function() require("harness.api").fix() end,            desc = "Harness: fix diagnostics" },
-      { "<leader>jr", function() require("harness.api").resend() end,         desc = "Harness: resend last prompt" },
-      { "<leader>jx", function() require("harness.api").kill() end,           desc = "Harness: kill active session" },
-      { "<leader>jJ", function() require("harness.api").kill_and_pick() end,  desc = "Harness: kill and re-pick" },
-      { "<leader>jo", function() require("harness.api").options() end,        desc = "Harness: configure options for active agent" },
-      { "<leader>j?", function() require("harness.api").status() end,         desc = "Harness: show active agent + options" },
-      { "<leader>jb", function() require("harness.api").add_buffer() end,     desc = "Harness: add current buffer" },
-      { "<leader>js", function() require("harness.api").send_selection() end, desc = "Harness: send selection",            mode = "v" },
-      { "<leader>jC", function() require("harness.api").walkthrough_clear() end, desc = "Harness: clear agent annotations" },
-      { "<leader>jp", function() require("harness.api").preview_spec() end,   desc = "Harness: preview current file (glow)" },
-      { "<leader>jw", "<Cmd>HarnessSpecWatch<CR>",                            desc = "Harness: toggle spec auto-preview" },
+      {
+        "<leader>jj",
+        function()
+          require("harness.api").toggle()
+        end,
+        desc = "Start or focus the agent pane",
+      },
+      {
+        "<leader>ja",
+        function()
+          require("harness.api").ask()
+        end,
+        desc = "Ask",
+        mode = { "n", "v" },
+      },
+      {
+        "<leader>jc",
+        function()
+          require("harness.api").comment()
+        end,
+        desc = "Comment",
+        mode = { "n", "v" },
+      },
+      {
+        "<leader>jf",
+        function()
+          require("harness.api").fix()
+        end,
+        desc = "Fix diagnostics",
+      },
+      {
+        "<leader>jr",
+        function()
+          require("harness.api").resend()
+        end,
+        desc = "Resend last prompt",
+      },
+      {
+        "<leader>jx",
+        function()
+          require("harness.api").kill()
+        end,
+        desc = "Kill the agent pane",
+      },
+      {
+        "<leader>j?",
+        function()
+          require("harness.api").status()
+        end,
+        desc = "Agent pane status",
+      },
+      {
+        "<leader>jb",
+        function()
+          require("harness.api").add_buffer()
+        end,
+        desc = "Add buffer",
+      },
+      {
+        "<leader>js",
+        function()
+          require("harness.api").send_selection()
+        end,
+        desc = "Send selection",
+        mode = "v",
+      },
+      {
+        "<leader>dna",
+        function()
+          require("harness.notes").add()
+        end,
+        desc = "Add note on this line",
+      },
+      {
+        "<leader>dnt",
+        function()
+          require("harness.notes").toggle()
+        end,
+        desc = "Toggle notes",
+      },
+      {
+        "<leader>dnd",
+        function()
+          require("harness.notes").remove_line()
+        end,
+        desc = "Delete notes on this line",
+      },
+      {
+        "<leader>dnD",
+        function()
+          require("harness.notes").remove_file()
+        end,
+        desc = "Delete notes in this file",
+      },
+      {
+        "<leader>dnX",
+        function()
+          require("harness.notes").remove_all()
+        end,
+        desc = "Delete every note",
+      },
+      {
+        "<leader>dnq",
+        function()
+          require("harness.notes_list").quickfix()
+        end,
+        desc = "Quickfix notes",
+      },
+      {
+        "<leader>dnf",
+        function()
+          require("harness.notes_list").pick()
+        end,
+        desc = "Find note",
+      },
+      {
+        "<leader>dw",
+        function()
+          require("harness.deltas").why()
+        end,
+        desc = "Which prompt wrote this line",
+      },
+      {
+        "<leader>dl",
+        function()
+          require("harness.deltas").pick()
+        end,
+        desc = "Find agent delta",
+      },
+      {
+        "<leader>dL",
+        function()
+          require("harness.deltas").pick({ file = true })
+        end,
+        desc = "Find agent delta in this file",
+      },
     },
   },
 }

@@ -1,7 +1,20 @@
+---@class harness.SelectionRange
+---@field from integer[]
+---@field to integer[]
+---@field kind string
+
+---@class harness.EditorState
+---@field win integer
+---@field buf integer
+---@field cwd string
+---@field row integer
+---@field col integer
+---@field range harness.SelectionRange?
+
 local M = {}
 
----@param buf? integer
----@return boolean
+local augroup = "harness_context"
+
 function M.is_file(buf)
   buf = buf or vim.api.nvim_get_current_buf()
   local name = vim.api.nvim_buf_get_name(buf)
@@ -12,10 +25,22 @@ function M.is_file(buf)
   return bt == "" or bt == "acwrite"
 end
 
----@type table<string,string|false>
 local git_root_cache = {}
 
----@param cwd string
+local function physical_path(path)
+  local normalized = vim.fs.normalize(path)
+  local resolved = vim.uv.fs_realpath(normalized)
+  if resolved then
+    return resolved
+  end
+  local parent = vim.fn.fnamemodify(normalized, ":h")
+  local physical_parent = vim.uv.fs_realpath(parent)
+  if physical_parent then
+    return vim.fs.joinpath(physical_parent, vim.fn.fnamemodify(normalized, ":t"))
+  end
+  return normalized
+end
+
 local function prewarm_git_root(cwd)
   if git_root_cache[cwd] ~= nil then
     return
@@ -36,30 +61,12 @@ local function prewarm_git_root(cwd)
   )
 end
 
-vim.api.nvim_create_autocmd("DirChanged", {
-  callback = function()
-    git_root_cache = {}
-    prewarm_git_root(vim.fn.getcwd())
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufEnter", {
-  callback = function()
-    local ok, cwd = pcall(vim.fn.getcwd)
-    if ok and cwd and cwd ~= "" then
-      prewarm_git_root(cwd)
-    end
-  end,
-})
-
----@return string|nil
-function M.get_git_root()
-  local cwd = vim.fn.getcwd()
+function M.get_git_root(cwd)
+  cwd = physical_path(cwd or vim.fn.getcwd())
   if git_root_cache[cwd] ~= nil then
     return git_root_cache[cwd] or nil
   end
 
-  -- 1.5s hard timeout to avoid hanging on slow filesystems
   local obj = vim.system({ "git", "rev-parse", "--show-toplevel" }, { cwd = cwd, text = true }):wait(1500)
   if not obj or obj.code == nil or obj.code ~= 0 then
     git_root_cache[cwd] = false
@@ -71,19 +78,21 @@ function M.get_git_root()
   return git_root_cache[cwd] or nil
 end
 
----@param path string
----@return string
-function M.strip_git_root(path)
-  local root = M.get_git_root()
-  if root and path:sub(1, #root) == root then
-    local remainder = path:sub(#root + 1)
-    return remainder:match("^/(.*)$") or remainder
+function M.strip_git_root(path, root)
+  root = root or M.get_git_root(vim.fn.fnamemodify(path, ":h"))
+  if root then
+    root = physical_path(root)
+    local physical = physical_path(path)
+    if physical == root then
+      return "."
+    end
+    if vim.startswith(physical, root .. "/") then
+      return physical:sub(#root + 2)
+    end
   end
   return path
 end
 
----@param buf? integer
----@return {from: integer[], to: integer[], kind: string}|nil
 function M.get_selection_range(buf)
   buf = buf or vim.api.nvim_get_current_buf()
 
@@ -109,12 +118,11 @@ function M.get_selection_range(buf)
   }
 end
 
----@type integer|nil
 local last_source_win = nil
 
 local excluded_filetypes = {
   snacks_terminal = true,
-  ["fyler_finder"] = true,
+  ["neo-tree"] = true,
   NvimTree = true,
   Outline = true,
   qf = true,
@@ -144,8 +152,6 @@ local excluded_filetypes = {
   ai_terminals_input = true,
 }
 
----@param win integer
----@return boolean
 local function is_source_window(win)
   if not vim.api.nvim_win_is_valid(win) then
     return false
@@ -163,22 +169,35 @@ local function is_source_window(win)
   return bt == "" or bt == "help" or bt == "acwrite"
 end
 
-vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-  callback = function()
-    local win = vim.api.nvim_get_current_win()
-    if is_source_window(win) then
-      last_source_win = win
-    end
-  end,
-})
-
----@class harness.EditorState
----@field win    integer
----@field buf    integer
----@field cwd    string
----@field row    integer  1-indexed
----@field col    integer  1-indexed
----@field range  {from:integer[],to:integer[],kind:string}|nil
+function M.setup()
+  local group = vim.api.nvim_create_augroup(augroup, { clear = true })
+  vim.api.nvim_create_autocmd("DirChanged", {
+    group = group,
+    callback = function()
+      git_root_cache = {}
+      prewarm_git_root(vim.fn.getcwd())
+    end,
+  })
+  vim.api.nvim_create_autocmd("BufEnter", {
+    group = group,
+    callback = function()
+      local ok, cwd = pcall(vim.fn.getcwd)
+      if ok and cwd and cwd ~= "" then
+        prewarm_git_root(cwd)
+      end
+    end,
+  })
+  vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+    group = group,
+    callback = function()
+      local win = vim.api.nvim_get_current_win()
+      if is_source_window(win) then
+        last_source_win = win
+      end
+    end,
+  })
+  prewarm_git_root(vim.fn.getcwd())
+end
 
 ---@return harness.EditorState
 function M.capture()
@@ -235,19 +254,13 @@ function M.capture()
   }
 end
 
----@class harness.Context
----@field ctx   harness.EditorState
----@field cache table<string,string|false>
 local Context = {}
 Context.__index = Context
 
----@return harness.Context
 function Context.new()
   return setmetatable({ ctx = M.capture(), cache = {} }, Context)
 end
 
----@param name string  e.g. "position" or "line|file"
----@return string|nil
 function Context:get(name)
   local names = vim.split(name, "|", { plain = true })
   for _, n in ipairs(names) do
@@ -272,9 +285,7 @@ end
 M.Context = Context
 M.new = Context.new
 
----@param buf integer
----@param marks {from: integer[], to: integer[], kind: string}
----@return harness.Context
+---@return harness.EditorState
 function M.from_marks(buf, marks)
   local cur_buf = vim.api.nvim_get_current_buf()
   local cur_win = vim.api.nvim_get_current_win()

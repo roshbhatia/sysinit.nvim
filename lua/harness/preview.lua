@@ -1,14 +1,7 @@
--- Markdown preview for spec artifacts.
---
--- glow emits ANSI, so the rendered form goes into a terminal buffer where the
--- escapes actually mean something. Without glow we fall back to the plain
--- markdown buffer, which is still readable and keeps this dependency optional.
---
--- One reusable window on the right; agent panes own the left now.
-
 local M = {}
 
-local state = { win = nil, buf = nil, path = nil }
+local state = { win = nil, buf = nil, path = nil, pane = nil, snacks = nil }
+local augroup = nil
 
 local function win_valid()
   return state.win ~= nil and vim.api.nvim_win_is_valid(state.win)
@@ -18,14 +11,87 @@ local function have_glow()
   return vim.fn.executable("glow") == 1
 end
 
+---@return integer|nil  the pane nvim itself runs in
+local function host_pane()
+  local parent = tonumber(vim.env.WEZTERM_PANE)
+  if not parent or vim.fn.executable("wezterm") ~= 1 then
+    return nil
+  end
+  return parent
+end
+
+local function snacks()
+  local ok, mod = pcall(require, "snacks")
+  return ok and mod or nil
+end
+
+---@param full string
+---@return string
+local function render_cmd(full)
+  return ("clear; CLICOLOR_FORCE=1 glow --style auto --width $(tput cols) %s"):format(vim.fn.shellescape(full))
+end
+
+local function pane_alive(pane)
+  if not pane then
+    return false
+  end
+  local wezterm = require("utils.wezterm_terminal")
+  return wezterm.pane_alive(pane)
+end
+
+---@param full string
+---@return boolean handled
+local function render_in_wezterm(full)
+  local parent = host_pane()
+  if not parent then
+    return false
+  end
+  local wezterm = require("utils.wezterm_terminal")
+
+  if pane_alive(state.pane) then
+    return wezterm.send_text(state.pane, render_cmd(full), { submit = true, paste = false })
+  end
+
+  local cmd = ("%s; exec ${SHELL:-sh}"):format(render_cmd(full))
+  local id = wezterm.split({
+    parent = parent,
+    percent = 42,
+    side = "right",
+    argv = { "sh", "-c", cmd },
+  })
+  if not id then
+    return false
+  end
+  state.pane = id
+  wezterm.activate(parent)
+  return true
+end
+
+local START_SCREENS = {
+  snacks_dashboard = true,
+  dashboard = true,
+  alpha = true,
+  starter = true,
+  ministarter = true,
+}
+
+local function dismiss_start_screen()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_config(win).relative ~= "" then
+      local buf = vim.api.nvim_win_get_buf(win)
+      if START_SCREENS[vim.bo[buf].filetype] then
+        pcall(vim.api.nvim_win_close, win, true)
+      end
+    end
+  end
+end
+
 local function open_window()
   if win_valid() then
     vim.api.nvim_set_current_win(state.win)
     return
   end
-  -- Required lazily: control.lua reaches back into this module for its
-  -- preview op, and a top-level require either way would be a cycle.
-  require("harness.control").dismiss_start_screen()
+  dismiss_start_screen()
   vim.cmd("botright vsplit")
   state.win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_width(state.win, math.max(60, math.floor(vim.o.columns * 0.42)))
@@ -33,6 +99,30 @@ local function open_window()
   vim.wo[state.win].relativenumber = false
   vim.wo[state.win].signcolumn = "no"
   vim.wo[state.win].winfixwidth = true
+end
+
+---@param full string
+---@return boolean handled
+local function render_in_snacks(full)
+  local mod = snacks()
+  if not mod or not mod.terminal then
+    return false
+  end
+  if state.snacks and state.snacks:valid() then
+    pcall(function()
+      state.snacks:close()
+    end)
+  end
+  local ok, win = pcall(mod.terminal.open, render_cmd(full) .. "; exec ${SHELL:-sh}", {
+    win = { position = "right", width = 0.42 },
+    auto_close = false,
+    start_insert = false,
+  })
+  if not ok or not win then
+    return false
+  end
+  state.snacks = win
+  return true
 end
 
 local function render_with_glow(full)
@@ -43,15 +133,10 @@ local function render_with_glow(full)
   pcall(vim.api.nvim_buf_set_name, buf, "glow://" .. vim.fn.fnamemodify(full, ":t"))
   vim.keymap.set("n", "q", "<Cmd>close<CR>", { buffer = buf, nowait = true })
 
-  -- nvim_open_term interprets glow's ANSI without running the job *in* the
-  -- buffer. Spawning it with jobstart({term=true}) would leave a
-  -- "[Process exited 0]" line and a term:// buffer name in the winbar.
   local chan = vim.api.nvim_open_term(buf, {})
   local width = math.max(40, vim.api.nvim_win_get_width(state.win) - 2)
   vim.system(
     { "glow", "--style", "auto", "--width", tostring(width), full },
-    -- glow strips color when stdout is a pipe, which is exactly what we want
-    -- to override: the escapes are the point.
     { env = { CLICOLOR_FORCE = "1" } },
     vim.schedule_wrap(function(res)
       if not vim.api.nvim_buf_is_valid(buf) then
@@ -68,20 +153,39 @@ local function render_with_glow(full)
   end
 end
 
---- Open `path` in the preview window.
+local function watch(full)
+  vim.api.nvim_clear_autocmds({ group = augroup, event = "BufWritePost" })
+  vim.api.nvim_create_autocmd("BufWritePost", {
+    group = augroup,
+    pattern = full,
+    callback = function()
+      M.refresh()
+    end,
+  })
+end
+
 ---@param path string
----@param opts? { focus?: boolean }
----@return table result
 function M.open(path, opts)
+  M.setup()
   opts = opts or {}
   local full = vim.fn.fnamemodify(vim.fn.expand(path), ":p")
   if vim.fn.filereadable(full) == 0 then
     return { ok = false, error = "no such file: " .. full }
   end
+  state.path = full
+  watch(full)
+
+  if have_glow() then
+    if render_in_wezterm(full) then
+      return { ok = true, path = full, renderer = "glow", surface = "wezterm" }
+    end
+    if render_in_snacks(full) then
+      return { ok = true, path = full, renderer = "glow", surface = "snacks" }
+    end
+  end
 
   local prev = vim.api.nvim_get_current_win()
   open_window()
-  state.path = full
 
   local renderer
   if have_glow() then
@@ -96,31 +200,32 @@ function M.open(path, opts)
   if opts.focus == false and vim.api.nvim_win_is_valid(prev) then
     vim.api.nvim_set_current_win(prev)
   end
-  return { ok = true, path = full, renderer = renderer }
+  return { ok = true, path = full, renderer = renderer, surface = "split" }
 end
 
---- Re-render whatever is already showing. Used by the spec watcher.
 function M.refresh()
-  if not state.path or not win_valid() then
+  if not state.path then
+    return
+  end
+  if not (pane_alive(state.pane) or (state.snacks and state.snacks:valid()) or win_valid()) then
     return
   end
   M.open(state.path, { focus = false })
 end
 
-function M.close()
-  if win_valid() then
-    vim.api.nvim_win_close(state.win, true)
+function M.setup()
+  if augroup ~= nil then
+    return
   end
-  state.win, state.buf, state.path = nil, nil, nil
-end
-
-function M.is_open()
-  return win_valid()
-end
-
----@return string|nil  path currently shown, if any
-function M.current()
-  return win_valid() and state.path or nil
+  augroup = vim.api.nvim_create_augroup("SysinitPreview", { clear = true })
+  vim.api.nvim_create_autocmd("VimLeavePre", {
+    group = augroup,
+    callback = function()
+      if pane_alive(state.pane) then
+        require("utils.wezterm_terminal").kill(state.pane)
+      end
+    end,
+  })
 end
 
 return M

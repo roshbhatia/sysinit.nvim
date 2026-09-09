@@ -39,16 +39,18 @@ return {
         ),
       })
 
-      -- winborder="rounded" is set globally; clear it for the duration of cmdline
-      -- so wilder's own palette border="rounded" is the only border drawn.
       local augroup_wb = vim.api.nvim_create_augroup("WilderWinborder", { clear = true })
       vim.api.nvim_create_autocmd("CmdlineEnter", {
         group = augroup_wb,
-        callback = function() vim.o.winborder = "" end,
+        callback = function()
+          vim.o.winborder = ""
+        end,
       })
       vim.api.nvim_create_autocmd("CmdlineLeave", {
         group = augroup_wb,
-        callback = function() vim.o.winborder = "rounded" end,
+        callback = function()
+          vim.o.winborder = "rounded"
+        end,
       })
 
       local popupmenu_renderer = wilder.popupmenu_renderer(wilder.popupmenu_palette_theme({
@@ -69,9 +71,6 @@ return {
           accent = "WilderAccent",
         },
         left = {
-          -- 3-element chunk: wilder uses [1] for non-selected, [2] for selected.
-          -- WilderPrefixHidden blends with the popup bg so > is invisible on
-          -- non-selected rows; WilderPrefixSelected makes it visible.
           { "> ", "WilderPrefixHidden", "WilderPrefixSelected" },
         },
         right = {

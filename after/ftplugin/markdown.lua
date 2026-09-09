@@ -1,23 +1,20 @@
--- Disable treesitter highlighting for markdown, use LSP instead
 vim.b.ts_highlight = false
 if vim.treesitter.highlighter.active[vim.api.nvim_get_current_buf()] then
   vim.treesitter.stop(vim.api.nvim_get_current_buf())
 end
 
 Snacks.keymap.set("n", "<localleader>xp", function()
-  local file = vim.fn.expand("%:p")
-  Snacks.terminal.toggle({ "glow", "-p", file }, {
-    win = { position = "right", width = 0.4 },
-  })
+  require("utils.markdown_preview").toggle_glow()
 end, { ft = "markdown", desc = "Preview with glow" })
 
--- Enable LSP semantic tokens for markdown
+Snacks.keymap.set("n", "<localleader>xP", function()
+  require("utils.markdown_preview").toggle_browser()
+end, { ft = "markdown", desc = "Preview in browser (go-grip)" })
+
 vim.b.semantic_tokens = true
 
--- Use traditional regex highlighting as fallback
 vim.bo.syntax = "on"
 
--- markdown_oxide: only enable if .obsidian folder exists in workspace root
 local function has_obsidian_workspace()
   return vim.fn.isdirectory(vim.fn.getcwd() .. "/.obsidian") == 1
 end

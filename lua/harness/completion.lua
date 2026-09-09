@@ -1,5 +1,6 @@
 local M = {}
 local registered = false
+local augroup = "harness_completion"
 
 local function register_source()
   if registered then
@@ -21,7 +22,9 @@ local function register_source()
 end
 
 function M.setup()
+  local group = vim.api.nvim_create_augroup(augroup, { clear = true })
   vim.api.nvim_create_autocmd("FileType", {
+    group = group,
     pattern = "ai_terminals_input",
     once = true,
     callback = register_source,
@@ -39,15 +42,15 @@ function source:_init(opts)
   return self
 end
 
-function source:enabled() -- luacheck: ignore self
+function source:enabled()
   return vim.bo.filetype == "ai_terminals_input"
 end
 
-function source:get_trigger_characters() -- luacheck: ignore self
+function source:get_trigger_characters()
   return { "+" }
 end
 
-function source:get_completions(_, callback) -- luacheck: ignore self
+function source:get_completions(_, callback)
   local items = {}
   local ok, types = pcall(require, "blink.cmp.types")
   if not ok then
@@ -72,7 +75,7 @@ function source:get_completions(_, callback) -- luacheck: ignore self
   return function() end
 end
 
-function source:resolve(item, callback) -- luacheck: ignore self
+function source:resolve(item, callback)
   callback(item)
 end
 

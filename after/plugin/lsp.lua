@@ -1,5 +1,3 @@
--- lsp.config and lsp.enable must run synchronously: they register FileType
--- autocmds that have to exist before the initial buffer's FileType event fires.
 vim.lsp.config("*", {
   capabilities = require("blink.cmp").get_lsp_capabilities(),
 })
@@ -37,12 +35,17 @@ local servers = {
 
 vim.lsp.enable(servers)
 
--- Everything below only affects diagnostics display and keymaps — none of it
--- needs to exist before LSP servers start. Deferring avoids initialising the
--- inlay-hint and diagnostic modules (~10ms) during the startup critical path.
-vim.schedule(function()
-  vim.lsp.inlay_hint.enable(true)
+-- diffview:// and fugitive:// buffers carry a real filetype, so a server starts
+-- and is then asked about a path that is not on disk. nixd answers every inlay
+-- hint on one with "-32602: clangd only supports 'file' URI scheme".
+local function on_disk(buf)
+  if vim.api.nvim_buf_get_name(buf) == "" then
+    return false
+  end
+  return vim.startswith(vim.uri_from_bufnr(buf), "file://")
+end
 
+vim.schedule(function()
   vim.diagnostic.config({
     severity_sort = true,
     virtual_text = false,
@@ -58,7 +61,6 @@ vim.schedule(function()
     },
     signs = {
       text = {
-        -- All empty on purpose, so it doesn't show in the sign column
         [vim.diagnostic.severity.ERROR] = "",
         [vim.diagnostic.severity.HINT] = "",
         [vim.diagnostic.severity.INFO] = "",
@@ -95,8 +97,12 @@ vim.schedule(function()
   }
 
   local function autoformat_enabled(buf)
-    if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then return false end
-    if require("neoconf").get("autoformat", nil, { bufnr = buf }) == false then return false end
+    if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then
+      return false
+    end
+    if require("neoconf").get("autoformat", nil, { bufnr = buf }) == false then
+      return false
+    end
     return true
   end
 
@@ -105,11 +111,23 @@ vim.schedule(function()
       local bufnr = args.buf
       local client = vim.lsp.get_client_by_id(args.data.client_id)
 
+      -- Detach, not just skip the hints, so no request carries a non-file URI.
+      if not on_disk(bufnr) then
+        if client then
+          vim.lsp.buf_detach_client(bufnr, client.id)
+        end
+        return
+      end
+
+      vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+
       if client and client.name == "eslint" then
         vim.api.nvim_create_autocmd("BufWritePre", {
           buffer = bufnr,
           callback = function()
-            if not autoformat_enabled(bufnr) then return end
+            if not autoformat_enabled(bufnr) then
+              return
+            end
             vim.cmd("EslintFixAll")
           end,
         })
@@ -119,7 +137,9 @@ vim.schedule(function()
         vim.api.nvim_create_autocmd("BufWritePre", {
           buffer = bufnr,
           callback = function()
-            if not autoformat_enabled(bufnr) then return end
+            if not autoformat_enabled(bufnr) then
+              return
+            end
             vim.lsp.buf.code_action({
               context = { only = { "source.fixAll.ruff", "source.organizeImports.ruff" }, diagnostics = {} },
               apply = true,
