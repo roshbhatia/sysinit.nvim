@@ -9,6 +9,7 @@ local base_config = {
     "opentofu",
     "opentofu-vars",
     "terraform",
+    "terraform-vars",
   },
   root_markers = {
     ".terraform",

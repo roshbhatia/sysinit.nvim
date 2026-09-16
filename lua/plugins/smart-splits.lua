@@ -1,6 +1,6 @@
 local function set_user_var(name, value)
   local seq = ("\27]1337;SetUserVar=%s=%s\7"):format(name, vim.base64.encode(value))
-  vim.fn.chansend(vim.v.stderr, seq)
+  vim.api.nvim_ui_send(seq)
 end
 
 local nav_seq = 0
@@ -28,8 +28,11 @@ return {
     "mrjones2014/smart-splits.nvim",
     event = "VeryLazy",
     init = function()
+      if vim.env.TERM_PROGRAM == "WezTerm" or vim.env.WEZTERM_PANE then
+        vim.g.smart_splits_multiplexer_integration = false
+      end
       announce_nvim(true)
-      vim.api.nvim_create_autocmd("VimResume", {
+      vim.api.nvim_create_autocmd({ "UIEnter", "VimResume" }, {
         callback = function()
           announce_nvim(true)
         end,

@@ -11,4 +11,4 @@ local base_config = {
   },
 }
 
-return vim.tbl_deep_extend("force", base_config, neoconf.get("dockerls") or {})
+return vim.tbl_deep_extend("force", base_config, neoconf.get("docker_language_server") or {})

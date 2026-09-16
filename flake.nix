@@ -76,6 +76,19 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
+          remote-arguments =
+            pkgs.runCommand "rnvim-arguments-test"
+              {
+                nativeBuildInputs = [
+                  pkgs.python3
+                  pkgs.bash
+                  pkgs.coreutils
+                ];
+              }
+              ''
+                python3 ${./checks/rnvim.py} ${./scripts/rnvim.sh}
+                touch $out
+              '';
           editor =
             pkgs.runCommand "nvim-config-tests"
               {

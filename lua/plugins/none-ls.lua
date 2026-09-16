@@ -160,7 +160,7 @@ local function open_link_generator()
         table.insert(actions, {
           title = "Open link in browser",
           action = function()
-            vim.fn.jobstart({ "open", url }, { detach = true })
+            vim.ui.open(url)
           end,
         })
       end
@@ -193,7 +193,7 @@ return {
             ["end"] = { args.line2, end_line:len() },
           }
         end
-        vim.lsp.buf.format({ async = true, range = range })
+        require("utils.formatting").format({ range = range })
       end, { range = true, desc = "Format buffer or range" })
 
       vim.api.nvim_create_user_command("FormatDisable", function()
@@ -241,7 +241,7 @@ return {
           null_ls.builtins.diagnostics.kube_linter,
           null_ls.builtins.diagnostics.staticcheck,
           null_ls.builtins.diagnostics.statix,
-          null_ls.builtins.diagnostics.terraform_validate,
+          null_ls.builtins.diagnostics.terraform_validate.with({ command = "tofu" }),
           null_ls.builtins.diagnostics.tfsec,
           null_ls.builtins.diagnostics.zsh,
 
@@ -285,10 +285,6 @@ return {
         generator = hex_color_generator(),
       })
 
-      local formatter_priority = {
-        nix = { "nixd", "nil_ls" },
-      }
-
       local augroup = vim.api.nvim_create_augroup("NullLsFormatting", { clear = true })
       vim.api.nvim_create_autocmd("BufWritePre", {
         group = augroup,
@@ -305,45 +301,7 @@ return {
             return
           end
 
-          local ft = vim.bo[bufnr].filetype
-          local has_null_ls_formatter = #require("null-ls.sources").get_available(ft, null_ls.methods.FORMATTING) > 0
-          local use_null_ls = has_null_ls_formatter and #vim.lsp.get_clients({ bufnr = bufnr, name = "null-ls" }) > 0
-
-          local chosen_lsp = nil
-          if not use_null_ls then
-            local priority = formatter_priority[ft]
-            if priority then
-              local attached = {}
-              for _, c in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-                if c.server_capabilities and c.server_capabilities.documentFormattingProvider then
-                  attached[c.name] = true
-                end
-              end
-              for _, name in ipairs(priority) do
-                if attached[name] then
-                  chosen_lsp = name
-                  break
-                end
-              end
-            end
-          end
-
-          vim.lsp.buf.format({
-            bufnr = bufnr,
-            async = false,
-            filter = function(client)
-              if client.name == "null-ls" then
-                return use_null_ls
-              end
-              if use_null_ls then
-                return false
-              end
-              if chosen_lsp then
-                return client.name == chosen_lsp
-              end
-              return true
-            end,
-          })
+          require("utils.formatting").format({ bufnr = bufnr })
         end,
       })
     end,

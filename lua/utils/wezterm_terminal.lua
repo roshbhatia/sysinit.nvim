@@ -8,9 +8,13 @@ function M.cli(args)
   -- headless mux server and draws the pane nowhere.
   local cmd = { "wezterm", "cli", "--no-auto-start" }
   vim.list_extend(cmd, args)
-  local result = vim.system(cmd, { text = true }):wait()
+  local ok, process = pcall(vim.system, cmd, { text = true })
+  if not ok then
+    return nil, tostring(process)
+  end
+  local result = process:wait(2000)
   if result.code ~= 0 then
-    return nil, vim.trim(result.stderr or "wezterm cli failed")
+    return nil, result.code == 124 and "wezterm cli timed out" or vim.trim(result.stderr or "wezterm cli failed")
   end
   return vim.trim(result.stdout or ""), nil
 end
@@ -66,7 +70,11 @@ function M.send_text(pane_id, text, opts)
 
   local cmd = { "wezterm", "cli", "--no-auto-start" }
   vim.list_extend(cmd, args)
-  local result = vim.system(cmd, { stdin = payload }):wait()
+  local ok, process = pcall(vim.system, cmd, { stdin = payload })
+  if not ok then
+    return false
+  end
+  local result = process:wait(2000)
   if result.code ~= 0 then
     return false
   end

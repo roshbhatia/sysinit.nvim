@@ -106,14 +106,14 @@ busted.describe("plugin specifications", function()
   end)
 
   busted.it("emits the WezTerm navigation protocol at editor boundaries", function()
-    local chansend = vim.fn.chansend
+    local ui_send = vim.api.nvim_ui_send
     local create_autocmd = vim.api.nvim_create_autocmd
     local original_splits = package.loaded["smart-splits"]
     local messages = {}
     local autocmds = {}
     local split_options
 
-    vim.fn.chansend = function(_, value)
+    vim.api.nvim_ui_send = function(value)
       messages[#messages + 1] = value
     end
     rawset(vim.api, "nvim_create_autocmd", function(events, options)
@@ -133,7 +133,7 @@ busted.describe("plugin specifications", function()
     autocmds[1].callback()
     autocmds[2].callback()
 
-    vim.fn.chansend = chansend
+    vim.api.nvim_ui_send = ui_send
     rawset(vim.api, "nvim_create_autocmd", create_autocmd)
     package.loaded["smart-splits"] = original_splits
 

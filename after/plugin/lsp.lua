@@ -9,7 +9,7 @@ local servers = {
   "contextive",
   "copilot_ls",
   "cue",
-  "dockerls",
+  "docker_language_server",
   "docker_compose_language_service",
   "eslint",
   "gopls",
@@ -19,15 +19,13 @@ local servers = {
   "jsonls",
   "lsp_ai",
   "lua_ls",
-  "marksman",
-  "nil_ls",
+  "markdown_oxide",
   "nixd",
   "pyright",
   "ruff",
   "rego_ls",
   "rust_analyzer",
-  "statix",
-  "terraformls",
+  "tofu_ls",
   "tflint",
   "up",
   "yamlls",
@@ -129,21 +127,6 @@ vim.schedule(function()
               return
             end
             vim.cmd("EslintFixAll")
-          end,
-        })
-      end
-
-      if client and client.name == "ruff" then
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          buffer = bufnr,
-          callback = function()
-            if not autoformat_enabled(bufnr) then
-              return
-            end
-            vim.lsp.buf.code_action({
-              context = { only = { "source.fixAll.ruff", "source.organizeImports.ruff" }, diagnostics = {} },
-              apply = true,
-            })
           end,
         })
       end

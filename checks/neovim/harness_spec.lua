@@ -130,6 +130,27 @@ busted.describe("WezTerm terminal bridge", function()
       assert.are.same({ "wezterm", "cli", "--no-auto-start" }, vim.list_slice(call.command, 1, 3))
     end
   end)
+
+  busted.it("bounds stalled calls and handles a missing CLI", function()
+    vim.system = function()
+      return {
+        wait = function(_, timeout)
+          assert.are.equal(2000, timeout)
+          return { code = 124, stderr = "" }
+        end,
+      }
+    end
+    local terminal = require("utils.wezterm_terminal")
+    local output, err = terminal.cli({ "list" })
+    assert.is_nil(output)
+    assert.are.equal("wezterm cli timed out", err)
+    assert.is_false(terminal.send_text(42, "prompt"))
+    vim.system = function()
+      error("ENOENT")
+    end
+    assert.is_nil(terminal.cli({ "list" }))
+    assert.is_false(terminal.send_text(42, "prompt"))
+  end)
 end)
 
 busted.describe("harness pane lifecycle", function()

@@ -27,13 +27,20 @@ session_key() {
   printf '%s\n' "${host} ${dir}" | sha256sum | cut -c1-10
 }
 
+shell_quote() {
+  local value="$1"
+  printf "'%s'" "${value//\'/\'\\\'\'}"
+}
+
 start_remote() {
   local ctl="$1"
   local host="$2"
   local dir="$3"
   local sock="$4"
 
-  ssh -S "${ctl}" "${host}" bash -s -- "${dir}" "${sock}" << 'REMOTE'
+  local command
+  command="bash -s -- $(shell_quote "${dir}") $(shell_quote "${sock}")"
+  ssh -S "${ctl}" "${host}" "${command}" << 'REMOTE'
 set -euo pipefail
 
 # Deliberately not a login shell: NixOS sources /etc/bash_logout on exit, which
