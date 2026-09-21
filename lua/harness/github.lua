@@ -15,6 +15,9 @@ function M.open(url, overview)
     vim.notify("Expected a GitHub PR URL", vim.log.levels.ERROR)
     return
   end
+  if vim.v.vim_did_enter == 0 then
+    vim.g.sysinit_pr_review = true
+  end
   vim.cmd("Octo " .. url)
   if overview then
     return

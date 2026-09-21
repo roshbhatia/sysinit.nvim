@@ -72,6 +72,14 @@ busted.describe("GitHub review entry", function()
     assert.is_true(calls.resumed)
     assert.are.equal(1, calls.start)
   end)
+  busted.it("keeps startup review windows out of automatic sessions", function()
+    local spec = dofile(vim.env.SYSINIT_NVIM_CONFIG .. "/lua/plugins/auto-session.lua")
+    local previous = vim.g.sysinit_pr_review
+    vim.g.sysinit_pr_review = true
+    assert.is_false(spec.opts.pre_restore_cmds[1]())
+    assert.is_false(spec.opts.pre_save_cmds[1]())
+    vim.g.sysinit_pr_review = previous
+  end)
   busted.it("maps comments, suggestions, threads, commits, and submission", function()
     require("harness.github").setup()
     local maps = calls.config.mappings

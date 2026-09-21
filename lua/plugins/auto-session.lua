@@ -18,8 +18,16 @@ return {
     cwd_change_handling = true,
     continue_restore_on_error = true,
     log_level = "info",
+    pre_restore_cmds = {
+      function()
+        return not vim.g.sysinit_pr_review
+      end,
+    },
     pre_save_cmds = {
       function()
+        if vim.g.sysinit_pr_review then
+          return false
+        end
         pcall(function()
           require("harness.api").review_close()
         end)
@@ -38,7 +46,7 @@ return {
     },
     no_restore_cmds = {
       function()
-        if vim.fn.argc(-1) == 0 then
+        if vim.fn.argc(-1) == 0 and vim.api.nvim_buf_get_name(0) == "" then
           Snacks.dashboard.open({
             wo = {
               cursorline = true,
