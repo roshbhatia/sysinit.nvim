@@ -24,6 +24,11 @@ in
       vimAlias = true;
       viAlias = true;
       sideloadInitLua = true;
+      extraWrapperArgs = [
+        "--set"
+        "SYSINIT_NVIM_OCTO"
+        "${pkgs.vimPlugins.octo-nvim}"
+      ];
       plugins = [
         cfg.notesPlugin
         cfg.changesPlugin

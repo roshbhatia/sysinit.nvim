@@ -100,6 +100,7 @@
               ''
                 export HOME="$TMPDIR/home"; mkdir -p "$HOME"
                 export SYSINIT_NVIM_CONFIG=${self}
+                export SYSINIT_NVIM_OCTO=${pkgs.vimPlugins.octo-nvim}
                 export SYSINIT_NVIM_DIFFVIEW=${pkgs.vimPlugins.diffview-nvim}
                 export SYSINIT_NOTES_PLUGIN=${agent-notes.packages.${system}.neovim-plugin}
                 nvim --headless --clean -u NONE --cmd 'set runtimepath^=${pkgs.vimPlugins.plenary-nvim}' -c 'runtime plugin/plenary.vim' -c "PlenaryBustedDirectory ${./checks/neovim} { minimal_init = '${./checks/neovim.lua}', sequential = true }"
