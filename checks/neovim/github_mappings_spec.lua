@@ -3,7 +3,11 @@ local assert = require("luassert")
 
 busted.describe("installed Octo mappings", function()
   busted.it("registers leader actions and preserves native navigation", function()
+    local gh = require("octo.gh")
+    local setup = gh.setup
+    gh.setup = function() end
     require("harness.github").setup()
+    gh.setup = setup
     local utils = require("octo.utils")
     local cases = {
       pull_request = { " oa", " oc", " oh", " ow", " oy" },
