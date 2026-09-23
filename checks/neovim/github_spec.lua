@@ -43,9 +43,6 @@ busted.describe("GitHub review entry", function()
   busted.after_each(function()
     pcall(vim.api.nvim_del_user_command, "Octo")
     pcall(vim.api.nvim_del_user_command, "PRReview")
-    for _, lhs in ipairs({ ",gr", ",gv", ",gq" }) do
-      pcall(vim.keymap.del, "n", lhs)
-    end
     for _, name in ipairs({ "octo", "octo.reviews", "octo.utils", "harness.github" }) do
       package.loaded[name] = originals[name]
     end
@@ -83,12 +80,36 @@ busted.describe("GitHub review entry", function()
   busted.it("maps comments, suggestions, threads, commits, and submission", function()
     require("harness.github").setup()
     local maps = calls.config.mappings
-    assert.are.equal("<localleader>gc", maps.review_diff.add_review_comment.lhs)
+    assert.are.equal("<leader>oc", maps.review_diff.add_review_comment.lhs)
     assert.are.same({ "n", "x" }, maps.review_diff.add_review_comment.mode)
-    assert.are.equal("<localleader>gv", maps.review_diff.submit_review.lhs)
-    assert.are.equal("<localleader>gh", maps.file_panel.review_commits.lhs)
-    assert.are.equal("<localleader>gc", maps.review_thread.add_comment.lhs)
-    assert.are.equal("<localleader>gt", maps.review_thread.resolve_thread.lhs)
-    assert.are.equal("<localleader>de", maps.review_diff.focus_files.lhs)
+    assert.are.equal("<leader>ov", maps.review_diff.submit_review.lhs)
+    assert.are.equal("<leader>oh", maps.file_panel.review_commits.lhs)
+    assert.are.equal("<leader>oc", maps.review_thread.add_comment.lhs)
+    assert.are.equal("<leader>ot", maps.review_thread.resolve_thread.lhs)
+    assert.are.equal("<leader>oe", maps.review_diff.focus_files.lhs)
+    assert.are.equal("<leader>oa", maps.pull_request.approve_pr.lhs)
+    assert.are.equal("<leader>oa", maps.submit_win.approve_review.lhs)
+    assert.are.equal("<leader>oc", maps.submit_win.comment_review.lhs)
+    assert.are.equal("<leader>ox", maps.submit_win.request_changes.lhs)
+    assert.are.same({ "n" }, maps.submit_win.approve_review.mode)
+    for _, group in pairs(maps) do
+      local used = {}
+      for _, mapping in pairs(group) do
+        assert.is_nil(used[mapping.lhs], "duplicate Octo key: " .. mapping.lhs)
+        used[mapping.lhs] = true
+      end
+    end
+  end)
+  busted.it("exposes review entry keys before Octo loads", function()
+    local spec = dofile(vim.env.SYSINIT_NVIM_CONFIG .. "/lua/plugins/github.lua")[1]
+    local keys = {}
+    for _, mapping in ipairs(spec.keys()) do
+      keys[mapping[1]] = mapping[2]
+    end
+    assert.are.equal("<cmd>Octo review browse<cr>", keys["<leader>od"])
+    assert.are.equal("<cmd>Octo pr edit<cr>", keys["<leader>oo"])
+    assert.are.equal("<cmd>Octo review submit<cr>", keys["<leader>ov"])
+    keys["<leader>or"]()
+    assert.are.equal(1, calls.start)
   end)
 end)

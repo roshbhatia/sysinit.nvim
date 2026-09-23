@@ -15,16 +15,33 @@ The notes UI comes from agent-notes. Its README covers vim.pack, Lazy, and Nixvi
 `:PRReview https://github.com/owner/repo/pull/123` opens the Octo diff and existing threads.
 `:PRReview!` opens the PR discussion. Browsing does not start a pending review.
 
-- `,gr`: start or resume your review.
-- `,gc`: comment on a line or visual selection; reply inside a thread.
-- `,gs`: suggest a change on selected lines.
-- `,gv`: open the review submission form for approval, comments, or requested changes.
-- `,gt` / `,gT`: resolve or reopen a thread.
-- `,gh`: inspect PR commits.
-- `,de` / `,db`: focus or toggle the file panel.
-- `,gq`: close the review.
+Press `Space o` for the Octo group in WhichKey. `Space` is `<leader>`.
 
-Write a comment buffer with `:w` to save it to GitHub. Submit the review explicitly with `,gv`.
+| Keys | Action |
+| --- | --- |
+| `Space op` / `Space oo` | List PRs / open the current branch's PR |
+| `Space od` | Browse the PR diff and existing threads |
+| `Space or` | Start or resume your review |
+| `Space oc` | Comment on a line or visual selection; reply inside a thread |
+| `Space os` | Suggest a change on selected lines |
+| `Space ov` | Open the review submission form |
+| `Space oa` | Approve from the PR overview; submit approval inside the form |
+| `Space ot` / `Space oT` | Resolve or reopen a thread |
+| `Space oh` | Inspect PR commits |
+| `Space oe` / `Space ob` | Focus or toggle the file panel |
+| `Space om` | Toggle the file's viewed state |
+| `Space ow` / `Space oy` | Open the PR in the browser / copy its URL from the overview |
+| `Space oq` | Close the review or submission form |
+
+Inside the submission form, `Space oc` submits a comment review and `Space ox`
+requests changes. `Space oa` submits approval. These keys act in normal mode;
+press Escape after writing the review body. Approval from the overview asks
+for an optional comment; Escape cancels it.
+
+Keep Octo's native `[q` / `]q` file navigation, `[t` / `]t` thread navigation,
+and `gf` to open the source file. Context actions are buffer-local.
+
+Write a comment buffer with `:w` to save it to GitHub. Submit the review explicitly with `Space ov`.
 Plain Diffview remains available through `:DiffviewOpen` and the existing diff keys.
 Octo is pinned through Nix and uses your GitHub CLI authentication.
 

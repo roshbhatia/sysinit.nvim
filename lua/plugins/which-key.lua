@@ -29,6 +29,7 @@ return {
         { "<leader>gb", group = "Buffer" },
         { "<leader>gh", group = "Hunk" },
         { "<leader>j", group = "Agents" },
+        { "<leader>o", group = "Octo" },
         { "<leader>q", group = "Quit" },
         { "[", group = "Prev" },
         { "]", group = "Next" },
@@ -37,6 +38,7 @@ return {
         { "<leader>g", group = "Git", mode = "v" },
         { "<leader>gh", group = "Hunk", mode = "v" },
         { "<leader>j", group = "Agents", mode = "v" },
+        { "<leader>o", group = "Octo", mode = "v" },
       })
     end,
   },

@@ -51,39 +51,60 @@ function M.setup()
     suppress_missing_scope = { projects_v2 = true },
     mappings = {
       pull_request = {
-        add_comment = { lhs = "<localleader>gc", desc = "Add PR comment" },
-        review_start = { lhs = "<localleader>gS", desc = "Start a new review" },
-        review_resume = { lhs = "<localleader>gR", desc = "Resume a pending review" },
+        approve_pr = { lhs = "<leader>oa", desc = "Approve PR" },
+        list_commits = { lhs = "<leader>oh", desc = "List PR commits" },
+        list_changed_files = { lhs = "<leader>of", desc = "List changed files" },
+        open_in_browser = { lhs = "<leader>ow", desc = "Open PR in browser" },
+        copy_url = { lhs = "<leader>oy", desc = "Copy PR URL" },
+        add_comment = { lhs = "<leader>oc", desc = "Add PR comment" },
+        review_start = { lhs = "<leader>oS", desc = "Start a new review" },
+        review_resume = { lhs = "<leader>oR", desc = "Resume a pending review" },
       },
       review_diff = {
-        add_review_comment = { lhs = "<localleader>gc", desc = "Comment on selected lines", mode = { "n", "x" } },
-        add_review_suggestion = { lhs = "<localleader>gs", desc = "Suggest a change", mode = { "n", "x" } },
-        submit_review = { lhs = "<localleader>gv", desc = "Submit review" },
-        discard_review = { lhs = "<localleader>gD", desc = "Discard pending review" },
-        focus_files = { lhs = "<localleader>de", desc = "Focus files" },
-        toggle_files = { lhs = "<localleader>db", desc = "Toggle files" },
-        review_commits = { lhs = "<localleader>gh", desc = "Review commits" },
+        toggle_viewed = { lhs = "<leader>om", desc = "Mark file viewed" },
+        add_review_comment = { lhs = "<leader>oc", desc = "Comment on selected lines", mode = { "n", "x" } },
+        add_review_suggestion = { lhs = "<leader>os", desc = "Suggest a change", mode = { "n", "x" } },
+        submit_review = { lhs = "<leader>ov", desc = "Submit review" },
+        discard_review = { lhs = "<leader>oD", desc = "Discard pending review" },
+        focus_files = { lhs = "<leader>oe", desc = "Focus files" },
+        toggle_files = { lhs = "<leader>ob", desc = "Toggle files" },
+        review_commits = { lhs = "<leader>oh", desc = "Review commits" },
       },
       file_panel = {
-        submit_review = { lhs = "<localleader>gv", desc = "Submit review" },
-        discard_review = { lhs = "<localleader>gD", desc = "Discard pending review" },
-        focus_files = { lhs = "<localleader>de", desc = "Focus files" },
-        toggle_files = { lhs = "<localleader>db", desc = "Toggle files" },
-        review_commits = { lhs = "<localleader>gh", desc = "Review commits" },
+        toggle_viewed = { lhs = "<leader>om", desc = "Mark file viewed" },
+        submit_review = { lhs = "<leader>ov", desc = "Submit review" },
+        discard_review = { lhs = "<leader>oD", desc = "Discard pending review" },
+        focus_files = { lhs = "<leader>oe", desc = "Focus files" },
+        toggle_files = { lhs = "<leader>ob", desc = "Toggle files" },
+        review_commits = { lhs = "<leader>oh", desc = "Review commits" },
       },
       review_thread = {
-        add_comment = { lhs = "<localleader>gc", desc = "Reply to thread" },
-        resolve_thread = { lhs = "<localleader>gt", desc = "Resolve thread" },
-        unresolve_thread = { lhs = "<localleader>gT", desc = "Reopen thread" },
+        add_comment = { lhs = "<leader>oc", desc = "Reply to thread" },
+        resolve_thread = { lhs = "<leader>ot", desc = "Resolve thread" },
+        unresolve_thread = { lhs = "<leader>oT", desc = "Reopen thread" },
+      },
+      submit_win = {
+        approve_review = { lhs = "<leader>oa", desc = "Submit approval", mode = { "n" } },
+        comment_review = { lhs = "<leader>oc", desc = "Submit comment review", mode = { "n" } },
+        request_changes = { lhs = "<leader>ox", desc = "Submit requested changes", mode = { "n" } },
+        close_review_tab = { lhs = "<leader>oq", desc = "Close submission form", mode = { "n" } },
       },
     },
   })
   vim.api.nvim_create_user_command("PRReview", function(args)
     M.open(args.args, args.bang)
   end, { nargs = 1, bang = true, desc = "Browse a GitHub PR diff; ! opens its discussion" })
-  vim.keymap.set("n", "<localleader>gr", M.start, { desc = "Start or resume GitHub review" })
-  vim.keymap.set("n", "<localleader>gv", "<cmd>Octo review submit<cr>", { desc = "Submit GitHub review" })
-  vim.keymap.set("n", "<localleader>gq", "<cmd>Octo review close<cr>", { desc = "Close GitHub review" })
+end
+
+function M.keys()
+  return {
+    { "<leader>op", "<cmd>Octo pr list<cr>", desc = "List GitHub PRs" },
+    { "<leader>oo", "<cmd>Octo pr edit<cr>", desc = "Open current GitHub PR" },
+    { "<leader>od", "<cmd>Octo review browse<cr>", desc = "Browse PR diff and threads" },
+    { "<leader>or", M.start, desc = "Start or resume GitHub review" },
+    { "<leader>ov", "<cmd>Octo review submit<cr>", desc = "Open review submission form" },
+    { "<leader>oq", "<cmd>Octo review close<cr>", desc = "Close GitHub review" },
+  }
 end
 
 return M
