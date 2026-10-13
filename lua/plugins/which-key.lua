@@ -19,6 +19,7 @@ return {
       })
 
       wk.add({
+        { "<leader>a", group = "Atlas" },
         { "<leader>c", group = "Code" },
         { "<leader>cf", group = "Search" },
         { "<leader>d", group = "Diff" },
