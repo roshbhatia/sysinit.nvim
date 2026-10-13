@@ -1,0 +1,19 @@
+init.lua
+  s_0f879b3de094f3::t_84cc2acab514d3 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a60f81c87843dc923c670a7013b9b82171de6e50",
+  "prompts": {},
+  "sessions": {
+    "s_0f879b3de094f3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1364e-f050-7b02-a092-9790835e2b3c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
