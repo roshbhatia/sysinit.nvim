@@ -27,6 +27,7 @@ if vim.fn.filereadable(lockfile) == 0 then
   local seed = vim.fn.stdpath("config") .. "/lazy-lock.json"
   if vim.fn.filereadable(seed) == 1 then
     assert(vim.uv.fs_copyfile(seed, lockfile))
+    assert(vim.uv.fs_chmod(lockfile, 420))
   end
 end
 
