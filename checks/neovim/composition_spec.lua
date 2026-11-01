@@ -90,23 +90,21 @@ busted.describe("formatter ownership", function()
   end)
 end)
 
-busted.describe("tmux UI routing", function()
-  busted.it("selects the tmux navigation backend inside WezTerm", function()
-    local old_term, old_pane, old_send = vim.env.TERM_PROGRAM, vim.env.TMUX_PANE, vim.api.nvim_ui_send
+busted.describe("WezTerm UI routing", function()
+  busted.it("uses the UI channel and disables the duplicate mux owner", function()
+    local old_term, old_send = vim.env.TERM_PROGRAM, vim.api.nvim_ui_send
     local old_mux = vim.g.smart_splits_multiplexer_integration
     local messages = {}
     vim.env.TERM_PROGRAM = "WezTerm"
-    vim.env.TMUX_PANE = "%7"
     vim.api.nvim_ui_send = function(value)
       table.insert(messages, value)
     end
     dofile(vim.env.SYSINIT_NVIM_CONFIG .. "/lua/plugins/smart-splits.lua")[1].init()
-    assert.are.equal("tmux", vim.g.smart_splits_multiplexer_integration)
+    assert.is_false(vim.g.smart_splits_multiplexer_integration)
     assert.are.equal(1, #messages)
     assert.is_truthy(messages[1]:find("IS_NVIM", 1, true))
     vim.api.nvim_ui_send = old_send
     vim.env.TERM_PROGRAM = old_term
-    vim.env.TMUX_PANE = old_pane
     vim.g.smart_splits_multiplexer_integration = old_mux
   end)
 end)

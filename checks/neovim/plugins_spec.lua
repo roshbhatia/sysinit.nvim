@@ -105,15 +105,13 @@ busted.describe("plugin specifications", function()
     assert.are.equal("Quit", quit.group)
   end)
 
-  busted.it("uses tmux pane navigation and retains editor presence updates", function()
+  busted.it("emits the WezTerm navigation protocol at editor boundaries", function()
     local ui_send = vim.api.nvim_ui_send
     local create_autocmd = vim.api.nvim_create_autocmd
     local original_splits = package.loaded["smart-splits"]
     local messages = {}
     local autocmds = {}
     local split_options
-    local original_mux = vim.g.smart_splits_multiplexer_integration
-    local original_pane = vim.env.TMUX_PANE
 
     vim.api.nvim_ui_send = function(value)
       messages[#messages + 1] = value
@@ -129,20 +127,17 @@ busted.describe("plugin specifications", function()
     }
 
     local spec = dofile(config_root .. "/lua/plugins/smart-splits.lua")[1]
-    vim.env.TMUX_PANE = "%7"
     spec.init()
     spec.config()
+    split_options.at_edge({ direction = "left" })
     autocmds[1].callback()
     autocmds[2].callback()
 
     vim.api.nvim_ui_send = ui_send
     rawset(vim.api, "nvim_create_autocmd", create_autocmd)
     package.loaded["smart-splits"] = original_splits
-    vim.g.smart_splits_multiplexer_integration = original_mux
-    vim.env.TMUX_PANE = original_pane
 
     local function user_var(message)
-      message = message:gsub("^\27Ptmux;\27\27", ""):gsub("\27\\\\$", "")
       local name, encoded = message:match("SetUserVar=([^=]+)=([^\7]+)")
       return name, vim.base64.decode(encoded)
     end
@@ -151,11 +146,13 @@ busted.describe("plugin specifications", function()
     assert.are.equal("IS_NVIM", name)
     assert.are.equal("true", value)
     name, value = user_var(messages[2])
-    assert.are.equal("IS_NVIM", name)
-    assert.are.equal("true", value)
+    assert.are.equal("SYSINIT_NAV", name)
+    assert.are.equal("left:1", value)
     name, value = user_var(messages[3])
     assert.are.equal("IS_NVIM", name)
+    assert.are.equal("true", value)
+    name, value = user_var(messages[4])
+    assert.are.equal("IS_NVIM", name)
     assert.are.equal("false", value)
-    assert.are.equal("tmux", split_options.multiplexer_integration)
   end)
 end)

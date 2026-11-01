@@ -1,3 +1,10 @@
+local function set_user_var(name, value)
+  local seq = ("\27]1337;SetUserVar=%s=%s\7"):format(name, vim.base64.encode(value))
+  vim.api.nvim_ui_send(seq)
+end
+
+local nav_seq = 0
+
 local function keep(resize)
   return function()
     resize()
@@ -7,12 +14,13 @@ local function keep(resize)
   end
 end
 
+local function ask_wezterm_to_move(direction)
+  nav_seq = nav_seq + 1
+  set_user_var("SYSINIT_NAV", direction .. ":" .. nav_seq)
+end
+
 local function announce_nvim(present)
-  local seq = ("\27]1337;SetUserVar=IS_NVIM=%s\7"):format(vim.base64.encode(present and "true" or "false"))
-  if vim.env.TMUX_PANE then
-    seq = "\27Ptmux;\27\27" .. seq:sub(2) .. "\27\\"
-  end
-  vim.api.nvim_ui_send(seq)
+  set_user_var("IS_NVIM", present and "true" or "false")
 end
 
 return {
@@ -20,8 +28,8 @@ return {
     "mrjones2014/smart-splits.nvim",
     event = "VeryLazy",
     init = function()
-      if vim.env.TMUX_PANE then
-        vim.g.smart_splits_multiplexer_integration = "tmux"
+      if vim.env.TERM_PROGRAM == "WezTerm" or vim.env.WEZTERM_PANE then
+        vim.g.smart_splits_multiplexer_integration = false
       end
       announce_nvim(true)
       vim.api.nvim_create_autocmd({ "UIEnter", "VimResume" }, {
@@ -39,7 +47,9 @@ return {
       local ft = require("utils.filetypes")
       require("smart-splits").setup({
         cursor_follows_swapped_bufs = true,
-        multiplexer_integration = vim.env.TMUX_PANE and "tmux" or false,
+        at_edge = function(ctx)
+          ask_wezterm_to_move(ctx.direction)
+        end,
         default_amount = 3,
         ignored_filetypes = ft.sidebar_filetypes,
         ignored_buftypes = ft.utility_buftypes,
