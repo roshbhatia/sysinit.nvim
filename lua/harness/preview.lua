@@ -13,8 +13,8 @@ end
 
 ---@return integer|nil  the pane nvim itself runs in
 local function host_pane()
-  local parent = tonumber(vim.env.WEZTERM_PANE)
-  if not parent or vim.fn.executable("wezterm") ~= 1 then
+  local parent = vim.env.TMUX_PANE
+  if not parent or vim.fn.executable("ty") ~= 1 then
     return nil
   end
   return parent
@@ -35,25 +35,25 @@ local function pane_alive(pane)
   if not pane then
     return false
   end
-  local wezterm = require("utils.wezterm_terminal")
-  return wezterm.pane_alive(pane)
+  local terminal = require("utils.tmux_terminal")
+  return terminal.pane_alive(pane)
 end
 
 ---@param full string
 ---@return boolean handled
-local function render_in_wezterm(full)
+local function render_in_tmux(full)
   local parent = host_pane()
   if not parent then
     return false
   end
-  local wezterm = require("utils.wezterm_terminal")
+  local terminal = require("utils.tmux_terminal")
 
   if pane_alive(state.pane) then
-    return wezterm.send_text(state.pane, render_cmd(full), { submit = true, paste = false })
+    return terminal.send_text(state.pane, render_cmd(full), { submit = true })
   end
 
   local cmd = ("%s; exec ${SHELL:-sh}"):format(render_cmd(full))
-  local id = wezterm.split({
+  local id = terminal.split({
     parent = parent,
     percent = 42,
     side = "right",
@@ -63,7 +63,7 @@ local function render_in_wezterm(full)
     return false
   end
   state.pane = id
-  wezterm.activate(parent)
+  terminal.activate(parent)
   return true
 end
 
@@ -176,8 +176,8 @@ function M.open(path, opts)
   watch(full)
 
   if have_glow() then
-    if render_in_wezterm(full) then
-      return { ok = true, path = full, renderer = "glow", surface = "wezterm" }
+    if render_in_tmux(full) then
+      return { ok = true, path = full, renderer = "glow", surface = "tmux" }
     end
     if render_in_snacks(full) then
       return { ok = true, path = full, renderer = "glow", surface = "snacks" }
@@ -222,7 +222,7 @@ function M.setup()
     group = augroup,
     callback = function()
       if pane_alive(state.pane) then
-        require("utils.wezterm_terminal").kill(state.pane)
+        require("utils.tmux_terminal").kill(state.pane)
       end
     end,
   })

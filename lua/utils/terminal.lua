@@ -15,7 +15,7 @@ function M.is_transparent()
     return false
   end
 
-  if vim.env.KITTY_WINDOW_ID or vim.env.WEZTERM_PANE or vim.env.WT_SESSION then
+  if vim.env.KITTY_WINDOW_ID or vim.env.WEZTERM_PANE or vim.env.TMUX_PANE or vim.env.WT_SESSION then
     return true
   end
 
