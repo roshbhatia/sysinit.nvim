@@ -1,8 +1,5 @@
 local function set_user_var(name, value)
   local seq = ("\27]1337;SetUserVar=%s=%s\7"):format(name, vim.base64.encode(value))
-  if vim.env.TMUX_PANE then
-    seq = "\27Ptmux;\27\27" .. seq:sub(2) .. "\27\\"
-  end
   vim.api.nvim_ui_send(seq)
 end
 
@@ -31,9 +28,7 @@ return {
     "mrjones2014/smart-splits.nvim",
     event = "VeryLazy",
     init = function()
-      if vim.env.TMUX_PANE then
-        vim.g.smart_splits_multiplexer_integration = "tmux"
-      elseif vim.env.TERM_PROGRAM == "WezTerm" or vim.env.WEZTERM_PANE then
+      if vim.env.TERM_PROGRAM == "WezTerm" or vim.env.WEZTERM_PANE then
         vim.g.smart_splits_multiplexer_integration = false
       end
       announce_nvim(true)
@@ -50,26 +45,15 @@ return {
     end,
     config = function()
       local ft = require("utils.filetypes")
-      local edge = vim.env.TMUX_PANE and "stop" or function(ctx)
-        ask_wezterm_to_move(ctx.direction)
-      end
-      local options = {
+      require("smart-splits").setup({
         cursor_follows_swapped_bufs = true,
-        multiplexer_integration = vim.env.TMUX_PANE and "tmux" or false,
-        at_edge = edge,
+        at_edge = function(ctx)
+          ask_wezterm_to_move(ctx.direction)
+        end,
         default_amount = 3,
         ignored_filetypes = ft.sidebar_filetypes,
         ignored_buftypes = ft.utility_buftypes,
-      }
-      if pcall(require, "smart-splits.backend") then
-        options = {
-          mux = { backend = vim.env.TMUX_PANE and require("utils.tmux_terminal").smart_splits_backend() or {} },
-          swap = { move_cursor = true },
-          move = { at_edge = edge, ignored_filetypes = ft.sidebar_filetypes, ignored_buftypes = ft.utility_buftypes },
-          resize = { amount = 3, ignored_filetypes = ft.sidebar_filetypes, ignored_buftypes = ft.utility_buftypes },
-        }
-      end
-      require("smart-splits").setup(options)
+      })
     end,
     keys = function()
       local smart_splits = require("smart-splits")
