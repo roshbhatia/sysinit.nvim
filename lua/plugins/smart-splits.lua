@@ -1,5 +1,8 @@
 local function set_user_var(name, value)
   local seq = ("\27]1337;SetUserVar=%s=%s\7"):format(name, vim.base64.encode(value))
+  if vim.env.TMUX_PANE then
+    seq = "\27Ptmux;\27\27" .. seq:sub(2) .. "\27\\"
+  end
   vim.api.nvim_ui_send(seq)
 end
 
@@ -28,7 +31,9 @@ return {
     "mrjones2014/smart-splits.nvim",
     event = "VeryLazy",
     init = function()
-      if vim.env.TERM_PROGRAM == "WezTerm" or vim.env.WEZTERM_PANE then
+      if vim.env.TMUX_PANE then
+        vim.g.smart_splits_multiplexer_integration = "tmux"
+      elseif vim.env.TERM_PROGRAM == "WezTerm" or vim.env.WEZTERM_PANE then
         vim.g.smart_splits_multiplexer_integration = false
       end
       announce_nvim(true)
@@ -47,7 +52,8 @@ return {
       local ft = require("utils.filetypes")
       require("smart-splits").setup({
         cursor_follows_swapped_bufs = true,
-        at_edge = function(ctx)
+        multiplexer_integration = vim.env.TMUX_PANE and "tmux" or false,
+        at_edge = vim.env.TMUX_PANE and "stop" or function(ctx)
           ask_wezterm_to_move(ctx.direction)
         end,
         default_amount = 3,

@@ -11,13 +11,12 @@ local function have_glow()
   return vim.fn.executable("glow") == 1
 end
 
----@return integer|nil  the pane nvim itself runs in
+---@return string|integer|nil
 local function host_pane()
-  local parent = tonumber(vim.env.WEZTERM_PANE)
-  if not parent or vim.fn.executable("wezterm") ~= 1 then
-    return nil
+  if vim.env.TMUX_PANE then
+    return vim.env.TMUX_PANE
   end
-  return parent
+  return tonumber(vim.env.WEZTERM_PANE)
 end
 
 local function snacks()
@@ -35,18 +34,18 @@ local function pane_alive(pane)
   if not pane then
     return false
   end
-  local wezterm = require("utils.wezterm_terminal")
+  local wezterm = require("utils.pane_terminal").backend()
   return wezterm.pane_alive(pane)
 end
 
 ---@param full string
 ---@return boolean handled
-local function render_in_wezterm(full)
+local function render_in_terminal(full)
   local parent = host_pane()
   if not parent then
     return false
   end
-  local wezterm = require("utils.wezterm_terminal")
+  local wezterm = require("utils.pane_terminal").backend()
 
   if pane_alive(state.pane) then
     return wezterm.send_text(state.pane, render_cmd(full), { submit = true, paste = false })
@@ -176,7 +175,7 @@ function M.open(path, opts)
   watch(full)
 
   if have_glow() then
-    if render_in_wezterm(full) then
+    if render_in_terminal(full) then
       return { ok = true, path = full, renderer = "glow", surface = "wezterm" }
     end
     if render_in_snacks(full) then
@@ -222,7 +221,7 @@ function M.setup()
     group = augroup,
     callback = function()
       if pane_alive(state.pane) then
-        require("utils.wezterm_terminal").kill(state.pane)
+        require("utils.pane_terminal").backend().kill(state.pane)
       end
     end,
   })

@@ -1,4 +1,4 @@
--- The agent runs in a wezterm pane beside this editor, never inside it.
+-- Agents use an external pane so the editor does not own their lifecycle.
 local M = {}
 
 local REGISTRY = vim.fs.normalize(vim.env.XDG_CONFIG_HOME or "~/.config") .. "/sysinit/agents.json"
@@ -41,9 +41,10 @@ function M.agents()
   return out
 end
 
-local wezterm = require("utils.wezterm_terminal")
+local terminal = require("utils.pane_terminal")
+local pane_controller = terminal.backend()
 
--- The remembered pane, or nil once it is gone. Asking wezterm every time is what
+-- The remembered pane, or nil once it is gone. Checking the multiplexer every time is what
 -- keeps a killed pane from looking live; nothing tells this editor when a pane
 -- closes.
 ---@return string|nil id, string|nil agent
@@ -52,7 +53,7 @@ function M.pane()
   if id == nil or id == "" then
     return nil, nil
   end
-  if not wezterm.pane_alive(id) then
+  if not pane_controller.pane_alive(id) then
     vim.g.harness_pane = nil
     require("harness.session").clear_active()
     return nil, nil
@@ -69,19 +70,19 @@ end
 ---@param agent table
 ---@return boolean
 function M.launch(agent)
-  if vim.env.WEZTERM_PANE == nil then
-    vim.notify("Harness: not inside wezterm, so there is no pane to split", vim.log.levels.WARN)
+  if terminal.host_pane() == nil then
+    vim.notify("Harness: not inside a terminal multiplexer, so there is no pane to split", vim.log.levels.WARN)
     return false
   end
 
-  local id, err = wezterm.split({
-    parent = vim.env.WEZTERM_PANE,
+  local id, err = pane_controller.split({
+    parent = terminal.host_pane(),
     cwd = root(),
     percent = 40,
     argv = { agent.command },
   })
   if not id or id == "" then
-    vim.notify("Harness: " .. (err or "wezterm returned no pane id"), vim.log.levels.ERROR)
+    vim.notify("Harness: " .. (err or "terminal multiplexer returned no pane id"), vim.log.levels.ERROR)
     return false
   end
 
@@ -95,14 +96,14 @@ function M.focus()
   if not id then
     return false
   end
-  wezterm.activate(id)
+  pane_controller.activate(id)
   return true
 end
 
 function M.kill()
   local id = M.pane()
   if id then
-    wezterm.kill(id)
+    pane_controller.kill(id)
   end
   vim.g.harness_pane = nil
   require("harness.session").clear_active()
@@ -119,7 +120,7 @@ function M.send(text, opts)
     vim.notify("Harness: no agent pane — start one with <leader>jj", vim.log.levels.WARN)
     return false
   end
-  if not wezterm.send_text(id, text, { submit = opts and opts.submit }) then
+  if not pane_controller.send_text(id, text, { submit = opts and opts.submit }) then
     vim.notify("Harness: send failed", vim.log.levels.ERROR)
     return false
   end
@@ -160,7 +161,7 @@ function M.pick()
   snacks.picker.pick({
     source = "harness_agents",
     items = items,
-    title = "Start agent in a wezterm pane",
+    title = "Start agent in a terminal pane",
     format = function(item)
       return { { item.text, "Normal" } }
     end,

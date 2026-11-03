@@ -111,7 +111,7 @@ function M.findings()
   else
     local state = launch.status()
     if state.agent then
-      add("ok", string.format("agent pane: %s in wezterm pane %s", state.agent, state.pane))
+      add("ok", string.format("agent pane: %s in terminal pane %s", state.agent, state.pane))
     else
       add("ok", "agent pane: none open. <leader>jj starts one")
     end
