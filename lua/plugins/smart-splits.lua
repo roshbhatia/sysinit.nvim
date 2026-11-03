@@ -50,16 +50,26 @@ return {
     end,
     config = function()
       local ft = require("utils.filetypes")
-      require("smart-splits").setup({
+      local edge = vim.env.TMUX_PANE and "stop" or function(ctx)
+        ask_wezterm_to_move(ctx.direction)
+      end
+      local options = {
         cursor_follows_swapped_bufs = true,
         multiplexer_integration = vim.env.TMUX_PANE and "tmux" or false,
-        at_edge = vim.env.TMUX_PANE and "stop" or function(ctx)
-          ask_wezterm_to_move(ctx.direction)
-        end,
+        at_edge = edge,
         default_amount = 3,
         ignored_filetypes = ft.sidebar_filetypes,
         ignored_buftypes = ft.utility_buftypes,
-      })
+      }
+      if pcall(require, "smart-splits.backend") then
+        options = {
+          mux = { backend = vim.env.TMUX_PANE and require("utils.tmux_terminal").smart_splits_backend() or {} },
+          swap = { move_cursor = true },
+          move = { at_edge = edge, ignored_filetypes = ft.sidebar_filetypes, ignored_buftypes = ft.utility_buftypes },
+          resize = { amount = 3, ignored_filetypes = ft.sidebar_filetypes, ignored_buftypes = ft.utility_buftypes },
+        }
+      end
+      require("smart-splits").setup(options)
     end,
     keys = function()
       local smart_splits = require("smart-splits")

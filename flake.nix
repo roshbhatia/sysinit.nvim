@@ -76,6 +76,20 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
+          tmux-pane =
+            pkgs.runCommand "nvim-tmux-pane-test"
+              {
+                nativeBuildInputs = [
+                  pkgs.neovim
+                  pkgs.tmux
+                ];
+              }
+              ''
+                export HOME="$TMPDIR/home"; mkdir -p "$HOME"
+                export SYSINIT_NVIM_CONFIG=${self}
+                nvim --headless --clean -u NONE -l ${./checks/tmux.lua}
+                touch $out
+              '';
           remote-arguments =
             pkgs.runCommand "rnvim-arguments-test"
               {

@@ -86,4 +86,42 @@ function M.kill(pane_id)
   M.cli({ "pane", "close", pane_id })
 end
 
+function M.smart_splits_backend()
+  local directions = { left = "L", down = "D", up = "U", right = "R" }
+  local function command(args)
+    local argv = { "tmux" }
+    vim.list_extend(argv, args)
+    return vim.system(argv, { text = true }):wait(2000)
+  end
+  return {
+    name = "tmux",
+    protocol_version = "3.0.0",
+    detect = function()
+      return vim.env.TMUX_PANE ~= nil and vim.fn.executable("tmux") == 1
+    end,
+    move = function(direction)
+      local edge = command({
+        "display-message",
+        "-p",
+        "-t",
+        vim.env.TMUX_PANE,
+        "#{pane_at_" .. direction .. "}:#{window_zoomed_flag}",
+      })
+      if edge.code ~= 0 or vim.trim(edge.stdout) ~= "0:0" then
+        return false
+      end
+      return command({ "select-pane", "-t", vim.env.TMUX_PANE, "-" .. directions[direction] }).code == 0
+    end,
+    resize = function(direction, opts)
+      return command({
+        "resize-pane",
+        "-t",
+        vim.env.TMUX_PANE,
+        "-" .. directions[direction],
+        tostring(opts and opts.amount or 3),
+      }).code == 0
+    end,
+  }
+end
+
 return M
