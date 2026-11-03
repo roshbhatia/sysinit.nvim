@@ -1,0 +1,25 @@
+lua/harness/health.lua
+  s_b6baf4162ed3c9::t_8b8dee56272101 114
+lua/harness/launch.lua
+  s_b6baf4162ed3c9::t_8a13756410af87 1,44,46,55,72-73,77-78,84,98,105,122,163
+lua/harness/preview.lua
+  s_b6baf4162ed3c9::t_18e4b01979be1f 14,16-18,20,38,44,49,179,225
+lua/plugins/smart-splits.lua
+  s_b6baf4162ed3c9::t_6737532cee6c04 31,48,50-52,56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ca1495ff264dc81370cb0b172ab639e015b730b8",
+  "prompts": {},
+  "sessions": {
+    "s_b6baf4162ed3c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19cf6-a9c0-7161-abce-266a87939179",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
