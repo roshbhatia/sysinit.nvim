@@ -66,6 +66,28 @@ local function root()
   return gitrepo.buffer_root() or gitrepo.cwd_root() or vim.fs.normalize(vim.uv.cwd() or ".")
 end
 
+-- The registry's launch.fullAccess is how every launcher starts a harness without prompts.
+---@param agent table
+---@return string[]
+function M.argv(agent)
+  local access = type(agent.launch) == "table" and agent.launch.fullAccess or {}
+  local argv = {}
+  local env = type(access.env) == "table" and access.env or {}
+  local names = vim.tbl_keys(env)
+  table.sort(names)
+  if #names > 0 then
+    argv[1] = "env"
+    for _, name in ipairs(names) do
+      argv[#argv + 1] = name .. "=" .. env[name]
+    end
+  end
+  argv[#argv + 1] = agent.command
+  for _, arg in ipairs(type(access.args) == "table" and access.args or {}) do
+    argv[#argv + 1] = arg
+  end
+  return argv
+end
+
 ---@param agent table
 ---@return boolean
 function M.launch(agent)
@@ -78,7 +100,7 @@ function M.launch(agent)
     parent = vim.env.WEZTERM_PANE,
     cwd = root(),
     percent = 40,
-    argv = { agent.command },
+    argv = M.argv(agent),
   })
   if not id or id == "" then
     vim.notify("Harness: " .. (err or "wezterm returned no pane id"), vim.log.levels.ERROR)

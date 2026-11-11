@@ -234,6 +234,20 @@ busted.describe("harness pane lifecycle", function()
     local launch = require("harness.launch")
     assert.is_true(launch.launch({ name = "codex", command = "codex" }))
     assert.are.same({ parent = "7", cwd = "/repo", percent = 40, argv = { "codex" } }, calls.split)
+    assert.are.same(
+      { "env", "GOOSE_MODE=auto", "goose", "session" },
+      launch.argv({
+        command = "goose",
+        launch = { fullAccess = { args = { "session" }, env = { GOOSE_MODE = "auto" } } },
+      })
+    )
+    assert.are.same(
+      { "claude", "--dangerously-skip-permissions" },
+      launch.argv({
+        command = "claude",
+        launch = { fullAccess = { args = { "--dangerously-skip-permissions" }, env = {} } },
+      })
+    )
     assert.are.equal("42", vim.g.harness_pane)
     assert.are.equal("codex", active)
 
