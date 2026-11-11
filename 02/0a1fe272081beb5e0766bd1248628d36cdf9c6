@@ -1,0 +1,20 @@
+init.lua
+  s_823df142a94f27::t_034a45ad7958ca 32-36
+  s_823df142a94f27::t_76974fe4adfa63 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "020a1fe272081beb5e0766bd1248628d36cdf9c6",
+  "prompts": {},
+  "sessions": {
+    "s_823df142a94f27": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e37c8c01-c1a2-4d87-94a7-b84ec196ba06",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
