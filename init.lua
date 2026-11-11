@@ -27,8 +27,13 @@ if vim.fn.filereadable(lockfile) == 0 then
   local seed = vim.fn.stdpath("config") .. "/lazy-lock.json"
   if vim.fn.filereadable(seed) == 1 then
     assert(vim.uv.fs_copyfile(seed, lockfile))
-    assert(vim.uv.fs_chmod(lockfile, 420))
   end
+end
+-- The seed is a read-only store file, and a copy made before the chmod existed
+-- kept that mode, so restore owner write on every start.
+local stat = vim.uv.fs_stat(lockfile)
+if stat and bit.band(stat.mode, 128) == 0 then
+  assert(vim.uv.fs_chmod(lockfile, 420))
 end
 
 require("lazy").setup({
