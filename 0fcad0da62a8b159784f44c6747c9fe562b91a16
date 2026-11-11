@@ -1,0 +1,45 @@
+lua/harness/launch.lua
+  s_00f0f53292bea7::t_7776912707ed9b 1,46,55
+  s_00f0f53292bea7::t_5a8e3e737129dd 44,72-73,77-78,84,98,105,122,163
+checks/neovim/plugins_spec.lua
+  s_00f0f53292bea7::t_ddb3976dd33ee6 108,115-116,132,141-142,156,159
+  s_00f0f53292bea7::t_9fa947aa059962 145
+lua/utils/tmux_terminal.lua
+  s_00f0f53292bea7::t_19331d2ec78a74 1,5,7-8,10,16,21,24-25,28-29,32-33,40,43-44,50-52,55-63,66,68,72-74,76-77,80,82,85,87
+  s_00f0f53292bea7::t_413c93265e6046 46
+lua/utils/terminal.lua
+  s_00f0f53292bea7::t_d4ebc4e264e86a 18
+checks/neovim/harness_spec.lua
+  s_00f0f53292bea7::t_1db0c8bc022904 148,153,207,238,246,257,281,286-287
+  s_00f0f53292bea7::t_d3b04a68e5e3ae 170,212-213,217,219,221
+  s_00f0f53292bea7::t_cff26bf2ce05e0 67-68,73,93,119,137,167,240,248,262
+  s_00f0f53292bea7::t_547118e7d02212 61,76,80-84,95,101-107,120,122-123,128
+  s_00f0f53292bea7::t_c403c557dd7c93 266,292,296
+lua/harness/health.lua
+  s_00f0f53292bea7::t_7399ed8bfc981f 114
+checks/neovim/composition_spec.lua
+  s_00f0f53292bea7::t_f6fc7879807c4e 93-95,99,104,109
+lua/harness/preview.lua
+  s_00f0f53292bea7::t_9c63122595a0b7 16-17,38-39,49,52,56,66,225
+  s_00f0f53292bea7::t_6a1f8115fe6a7b 44,179-180
+lua/plugins/smart-splits.lua
+  s_00f0f53292bea7::t_db95113747f94a 11
+  s_00f0f53292bea7::t_71dee23cf3d48a 12-15
+  s_00f0f53292bea7::t_b8a2a6bac329fc 23-24,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0fcad0da62a8b159784f44c6747c9fe562b91a16",
+  "prompts": {},
+  "sessions": {
+    "s_00f0f53292bea7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1933c-a6e8-7442-97c4-87ca5f511b94",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}

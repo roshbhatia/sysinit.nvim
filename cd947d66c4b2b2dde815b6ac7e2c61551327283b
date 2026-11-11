@@ -1,0 +1,35 @@
+checks/tmux.lua
+  s_b6baf4162ed3c9::t_612d2e94bf476a 1-38
+lua/utils/tmux_terminal.lua
+  s_b6baf4162ed3c9::t_3735ba664b4819 89-114
+  s_4739e15c332336::t_91ad9c43c4fc6b 115-126
+flake.nix
+  s_b6baf4162ed3c9::t_612d2e94bf476a 79-86
+  s_b6baf4162ed3c9::t_05ab773aaf9841 87-89
+lua/plugins/smart-splits.lua
+  s_b6baf4162ed3c9::t_3735ba664b4819 53-56,59,63-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cd947d66c4b2b2dde815b6ac7e2c61551327283b",
+  "prompts": {},
+  "sessions": {
+    "s_4739e15c332336": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1794d-ace0-74e2-8924-c9a64b78418e",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    },
+    "s_b6baf4162ed3c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19cf6-a9c0-7161-abce-266a87939179",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
