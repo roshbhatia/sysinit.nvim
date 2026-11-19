@@ -220,11 +220,14 @@ return {
     end,
     config = function()
       local null_ls = require("null-ls")
+      local temporary_directory = vim.fn.stdpath("cache") .. "/null-ls"
+
+      vim.fn.mkdir(temporary_directory, "p")
 
       null_ls.setup({
         debounce = 150,
         default_timeout = 5000,
-        temp_dir = vim.fn.stdpath("cache") .. "/null-ls",
+        temp_dir = temporary_directory,
         sources = {
           null_ls.builtins.code_actions.gitrebase,
           null_ls.builtins.code_actions.gitsigns,
