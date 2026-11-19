@@ -21,6 +21,7 @@ local servers = {
   "lua_ls",
   "markdown_oxide",
   "nixd",
+  "nushell",
   "pyright",
   "ruff",
   "rego_ls",

@@ -4,6 +4,7 @@ vim.filetype.add({
     tmpl = "helm",
     gotmpl = "gotmpl",
     nu = "nu",
+    nuon = "nu",
   },
   filename = {
     ["kustomization.yaml"] = "yaml.kustomize",

@@ -37,6 +37,7 @@ return {
         "luadoc",
         "luap",
         "nix",
+        "nu",
         "python",
         "query",
         "regex",

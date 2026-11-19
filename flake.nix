@@ -94,6 +94,9 @@
               {
                 nativeBuildInputs = [
                   pkgs.neovim
+                  pkgs.nushell
+                  pkgs.deadnix
+                  pkgs.statix
                   pkgs.git
                 ];
               }
@@ -103,6 +106,9 @@
                 export SYSINIT_NVIM_OCTO=${pkgs.vimPlugins.octo-nvim}
                 export SYSINIT_NVIM_DIFFVIEW=${pkgs.vimPlugins.diffview-nvim}
                 export SYSINIT_NOTES_PLUGIN=${agent-notes.packages.${system}.neovim-plugin}
+                export SYSINIT_NVIM_NU_PARSER=${pkgs.vimPlugins.nvim-treesitter.grammarPlugins.nu}
+                export SYSINIT_NVIM_NONE_LS=${pkgs.vimPlugins.none-ls-nvim}
+                export SYSINIT_NVIM_NU_QUERIES=${pkgs.vimPlugins.nvim-treesitter.queries.nu}
                 nvim --headless --clean -u NONE --cmd 'set runtimepath^=${pkgs.vimPlugins.plenary-nvim}' -c 'runtime plugin/plenary.vim' -c "PlenaryBustedDirectory ${./checks/neovim} { minimal_init = '${./checks/neovim.lua}', sequential = true }"
                 touch $out
               '';
