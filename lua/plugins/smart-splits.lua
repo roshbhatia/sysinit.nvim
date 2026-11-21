@@ -45,15 +45,24 @@ return {
     end,
     config = function()
       local ft = require("utils.filetypes")
-      require("smart-splits").setup({
-        cursor_follows_swapped_bufs = true,
-        at_edge = function(ctx)
-          ask_wezterm_to_move(ctx.direction)
-        end,
-        default_amount = 3,
+      local smart_splits = require("smart-splits")
+      local function at_edge(ctx)
+        ask_wezterm_to_move(ctx.direction)
+      end
+      local options = {
         ignored_filetypes = ft.sidebar_filetypes,
         ignored_buftypes = ft.utility_buftypes,
-      })
+      }
+      if smart_splits.PROTOCOL_VERSION then
+        options.swap = { move_cursor = true }
+        options.move = { at_edge = at_edge }
+        options.resize = { amount = 3 }
+      else
+        options.cursor_follows_swapped_bufs = true
+        options.at_edge = at_edge
+        options.default_amount = 3
+      end
+      smart_splits.setup(options)
     end,
     keys = function()
       local smart_splits = require("smart-splits")
