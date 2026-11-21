@@ -48,7 +48,7 @@ function M.toggle_glow()
     vim.notify("markdown preview: buffer has no file", vim.log.levels.WARN)
     return
   end
-  local res = require("harness.preview").open(path, { focus = false })
+  local res = require("utils.glow_preview").open(path, { focus = false })
   if not res.ok then
     vim.notify("markdown preview: " .. tostring(res.error), vim.log.levels.WARN)
   end

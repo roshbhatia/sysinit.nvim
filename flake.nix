@@ -3,13 +3,10 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   inputs.changes.url = "github:roshbhatia/changes";
   inputs.changes.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.agent-notes.url = "github:roshbhatia/agent-notes";
-  inputs.agent-notes.inputs.nixpkgs.follows = "nixpkgs";
   outputs =
     {
       self,
       nixpkgs,
-      agent-notes,
       changes,
     }:
     let
@@ -24,14 +21,9 @@
       lib.configSource = self.outPath;
       homeManagerModules.default = { pkgs, ... }: {
         imports = [ ./module.nix ];
-        home.packages = [
-          agent-notes.packages.${pkgs.stdenv.hostPlatform.system}.default
-          changes.packages.${pkgs.stdenv.hostPlatform.system}.default
-        ];
+        home.packages = [ changes.packages.${pkgs.stdenv.hostPlatform.system}.default ];
         programs.sysinit-neovim.changesPlugin =
           changes.packages.${pkgs.stdenv.hostPlatform.system}.neovim-plugin;
-        programs.sysinit-neovim.notesPlugin =
-          agent-notes.packages.${pkgs.stdenv.hostPlatform.system}.neovim-plugin;
       };
       packages = each (system: {
         default =
@@ -105,7 +97,6 @@
                 export SYSINIT_NVIM_CONFIG=${self}
                 export SYSINIT_NVIM_OCTO=${pkgs.vimPlugins.octo-nvim}
                 export SYSINIT_NVIM_DIFFVIEW=${pkgs.vimPlugins.diffview-nvim}
-                export SYSINIT_NOTES_PLUGIN=${agent-notes.packages.${system}.neovim-plugin}
                 export SYSINIT_NVIM_NU_PARSER=${pkgs.vimPlugins.nvim-treesitter.grammarPlugins.nu}
                 export SYSINIT_NVIM_NONE_LS=${pkgs.vimPlugins.none-ls-nvim}
                 export SYSINIT_NVIM_NU_QUERIES=${pkgs.vimPlugins.nvim-treesitter.queries.nu}

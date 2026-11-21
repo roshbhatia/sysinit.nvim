@@ -3,7 +3,7 @@ local assert = require("luassert")
 
 busted.describe("Lua module lifecycle", function()
   local names = {
-    "harness.preview",
+    "utils.glow_preview",
     "utils.gitrepo",
     "utils.markdown_preview",
   }
@@ -38,7 +38,7 @@ busted.describe("Lua module lifecycle", function()
 
   busted.it("registers each lifecycle hook once through setup", function()
     local groups = {
-      ["harness.preview"] = "SysinitPreview",
+      ["utils.glow_preview"] = "SysinitPreview",
       ["utils.gitrepo"] = "gitrepo_cache",
       ["utils.markdown_preview"] = "SysinitGoGrip",
     }

@@ -6,7 +6,7 @@ busted.describe("GitHub review entry", function()
   local calls
   busted.before_each(function()
     originals = {}
-    for _, name in ipairs({ "octo", "octo.reviews", "octo.utils", "harness.github" }) do
+    for _, name in ipairs({ "octo", "octo.reviews", "octo.utils", "utils.github_review" }) do
       originals[name] = package.loaded[name]
       package.loaded[name] = nil
     end
@@ -43,12 +43,12 @@ busted.describe("GitHub review entry", function()
   busted.after_each(function()
     pcall(vim.api.nvim_del_user_command, "Octo")
     pcall(vim.api.nvim_del_user_command, "PRReview")
-    for _, name in ipairs({ "octo", "octo.reviews", "octo.utils", "harness.github" }) do
+    for _, name in ipairs({ "octo", "octo.reviews", "octo.utils", "utils.github_review" }) do
       package.loaded[name] = originals[name]
     end
   end)
   busted.it("opens the diff without starting a review", function()
-    require("harness.github").setup()
+    require("utils.github_review").setup()
     vim.cmd("PRReview https://github.com/owner/repo/pull/3")
     assert.are.equal("https://github.com/owner/repo/pull/3", calls.command)
     assert.are.equal(1, calls.browse)
@@ -57,7 +57,7 @@ busted.describe("GitHub review entry", function()
     assert.are.equal(1, calls.browse)
   end)
   busted.it("starts or resumes only after the explicit review action", function()
-    local integration = require("harness.github")
+    local integration = require("utils.github_review")
     integration.start()
     assert.are.equal(1, calls.start)
     calls.review = {
@@ -78,7 +78,7 @@ busted.describe("GitHub review entry", function()
     vim.g.sysinit_pr_review = previous
   end)
   busted.it("maps comments, suggestions, threads, commits, and submission", function()
-    require("harness.github").setup()
+    require("utils.github_review").setup()
     local maps = calls.config.mappings
     assert.are.equal("<leader>oc", maps.review_diff.add_review_comment.lhs)
     assert.are.same({ "n", "x" }, maps.review_diff.add_review_comment.mode)

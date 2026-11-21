@@ -85,7 +85,7 @@ function M.refit()
 end
 
 function M.setup()
-  local group = vim.api.nvim_create_augroup("harness_diff_layout", { clear = true })
+  local group = vim.api.nvim_create_augroup("sysinit_diffview_layout", { clear = true })
 
   vim.api.nvim_create_autocmd({ "VimResized", "TabEnter" }, {
     group = group,

@@ -25,12 +25,7 @@ return {
     },
     pre_save_cmds = {
       function()
-        if vim.g.sysinit_pr_review then
-          return false
-        end
-        pcall(function()
-          require("harness.api").review_close()
-        end)
+        return not vim.g.sysinit_pr_review
       end,
     },
     post_restore_cmds = {

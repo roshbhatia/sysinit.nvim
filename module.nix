@@ -15,7 +15,6 @@ in
       default = null;
     };
     changesPlugin = lib.mkOption { type = lib.types.package; };
-    notesPlugin = lib.mkOption { type = lib.types.package; };
   };
   config = lib.mkIf cfg.enable {
     programs.neovim = {
@@ -29,10 +28,7 @@ in
         "SYSINIT_NVIM_OCTO"
         "${pkgs.vimPlugins.octo-nvim}"
       ];
-      plugins = [
-        cfg.notesPlugin
-        cfg.changesPlugin
-      ];
+      plugins = [ cfg.changesPlugin ];
     };
     xdg.configFile."nvim".source =
       if cfg.configPath == null then ./. else config.lib.file.mkOutOfStoreSymlink cfg.configPath;

@@ -5,7 +5,6 @@ return {
       "nvim-lua/plenary.nvim",
     },
     cmd = {
-      "Review",
       "DiffviewOpen",
       "DiffviewClose",
       "DiffviewToggleFiles",
@@ -13,63 +12,31 @@ return {
       "DiffviewRefresh",
     },
     config = function()
-      require("harness.diffview").setup()
+      require("utils.diffview").setup()
     end,
     keys = {
       {
         "<leader>dd",
         function()
-          require("harness.review").toggle()
+          if require("diffview.lib").get_current_view() then
+            vim.cmd.DiffviewClose()
+          else
+            vim.cmd.DiffviewOpen()
+          end
         end,
         desc = "Toggle diff",
         mode = "n",
       },
       {
-        "<leader>dc",
-        function()
-          require("harness.changes").quickfix()
-        end,
-        desc = "Changed files",
-        mode = "n",
-      },
-      {
-        "<leader>dC",
-        function()
-          require("harness.changes").pick()
-        end,
-        desc = "Find changed file",
-        mode = "n",
-      },
-      {
         "<leader>dh",
-        function()
-          require("harness.review").history()
-        end,
+        "<cmd>DiffviewFileHistory %<cr>",
         desc = "File history",
         mode = "n",
       },
       {
         "<leader>dH",
-        function()
-          require("harness.history").open()
-        end,
+        "<cmd>DiffviewFileHistory<cr>",
         desc = "Project history",
-        mode = "n",
-      },
-      {
-        "]r",
-        function()
-          require("harness.review").cycle(1)
-        end,
-        desc = "Next repo",
-        mode = "n",
-      },
-      {
-        "[r",
-        function()
-          require("harness.review").cycle(-1)
-        end,
-        desc = "Previous repo",
         mode = "n",
       },
     },

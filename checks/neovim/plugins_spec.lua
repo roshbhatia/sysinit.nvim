@@ -43,7 +43,7 @@ busted.describe("plugin specifications", function()
     end
 
     assert.is_true(plugin_files > 0)
-    assert.are.equal("harness.lua", plugin_ids.harness)
+    assert.is_nil(plugin_ids.harness)
   end)
 
   busted.it("keeps Tree-sitter motions on the jump list", function()

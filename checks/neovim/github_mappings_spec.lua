@@ -6,7 +6,7 @@ busted.describe("installed Octo mappings", function()
     local gh = require("octo.gh")
     local setup = gh.setup
     gh.setup = function() end
-    require("harness.github").setup()
+    require("utils.github_review").setup()
     gh.setup = setup
     local utils = require("octo.utils")
     local cases = {

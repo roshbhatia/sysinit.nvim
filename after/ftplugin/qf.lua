@@ -11,14 +11,10 @@ vim.schedule(function()
     return
   end
   Snacks.keymap.set("n", "<CR>", function()
-    local ok, scopes = pcall(require, "harness.scopes")
-    if ok and scopes.activate() then
-      return
-    end
     if not pcall(function()
       require("bqf.qfwin.handler").open(false)
     end) then
       vim.cmd(".cc")
     end
-  end, { buffer = buf, desc = "Open entry, or switch the review scope" })
+  end, { buffer = buf, desc = "Open entry" })
 end)
