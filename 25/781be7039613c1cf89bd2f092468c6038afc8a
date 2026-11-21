@@ -1,0 +1,52 @@
+lua/utils/diffview_layout.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 1-99
+checks/neovim/github_spec.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 9,46,51,60,81
+module.nix
+  s_a4a3eea4720821::t_6c2dd53317c1ac 31
+checks/neovim/github_mappings_spec.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 9
+checks/neovim/diffview_spec.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 60-61,84,109-110,149,156,158,168-169,200-201
+  s_a4a3eea4720821::t_6c2dd53317c1ac 125,181,209
+lua/utils/diffview.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 1-10,12-78
+flake.nix
+  s_a4a3eea4720821::t_6c2dd53317c1ac 24
+lua/plugins/diffview.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 15
+README.md
+  s_a4a3eea4720821::t_6c2dd53317c1ac 3,10
+lua/plugins/github.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 7,11
+lua/utils/markdown_preview.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 51
+checks/neovim/plugins_spec.lua
+  s_a4a3eea4720821::t_6c2dd53317c1ac 46
+checks/neovim/preview_spec.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 1-75
+checks/neovim/modules_spec.lua
+  s_a4a3eea4720821::t_5e4bf3f7c0ed19 6,41
+after/ftplugin/qf.lua
+  s_a4a3eea4720821::t_6d8d64b3d75d4a 19
+lua/plugins/auto-session.lua
+  s_a4a3eea4720821::t_91f3dcc62194bd 28
+lua/plugins/staline.lua
+  s_a4a3eea4720821::t_6fa8586f90f0cd 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "25781be7039613c1cf89bd2f092468c6038afc8a",
+  "prompts": {},
+  "sessions": {
+    "s_a4a3eea4720821": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f4ef-68fa-7c11-b609-3f16bf1d9bf7",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
