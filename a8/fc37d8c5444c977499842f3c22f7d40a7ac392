@@ -1,0 +1,23 @@
+README.md
+  s_a4a3eea4720821::t_0595da78b67233 14-20
+lazy-lock.json
+  s_a4a3eea4720821::t_51c4945936ad0b 6-9
+lua/plugins/atlas.lua
+  s_a4a3eea4720821::t_e40ac8e29df177 3-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a8fc37d8c5444c977499842f3c22f7d40a7ac392",
+  "prompts": {},
+  "sessions": {
+    "s_a4a3eea4720821": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f4ef-68fa-7c11-b609-3f16bf1d9bf7",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
