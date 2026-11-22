@@ -1,4 +1,3 @@
-vim.opt.runtimepath:prepend(assert(vim.env.SYSINIT_NVIM_OCTO))
 local config_root = assert(vim.env.SYSINIT_NVIM_CONFIG, "SYSINIT_NVIM_CONFIG is required")
 local diffview_root = assert(vim.env.SYSINIT_NVIM_DIFFVIEW, "SYSINIT_NVIM_DIFFVIEW is required")
 

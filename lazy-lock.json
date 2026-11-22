@@ -3,6 +3,10 @@
     "branch": "main",
     "commit": "a652fcc01bf03946ab94b815be8c80ee157cbe1a"
   },
+  "atlas.nvim": {
+    "branch": "main",
+    "commit": "fb40953462ff922c1084f1338072588c6e0eb0bf"
+  },
   "auto-cmdheight.nvim": {
     "branch": "main",
     "commit": "82619eab0268f27024e1e0981ec3721a003ab2b7"

@@ -95,7 +95,6 @@
               ''
                 export HOME="$TMPDIR/home"; mkdir -p "$HOME"
                 export SYSINIT_NVIM_CONFIG=${self}
-                export SYSINIT_NVIM_OCTO=${pkgs.vimPlugins.octo-nvim}
                 export SYSINIT_NVIM_DIFFVIEW=${pkgs.vimPlugins.diffview-nvim}
                 export SYSINIT_NVIM_NU_PARSER=${pkgs.vimPlugins.nvim-treesitter.grammarPlugins.nu}
                 export SYSINIT_NVIM_NONE_LS=${pkgs.vimPlugins.none-ls-nvim}

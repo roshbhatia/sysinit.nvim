@@ -23,11 +23,6 @@ in
       vimAlias = true;
       viAlias = true;
       sideloadInitLua = true;
-      extraWrapperArgs = [
-        "--set"
-        "SYSINIT_NVIM_OCTO"
-        "${pkgs.vimPlugins.octo-nvim}"
-      ];
       plugins = [ cfg.changesPlugin ];
     };
     xdg.configFile."nvim".source =
