@@ -1,0 +1,21 @@
+workbench/lua/sysinit_workbench/view.lua
+  s_a4a3eea4720821::t_977e2ccc52a74b 33
+workbench/lua/sysinit_workbench/traces.lua
+  s_a4a3eea4720821::t_977e2ccc52a74b 90-101,104-122,124-131,133-135,137-147,149-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "239a214364b07e50f43fa7fea0619ec48d419933",
+  "prompts": {},
+  "sessions": {
+    "s_a4a3eea4720821": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f4ef-68fa-7c11-b609-3f16bf1d9bf7",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
