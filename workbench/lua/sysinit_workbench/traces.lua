@@ -87,44 +87,69 @@ function M.open(query)
   end
   local argv = vim.list_extend({ query.program }, args)
   table.insert(argv, "--json")
-  view.query(argv, cwd, function(err, output)
-    if err then
-      vim.notify(err, vim.log.levels.ERROR)
+  local buffer = view.buffer("traces://sessions", "markdown")
+  local pending = false
+  local function render(message, details)
+    local lines = { "# Traces · sessions", "", "r refresh  q close", "", message }
+    if details and vim.trim(details) ~= "" then
+      vim.list_extend(lines, { "", "Provider diagnostics:", "" })
+      vim.list_extend(lines, vim.split(vim.trim(details), "\n", { plain = true }))
+    end
+    view.render(buffer, lines)
+  end
+  local function load()
+    if pending then
       return
     end
-    local by_id = {}
-    if
-      not records(output, function(row)
-        if type(row.session) == "string" and row.session ~= "" then
-          local existing = by_id[row.session]
-          if not existing or (row.startUnixNano or "") > (existing.startUnixNano or "") then
-            by_id[row.session] = row
+    pending = true
+    render("Loading Traces sessions…")
+    view.query(argv, cwd, function(err, output, stderr)
+      pending = false
+      if not vim.api.nvim_buf_is_valid(buffer) then
+        return
+      end
+      if err then
+        render("Could not load Traces sessions.", err)
+        return
+      end
+      local by_id = {}
+      if
+        not records(output, function(row)
+          if type(row.session) == "string" and row.session ~= "" then
+            local existing = by_id[row.session]
+            if not existing or (row.startUnixNano or "") > (existing.startUnixNano or "") then
+              by_id[row.session] = row
+            end
           end
+        end)
+      then
+        render("Traces returned invalid activity JSON Lines.", stderr)
+        return
+      end
+      local sessions = vim.tbl_values(by_id)
+      table.sort(sessions, function(left, right)
+        return (left.startUnixNano or "") > (right.startUnixNano or "")
+      end)
+      if #sessions == 0 then
+        render("No Traces sessions in this scope. Use traces --all to scan all sessions.", stderr)
+        return
+      end
+      render(("%d sessions found. Press r to reopen the picker."):format(#sessions), stderr)
+      vim.ui.select(sessions, {
+        prompt = "Traces session",
+        format_item = function(row)
+          return ("%s  %s"):format(row.service or "agent", row.session)
+        end,
+      }, function(item)
+        if item then
+          transcript(item.session)
         end
       end)
-    then
-      vim.notify("Traces returned invalid activity JSON Lines", vim.log.levels.ERROR)
-      return
-    end
-    local sessions = vim.tbl_values(by_id)
-    table.sort(sessions, function(left, right)
-      return (left.startUnixNano or "") > (right.startUnixNano or "")
     end)
-    if #sessions == 0 then
-      vim.notify("No Traces sessions in this scope")
-      return
-    end
-    vim.ui.select(sessions, {
-      prompt = "Traces session",
-      format_item = function(row)
-        return ("%s  %s"):format(row.service or "agent", row.session)
-      end,
-    }, function(item)
-      if item then
-        transcript(item.session)
-      end
-    end)
-  end)
+  end
+  vim.keymap.set("n", "r", load, { buffer = buffer })
+  vim.keymap.set("n", "q", "<cmd>tabclose<CR>", { buffer = buffer })
+  load()
 end
 
 return M

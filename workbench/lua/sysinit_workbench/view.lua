@@ -30,7 +30,7 @@ function M.query(argv, cwd, callback)
         )
         return
       end
-      callback(nil, result.stdout)
+      callback(nil, result.stdout, result.stderr)
     end)
   )
 end
