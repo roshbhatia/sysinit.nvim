@@ -6,6 +6,7 @@
 }:
 let
   cfg = config.programs.sysinit-neovim;
+  workbench = pkgs.callPackage ./workbench { };
 in
 {
   options.programs.sysinit-neovim = {
@@ -23,7 +24,16 @@ in
       vimAlias = true;
       viAlias = true;
       sideloadInitLua = true;
-      plugins = [ cfg.changesPlugin ];
+      plugins = [
+        cfg.changesPlugin
+        workbench.sysinit-reviewr
+        workbench.sysinit-editor-workbench
+      ];
+      # lazy.nvim disables Neovim's automatic plugin startup.
+      extraLuaConfig = ''
+        vim.cmd.packadd("reviewr.nvim")
+        vim.cmd.packadd("sysinit-editor-workbench")
+      '';
     };
     xdg.configFile."nvim".source =
       if cfg.configPath == null then ./. else config.lib.file.mkOutOfStoreSymlink cfg.configPath;
