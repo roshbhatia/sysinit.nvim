@@ -7,10 +7,6 @@
     "branch": "main",
     "commit": "fb40953462ff922c1084f1338072588c6e0eb0bf"
   },
-  "auto-cmdheight.nvim": {
-    "branch": "main",
-    "commit": "82619eab0268f27024e1e0981ec3721a003ab2b7"
-  },
   "auto-session": {
     "branch": "main",
     "commit": "6cde3874a9283c2db55627acca5f28e4fa402320"
