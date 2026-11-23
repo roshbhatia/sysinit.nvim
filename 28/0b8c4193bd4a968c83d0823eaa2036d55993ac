@@ -1,0 +1,31 @@
+module.nix
+  s_a4a3eea4720821::t_dda9db342c115c 9,27-36
+workbench/default.nix
+  s_a4a3eea4720821::t_ee8afd0c64d435 1-19
+workbench/lua/sysinit_workbench/changes.lua
+  s_a4a3eea4720821::t_6cb16867f0d2c8 1-180
+workbench/lua/sysinit_workbench/review.lua
+  s_a4a3eea4720821::t_04bdcacaeb7771 1-76
+workbench/lua/sysinit_workbench/traces.lua
+  s_a4a3eea4720821::t_aefd1dede56830 1-130
+workbench/lua/sysinit_workbench/view.lua
+  s_a4a3eea4720821::t_52a42d8a164e9e 1-51
+workbench/plugin/sysinit-workbench.lua
+  s_a4a3eea4720821::t_077bee3d8545f5 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "280b8c4193bd4a968c83d0823eaa2036d55993ac",
+  "prompts": {},
+  "sessions": {
+    "s_a4a3eea4720821": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f4ef-68fa-7c11-b609-3f16bf1d9bf7",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
