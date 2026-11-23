@@ -172,7 +172,7 @@ end
 return {
   {
     "nvimtools/none-ls.nvim",
-    event = "LSPAttach",
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
