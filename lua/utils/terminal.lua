@@ -11,10 +11,6 @@ local TRANSPARENT_TERMINALS = {
 }
 
 function M.is_transparent()
-  if not vim.env.LS_COLORS or vim.env.LS_COLORS == "" then
-    return false
-  end
-
   if vim.env.KITTY_WINDOW_ID or vim.env.WEZTERM_PANE or vim.env.WT_SESSION then
     return true
   end
