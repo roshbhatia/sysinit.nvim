@@ -30,7 +30,7 @@ in
         workbench.sysinit-editor-workbench
       ];
       # lazy.nvim disables Neovim's automatic plugin startup.
-      extraLuaConfig = ''
+      initLua = ''
         vim.cmd.packadd("reviewr.nvim")
         vim.cmd.packadd("sysinit-editor-workbench")
       '';
