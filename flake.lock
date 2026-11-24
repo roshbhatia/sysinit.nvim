@@ -9,11 +9,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1788914492,
-        "narHash": "sha256-TBtlxeXD540mbv4CsPRC/0W0uRznnjV65JiEUJKgZxQ=",
+        "lastModified": 1795489966,
+        "narHash": "sha256-qzAWO9H9l03jaWvUa9Qdc0msaB7yvogpq9rpn404dlY=",
         "owner": "roshbhatia",
         "repo": "changes",
-        "rev": "dadf5140b42d49d6c86fce313753389f1a717e37",
+        "rev": "bcb076747fef94cda10ba53e52ef3ab27ced8b94",
         "type": "github"
       },
       "original": {

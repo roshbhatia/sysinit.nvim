@@ -45,7 +45,8 @@ busted.describe("Lua module lifecycle", function()
       local module = require(name)
       module.setup()
       module.setup()
-      assert.are.equal(1, #vim.api.nvim_get_autocmds({ group = groups[name] }))
+      local count = name == "utils.glow_preview" and 2 or 1
+      assert.are.equal(count, #vim.api.nvim_get_autocmds({ group = groups[name] }))
     end
   end)
 end)

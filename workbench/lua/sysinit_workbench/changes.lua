@@ -4,7 +4,7 @@ local M = {}
 local function options(args)
   local root = vim.fn.getcwd()
   local recursive = false
-  local argv = { "workspace" }
+  local argv = {}
   local i = 1
   while i <= #args do
     local value = args[i]
@@ -108,26 +108,20 @@ local function display(program, cwd, args)
   local function load(refresh)
     generation = generation + 1
     local request = generation
-    local argv = vim.list_extend({ program }, args)
-    if refresh then
-      table.insert(argv, "--refresh")
-    end
-    view.query(argv, cwd, function(err, output)
+    require("changes.workspace").read({
+      command = program,
+      cwd = cwd,
+      args = args,
+      refresh = refresh,
+    }, function(err, snapshot)
       if request ~= generation or not vim.api.nvim_buf_is_valid(buffer) then
         return
       end
-      local ok, snapshot = pcall(vim.json.decode, output or "")
-      if
-        err
-        or not ok
-        or type(snapshot) ~= "table"
-        or snapshot.version ~= "changes.workspace/v1"
-      then
-        local message = err or "Unsupported Changes workspace response"
+      if err then
         if current then
-          vim.notify(message, vim.log.levels.WARN)
+          vim.notify(err, vim.log.levels.WARN)
         else
-          view.render(buffer, vim.split(message, "\n", { plain = true }))
+          view.render(buffer, vim.split(err, "\n", { plain = true }))
         end
         return
       end
