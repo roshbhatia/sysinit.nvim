@@ -1,0 +1,26 @@
+lua/utils/glow_preview.lua
+  s_a4a3eea4720821::t_a495c8a0c6013c 13-14,17-19,33-46,48-49,51-53,104,106-116,118-126
+  s_a4a3eea4720821::t_4288905bd6c518 6-9,21,89,117
+workbench/lua/sysinit_workbench/changes.lua
+  s_a4a3eea4720821::t_0b614d1423f1bd 7,111-116,120,122,124
+checks/neovim/modules_spec.lua
+  s_a4a3eea4720821::t_a495c8a0c6013c 48-49
+checks/neovim/preview_spec.lua
+  s_a4a3eea4720821::t_c36ca7a9f819d1 9,17-20,26,32,35,37-44,47,50-52,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0566e4b93f3ecf4b34017ab88233be83882dd0a2",
+  "prompts": {},
+  "sessions": {
+    "s_a4a3eea4720821": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f4ef-68fa-7c11-b609-3f16bf1d9bf7",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
