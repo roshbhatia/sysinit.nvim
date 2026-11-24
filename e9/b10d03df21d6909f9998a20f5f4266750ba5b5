@@ -1,0 +1,35 @@
+README.md
+  s_a4a3eea4720821::t_3b8900288ccf31 22-28
+workbench/plugin/sysinit-workbench.lua
+  s_a4a3eea4720821::t_615b1a78c1ca84 1-3,5-6,9-12,14
+lua/plugins/neogit.lua
+  s_a4a3eea4720821::t_615b1a78c1ca84 94-95
+lua/plugins/diffview.lua
+  s_a4a3eea4720821::t_615b1a78c1ca84 14,18-19
+lazy-lock.json
+  s_a4a3eea4720821::t_3b8900288ccf31 10-13
+lua/plugins/auto-cmdheight.lua
+  s_a4a3eea4720821::t_615b1a78c1ca84 1-6,8
+workbench/lua/sysinit_workbench/traces.lua
+  s_a4a3eea4720821::t_479b3635d98b34 4-10,50,82,102
+workbench/lua/sysinit_workbench/changes.lua
+  s_a4a3eea4720821::t_615b1a78c1ca84 8,148
+checks/neovim/diffview_spec.lua
+  s_a4a3eea4720821::t_e3cc032a5962de 5-6,9-11,15-17,20-23,25-48,50-59,61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e9b10d03df21d6909f9998a20f5f4266750ba5b5",
+  "prompts": {},
+  "sessions": {
+    "s_a4a3eea4720821": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f4ef-68fa-7c11-b609-3f16bf1d9bf7",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
