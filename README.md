@@ -19,6 +19,13 @@ Atlas shows the diff, threads, and review actions in one view. Its GitHub
 provider uses GitHub CLI authentication. Use `:DiffviewOpen` for local
 working-tree diffs.
 
+## Local Git and agent activity
+
+Press `Space g g` for Neogit and `Space d d` for Diffview. In an existing
+editor, run `:Changes` for change groups, `:Traces` for local sessions, or
+`:Traces --all` to search across checkouts. Both commands accept flags from
+their corresponding CLI. Run `:Traces ID` to open an exact transcript.
+
 ## Checks
 
 Run `nix flake check` to execute the headless editor suite.

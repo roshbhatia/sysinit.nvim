@@ -11,20 +11,12 @@ return {
       "DiffviewFileHistory",
       "DiffviewRefresh",
     },
-    config = function()
-      require("utils.diffview").setup()
-    end,
+    opts = {},
     keys = {
       {
         "<leader>dd",
-        function()
-          if require("diffview.lib").get_current_view() then
-            vim.cmd.DiffviewClose()
-          else
-            vim.cmd.DiffviewOpen()
-          end
-        end,
-        desc = "Toggle diff",
+        "<cmd>DiffviewOpen<cr>",
+        desc = "Open diff",
         mode = "n",
       },
       {

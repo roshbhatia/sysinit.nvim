@@ -5,7 +5,7 @@ local function options(args)
   local root = vim.fn.getcwd()
   local recursive = false
   local argv = { "workspace" }
-  local i = 2
+  local i = 1
   while i <= #args do
     local value = args[i]
     if value == "--root" or value == "-root" then
@@ -145,6 +145,7 @@ local function display(program, cwd, args)
     if current then
       local diff = view.buffer("changes://diff", "diff")
       view.render(diff, vim.split(current.rendered, "\n", { plain = true }))
+      vim.keymap.set("n", "q", "<cmd>tabclose<CR>", { buffer = diff })
     end
   end, { buffer = buffer })
   vim.keymap.set("n", "r", function()

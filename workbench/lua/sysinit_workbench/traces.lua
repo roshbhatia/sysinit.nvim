@@ -1,6 +1,13 @@
 local view = require("sysinit_workbench.view")
 local M = {}
 
+local function append_diagnostics(lines, details)
+  if details and vim.trim(details) ~= "" then
+    vim.list_extend(lines, { "", "Provider diagnostics:", "" })
+    vim.list_extend(lines, vim.split(vim.trim(details), "\n", { plain = true }))
+  end
+end
+
 local function records(output, consume)
   for line in output:gmatch("[^\r\n]+") do
     local ok, record = pcall(vim.json.decode, line)
@@ -40,7 +47,7 @@ function M.open(query)
     local function refresh()
       generation = generation + 1
       local request = generation
-      view.query(argv, cwd, function(err, output)
+      view.query(argv, cwd, function(err, output, stderr)
         if request ~= generation or not vim.api.nvim_buf_is_valid(buffer) then
           return
         end
@@ -72,6 +79,7 @@ function M.open(query)
         end
         if #lines == 6 then
           table.insert(lines, "No assistant replies for this exact session.")
+          append_diagnostics(lines, stderr)
         end
         view.render(buffer, lines)
       end)
@@ -91,10 +99,7 @@ function M.open(query)
   local pending = false
   local function render(message, details)
     local lines = { "# Traces · sessions", "", "r refresh  q close", "", message }
-    if details and vim.trim(details) ~= "" then
-      vim.list_extend(lines, { "", "Provider diagnostics:", "" })
-      vim.list_extend(lines, vim.split(vim.trim(details), "\n", { plain = true }))
-    end
+    append_diagnostics(lines, details)
     view.render(buffer, lines)
   end
   local function load()

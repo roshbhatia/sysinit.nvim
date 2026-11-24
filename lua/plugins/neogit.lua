@@ -91,12 +91,8 @@ return {
     keys = {
       {
         "<leader>gg",
-        function()
-          require("utils.gitrepo").resolve(function(root)
-            require("neogit").open({ cwd = root })
-          end, { ask = true })
-        end,
-        desc = "Toggle Neogit",
+        "<cmd>Neogit<cr>",
+        desc = "Open Neogit",
         mode = "n",
       },
     },
