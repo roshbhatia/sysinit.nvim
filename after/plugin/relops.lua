@@ -3,7 +3,8 @@ if vim.g.RELOPS_ACTIVE == nil then
 end
 
 local function refresh_line_numbers()
-  if not vim.bo.modifiable or vim.bo.buftype ~= "" or vim.bo.filetype == "help" then
+  local review_source = vim.b.reviewr_side ~= nil
+  if not review_source and (not vim.bo.modifiable or vim.bo.buftype ~= "" or vim.bo.filetype == "help") then
     vim.opt_local.number = false
     vim.opt_local.relativenumber = false
     return
