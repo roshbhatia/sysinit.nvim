@@ -33,6 +33,7 @@ in
       initLua = ''
         vim.cmd.packadd("reviewr.nvim")
         vim.cmd.packadd("sysinit-editor-workbench")
+        require("sysinit_workbench.review_keys").setup()
       '';
     };
     xdg.configFile."nvim".source =
