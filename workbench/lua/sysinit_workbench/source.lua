@@ -1,0 +1,55 @@
+local function find_window(file)
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.api.nvim_buf_get_name(buf) == file then
+      return win
+    end
+  end
+end
+
+local function review_window(file)
+  local reviewr = require("reviewr")
+  local ui = require("reviewr.ui")
+  ui.focus_tab()
+  local state = require("reviewr.state").get()
+  local path = state and vim.fs.relpath(state.repo, file)
+  if not path then
+    return nil
+  end
+  local includes_file = vim.iter(state.files or {}):any(function(entry)
+    return entry.path == path
+  end)
+  if (state.head_ref or not includes_file) and not reviewr.set_scope("uncommitted") then
+    return nil
+  end
+  if reviewr.open_file(path) then
+    return ui.panes().right_win
+  end
+end
+
+local function jump(position, review)
+  local win
+  if review then
+    win = review_window(position.file)
+  else
+    vim.wait(750, function()
+      win = find_window(position.file)
+      return win ~= nil
+    end, 20)
+  end
+  if not win then
+    return false
+  end
+  vim.api.nvim_set_current_win(win)
+  if position.line then
+    local buf = vim.api.nvim_win_get_buf(win)
+    local line = math.min(position.line, vim.api.nvim_buf_line_count(buf))
+    local text = vim.api.nvim_buf_get_lines(buf, line - 1, line, false)[1] or ""
+    local column = math.min(position.column - 1, math.max(#text - 1, 0))
+    vim.api.nvim_win_set_cursor(win, { line, column })
+    vim.cmd.normal({ "zv", bang = true })
+  end
+  return true
+end
+
+return { jump = jump }

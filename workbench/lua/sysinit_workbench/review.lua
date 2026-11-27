@@ -15,22 +15,13 @@ local function prepare_index()
   assert(untracked.code == 0, untracked.stderr)
   local files = vim.split(untracked.stdout, "\0", { plain = true, trimempty = true })
   if #files > 0 then
-    local added =
-      git(vim.list_extend({ "--literal-pathspecs", "add", "--intent-to-add", "--" }, files), env)
+    local added = git(vim.list_extend({ "--literal-pathspecs", "add", "--intent-to-add", "--" }, files), env)
     assert(added.code == 0, added.stderr)
   end
   vim.env.GIT_INDEX_FILE = index.temporary
 end
 
-function M.open()
-  local reviewr = require("reviewr")
-  reviewr.setup({ send_mode = "queue", baseline_trigger = "manual" })
-  local owner = vim.env.SYSINIT_REVIEW_PANE
-  vim.env.SYSINIT_REVIEW_PANE = nil
-  if not owner or owner == "" then
-    return reviewr.open()
-  end
-
+local function setup_standalone(reviewr, options)
   local resolved = git({ "rev-parse", "--path-format=absolute", "--git-path", "index" })
   assert(resolved.code == 0, resolved.stderr)
   local directory = vim.fn.tempname()
@@ -57,13 +48,28 @@ function M.open()
   local transport = require("reviewr.transport")
   local detect = transport.detect
   transport.detect = function(repo)
+    if not options.owner or (options.available and not options.available()) then
+      return {}
+    end
     return vim.tbl_filter(function(candidate)
-      return candidate.transport == "wezterm" and candidate.id == owner
+      return candidate.transport == "wezterm" and candidate.id == options.owner
     end, detect(repo))
   end
   vim.g.reviewr_standalone = true
-  local opened = reviewr.open()
-  if opened then
+end
+
+function M.open(options)
+  options = options or {}
+  require("sysinit_workbench.review_layout").setup()
+  local reviewr = require("reviewr")
+  reviewr.setup({ send_mode = "queue", baseline_trigger = "manual" })
+  local range = options.range and { options.range[1], options.range[2], "turn" }
+  if options.standalone and not index then
+    setup_standalone(reviewr, options)
+  end
+
+  local opened = reviewr.open(range)
+  if opened and vim.g.reviewr_standalone then
     vim.g.sysinit_review_ready = 1
   end
   return opened
@@ -71,6 +77,29 @@ end
 
 function M.refresh()
   return require("reviewr").refresh() and 1 or 0
+end
+
+function M.select(refresh, range)
+  local ui = require("reviewr.ui")
+  if not ui.is_open() then
+    return 0
+  end
+  ui.focus_tab()
+  local state = require("reviewr.state").get()
+  if range then
+    if state.base_ref ~= range[1] or state.head_ref ~= range[2] then
+      require("reviewr").open({ range[1], range[2], "turn" })
+    end
+  elseif refresh then
+    if state.head_ref and state.scope.name == "turn" then
+      require("reviewr").set_scope("uncommitted")
+    end
+    if M.refresh() ~= 1 then
+      return 0
+    end
+  end
+  local review_tab = vim.api.nvim_win_get_tabpage(ui.panes().right_win)
+  return vim.api.nvim_get_current_tabpage() == review_tab and 1 or 0
 end
 
 return M
