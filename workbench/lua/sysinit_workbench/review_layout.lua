@@ -1,5 +1,5 @@
 local file_edges = { "left", "right", "top", "bottom", "auto" }
-local edge_moves = { left = "H", right = "L", top = "K", bottom = "J" }
+local split_directions = { left = "left", right = "right", top = "above", bottom = "below" }
 local file_edge = "auto"
 
 local M = {}
@@ -26,33 +26,38 @@ function M.setup()
     local width = math.min(36, math.max(16, math.floor(cols * 0.22)))
     local stack = cols - (side and width or 0) < 100 and rows >= 22
     local diff_tab = vim.api.nvim_win_get_tabpage(diff.left_win)
-    vim.api.nvim_win_call(diff.left_win, function()
-      local left = vim.api.nvim_win_get_position(diff.left_win)
-      local right = vim.api.nvim_win_get_position(diff.right_win)
-      local move_diff = stack ~= (left[1] ~= right[1])
-      if move_diff then
-        vim.fn.win_splitmove(diff.right_win, diff.left_win, { vertical = not stack, rightbelow = true })
-      end
-      if edge ~= last_edge or move_diff then
-        vim.api.nvim_win_call(panel.win, function()
-          vim.cmd.wincmd(edge_moves[edge])
-        end)
-      end
-      last_edge = edge
-      vim.wo[panel.win].winfixwidth = side
-      vim.wo[panel.win].winfixheight = not side
-      if side then
-        vim.api.nvim_win_set_width(panel.win, width)
-      else
-        vim.api.nvim_win_set_height(panel.win, math.min(8, math.max(3, math.floor(rows * 0.19))))
-      end
-      if #vim.api.nvim_tabpage_list_wins(diff_tab) == 3 then
-        local size = stack and vim.api.nvim_win_get_height or vim.api.nvim_win_get_width
-        local resize = stack and vim.api.nvim_win_set_height or vim.api.nvim_win_set_width
-        resize(diff.left_win, math.floor((size(diff.left_win) + size(diff.right_win)) / 2))
-      end
-    end)
+    if diff_tab ~= vim.api.nvim_get_current_tabpage() then
+      return
+    end
+
+    local left = vim.api.nvim_win_get_position(diff.left_win)
+    local right = vim.api.nvim_win_get_position(diff.right_win)
+    local move_diff = stack ~= (left[1] ~= right[1])
+    if move_diff then
+      vim.api.nvim_win_set_config(diff.right_win, { win = diff.left_win, split = stack and "below" or "right" })
+    end
+    if edge ~= last_edge or move_diff then
+      vim.api.nvim_win_set_config(panel.win, { win = -1, split = split_directions[edge] })
+    end
+    last_edge = edge
+    vim.wo[panel.win].winfixwidth = side
+    vim.wo[panel.win].winfixheight = not side
+    if side then
+      vim.api.nvim_win_set_width(panel.win, width)
+    else
+      vim.api.nvim_win_set_height(panel.win, math.min(8, math.max(3, math.floor(rows * 0.19))))
+    end
+    if #vim.api.nvim_tabpage_list_wins(diff_tab) == 3 then
+      local size = stack and vim.api.nvim_win_get_height or vim.api.nvim_win_get_width
+      local resize = stack and vim.api.nvim_win_set_height or vim.api.nvim_win_set_width
+      resize(diff.left_win, math.floor((size(diff.left_win) + size(diff.right_win)) / 2))
+    end
   end
+  vim.api.nvim_create_autocmd("TabEnter", {
+    callback = function()
+      ui.equalize()
+    end,
+  })
   local render = ui.open_files_panel
   ui.open_files_panel = function(files)
     local previous = ui.files_panel().win
