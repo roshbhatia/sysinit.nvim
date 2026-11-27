@@ -1,0 +1,21 @@
+module.nix
+  s_8db7fc35d14233::t_cdccb9f05a1c19 36
+workbench/lua/sysinit_workbench/review_keys.lua
+  s_8db7fc35d14233::t_5e08b52a40f31d 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eefbdcde61f224985632f0f670c825472595ef9d",
+  "prompts": {},
+  "sessions": {
+    "s_8db7fc35d14233": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a215ce-24da-7591-890e-c407374c6ce4",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "Roshan Bhatia <rshnbhatia@gmail.com>"
+    }
+  }
+}
